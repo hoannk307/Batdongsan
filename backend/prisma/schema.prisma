@@ -1,0 +1,209 @@
+// Prisma Schema cho Website Bất động sản
+// Database: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Prisma seed configuration
+// Chạy: npm run  :seed
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// BẢNG NGƯỜI DÙNG
+// ============================================
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique @db.VarChar(50)
+  email     String   @unique @db.VarChar(100)
+  password  String   @db.VarChar(255)
+  fullName  String?  @map("full_name") @db.VarChar(100)
+  phone     String?  @db.VarChar(20)
+  role      UserRole @default(USER)
+  avatar    String?  @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  properties Property[]
+  news       News[]
+  favorites  Favorite[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+// ============================================
+// BẢNG BẤT ĐỘNG SẢN
+// ============================================
+model Property {
+  id               Int            @id @default(autoincrement())
+  userId           Int            @map("user_id")
+  title            String         @db.VarChar(255)
+  description      String?        @db.Text
+  type             PropertyType
+  purpose          PropertyPurpose
+  price            Decimal        @db.Decimal(15, 2)
+  area             Decimal        @db.Decimal(10, 2)
+  bedrooms         Int            @default(0)
+  bathrooms        Int            @default(0)
+  floors           Int            @default(1)
+  houseDirection   String?        @map("house_direction") @db.VarChar(20)
+  balconyDirection String?        @map("balcony_direction") @db.VarChar(20)
+  province         String         @db.VarChar(100)
+  district         String         @db.VarChar(100)
+  ward             String?        @db.VarChar(100)
+  street           String?        @db.VarChar(255)
+  latitude         Decimal?       @db.Decimal(10, 8)
+  longitude        Decimal?       @db.Decimal(11, 8)
+  contactName      String?        @map("contact_name") @db.VarChar(100)
+  contactPhone     String         @map("contact_phone") @db.VarChar(20)
+  contactEmail     String?       @map("contact_email") @db.VarChar(100)
+  status           PropertyStatus @default(ACTIVE)
+  views            Int            @default(0)
+  featured         Boolean        @default(false)
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  images     PropertyImage[]
+  favorites  Favorite[]
+
+  // Indexes for search optimization
+  @@index([purpose, status])
+  @@index([type])
+  @@index([province, district])
+  @@index([price])
+  @@index([area])
+  @@index([bedrooms])
+  @@index([houseDirection])
+  @@index([balconyDirection])
+  @@index([status, createdAt])
+  @@map("properties")
+}
+
+enum PropertyType {
+  HOUSE          // Nhà
+  LAND           // Đất
+  APARTMENT      // Căn hộ chung cư
+  VILLA          // Biệt thự
+  OFFICE         // Văn phòng
+  AGRICULTURAL   // BĐS nông nghiệp
+  INDUSTRIAL     // BĐS công nghiệp
+}
+
+enum PropertyPurpose {
+  SALE  // Bán
+  RENT  // Cho thuê
+}
+
+enum PropertyStatus {
+  ACTIVE  // Đang hiển thị
+  SOLD    // Đã bán
+  RENTED  // Đã cho thuê
+  HIDDEN  // Tạm ẩn
+}
+
+// ============================================
+// BẢNG HÌNH ẢNH BẤT ĐỘNG SẢN
+// ============================================
+model PropertyImage {
+  id         Int      @id @default(autoincrement())
+  propertyId Int      @map("property_id")
+  imageUrl   String   @map("image_url") @db.VarChar(500)
+  isPrimary Boolean  @default(false) @map("is_primary")
+  order      Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@map("property_images")
+}
+
+// ============================================
+// BẢNG TIN TỨC
+// ============================================
+model News {
+  id           Int        @id @default(autoincrement())
+  userId       Int        @map("user_id")
+  title        String     @db.VarChar(255)
+  slug         String     @unique @db.VarChar(255)
+  summary      String?    @db.Text
+  content      String     @db.Text
+  featuredImage String?   @map("featured_image") @db.VarChar(500)
+  category     String?    @db.VarChar(50)
+  views        Int        @default(0)
+  status       NewsStatus @default(DRAFT)
+  publishedAt  DateTime?  @map("published_at")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status, publishedAt])
+  @@index([category])
+  @@index([slug])
+  @@map("news")
+}
+
+enum NewsStatus {
+  PUBLISHED  // Đã xuất bản
+  DRAFT      // Nháp
+}
+
+// ============================================
+// BẢNG ĐỊA ĐIỂM (Tỉnh/Phường)
+// ============================================
+model Location {
+  id       Int          @id @default(autoincrement())
+  code     String       @unique @db.VarChar(20)
+  name     String       @db.VarChar(100)
+  type     LocationType
+  parentId Int?         @map("parent_id")
+  level    Int          // 1=province, 2=ward
+
+  // Self-referential relation
+  parent   Location?    @relation("LocationHierarchy", fields: [parentId], references: [id])
+  children Location[]   @relation("LocationHierarchy")
+
+  @@index([type])
+  @@index([parentId])
+  @@index([level])
+  @@map("locations")
+}
+
+enum LocationType {
+  PROVINCE  // Tỉnh/Thành phố
+  WARD      // Phường/Xã
+}
+
+// ============================================
+// BẢNG YÊU THÍCH (Optional - Tính năng bổ sung)
+// ============================================
+model Favorite {
+  id         Int      @id @default(autoincrement())
+  userId     Int      @map("user_id")
+  propertyId Int      @map("property_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, propertyId])
+  @@index([userId])
+  @@map("favorites")
+}
+

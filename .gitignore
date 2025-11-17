@@ -1,0 +1,12 @@
+frontend_admin/node_modules
+frontend_admin/.next
+frontend_client/node_modules
+frontend_client/.next
+backend/node_modules
+backend/dist
+
+
+
+
+
+
