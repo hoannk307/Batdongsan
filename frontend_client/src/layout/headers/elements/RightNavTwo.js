@@ -11,49 +11,36 @@ const RightNavTwo = () => {
   return (
     <ul className="header-right">
       <li>
-        <div className={`search-box ${searchDropDown ? "open" : ""}`}>
-          <i
-            className="fas fa-search search-icon"
-            onClick={() => {
-              setSearchDropDown(!searchDropDown);
-            }}></i>
-          <span
-            className="font-roboto"
-            onClick={() => {
-              setSearchDropDown(true);
-              setInputFocus(true);
-            }}>
-            Search
-          </span>
-          <div className="form-group">
-            <input
-              ref={inputRef}
-              type="text"
-              className="form-control"
-              placeholder="Search here.."
-              value={searchInput}
-              onChange={(e) => {
-                setSearchInput(e.target.value);
-              }}
-              onFocus={() => setSearchDropDown(true)}
-              onBlur={() => {
-                setSearchDropDown(false);
-                setSearchInput("");
-              }}
-              style={{ zIndex: searchDropDown ? "5" : -1 }}
-            />
-            <SearchSuggestionBox searchDropDown={searchDropDown} searchInput={searchInput} />
-          </div>
-        </div>
+        <Link href="/user-profile">
+          <User />
+        </Link>
       </li>
+
       <li>
-        <Link href="/agent/submit-property">
-          <Home />
+        <Link
+          href="/authen/signup"
+          className="btn btn-solid btn-flat text-white"
+          style={{ fontSize: "16px", fontWeight: 500, padding: "4px 10px", borderRadius: "8px" }}
+        >
+          Đăng ký
         </Link>
       </li>
       <li>
-        <Link href="/pages/other-pages/login">
-          <User />
+        <Link
+          href="/authen/login"
+          className="btn btn-solid btn-flat text-white"
+          style={{ fontSize: "16px", fontWeight: 500, padding: "4px 10px", borderRadius: "8px" }}
+        >
+          Đăng nhập
+        </Link>
+      </li>
+      <li>
+        <Link
+          href="http://localhost:3001/myproperties/add-property"
+          className="btn btn-solid btn-flat text-white"
+          style={{ fontSize: "16px", fontWeight: 500, padding: "4px 10px", borderRadius: "8px" }}
+        >
+          Đăng bài
         </Link>
       </li>
     </ul>

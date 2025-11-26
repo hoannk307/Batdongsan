@@ -1,16 +1,19 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
   Query,
-  UseGuards,
   Request,
+  UseGuards,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { PropertiesService } from './properties.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
@@ -30,6 +33,44 @@ export class PropertiesController {
     return this.propertiesService.create(req.user.userId, createPropertyDto);
   }
 
+  @Post('with-files')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FilesInterceptor('files'))
+  @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Tạo bất động sản mới kèm file đính kèm (transaction + Cloudflare upload)' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        propertyType: { type: 'string', description: 'Loại bất động sản' },
+        propertyStatus: { type: 'string', description: 'Trạng thái giao dịch' },
+        beds: { type: 'number', description: 'Số phòng ngủ' },
+        baths: { type: 'number', description: 'Số phòng tắm' },
+        area: { type: 'number', description: 'Diện tích' },
+        price: { type: 'number', description: 'Giá' },
+        description: { type: 'string', description: 'Mô tả chi tiết' },
+        anyCity: { type: 'string', description: 'Tỉnh/Thành phố' },
+        anyWard: { type: 'string', description: 'Phường/Xã' },
+        landmark: { type: 'string', description: 'Địa chỉ chi tiết' },
+        files: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    },
+  })
+  createWithFiles(
+    @Request() req,
+    @Body() createPropertyDto: CreatePropertyDto,
+    @UploadedFiles() files: Express.Multer.File[],
+  ) {
+    return this.propertiesService.createWithFiles(req.user.userId, createPropertyDto, files);
+  }
+
   @Get()
   @ApiOperation({ summary: 'Lấy danh sách bất động sản' })
   findAll(@Query() query: SearchPropertyDto) {
@@ -40,6 +81,12 @@ export class PropertiesController {
   @ApiOperation({ summary: 'Tìm kiếm bất động sản nâng cao' })
   search(@Body() searchDto: SearchPropertyDto) {
     return this.propertiesService.search(searchDto);
+  }
+
+  @Get('defaults/options')
+  @ApiOperation({ summary: 'Lấy các tùy chọn mặc định cho form bất động sản' })
+  getDefaults() {
+    return this.propertiesService.getDefaults();
   }
 
   @Get(':id')

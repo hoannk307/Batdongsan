@@ -61,6 +61,75 @@ Sau khi chạy thành công, bạn sẽ thấy:
 33. Tỉnh Cà Mau
 34. Tỉnh An Giang
 
+## Danh sách phường xã của tỉnh Khánh Hòa
+
+Xã Nam Cam Ranh
+Xã Bắc Ninh Hòa
+Xã Tân Định
+Xã Nam Ninh Hòa
+Xã Tây Ninh Hòa
+Xã Hòa Trí
+Xã Đại Lãnh
+Xã Tu Bông
+Xã Vạn Thắng
+Xã Vạn Ninh
+Xã Vạn Hưng
+Xã Diên Khánh
+Xã Diên Lạc
+Xã Diên Điền
+Xã Diên Lâm
+Xã Diên Thọ
+Xã Suối Hiệp
+Xã Cam Lâm
+Xã Suối Dầu.
+Xã Cam Hiệp
+Xã Cam An
+Xã Bắc Khánh Vĩnh
+Xã Trung Khánh Vĩnh
+Xã Tây Khánh Vĩnh
+Xã Nam Khánh Vĩnh
+Xã Khánh Vĩnh
+Xã Khánh Sơn
+Xã Tây Khánh Sơn
+Xã Đông Khánh Sơn
+Xã Ninh Phước
+Xã Phước Hữu
+Xã Phước Hậu
+Xã Thuận Nam
+Xã Cà Ná
+Xã Phước Hà
+Xã Phước Dinh
+Xã Ninh Hải
+Xã Xuân Hải
+Xã Vĩnh Hải
+Xã Thuận Bắc
+Xã Công Hải
+Xã Ninh Sơn
+Xã Lâm Sơn
+Xã Anh Dũng
+Xã Mỹ Sơn
+Xã Bác Ái Đông
+Xã Bác Ái
+Xã Bác Ái Tây
+Phường Nha Trang
+Phường Bắc Nha Trang
+Phường Tây Nha Trang
+Phường Nam Nha Trang
+Phường Bắc Cam Ranh
+Phường Cam Ranh
+Phường Cam Linh
+Phường Ba Ngòi
+Phường Ninh Hòa
+Phường Đông Ninh Hòa
+Phường Hòa Thắng
+Phường Phan Rang
+Phường Đông Hải
+Phường Ninh Chử
+Phường Bảo An
+Phường Đô Vinh
+Đặc khu Trường Sa
+
+
 ## Kiểm tra dữ liệu
 
 ### Cách 1: Qua Prisma Studio
@@ -112,6 +181,13 @@ Sau khi seed tỉnh/thành, bạn có thể:
 2. Thêm logic seed quận/huyện (level 2)
 3. Thêm logic seed phường/xã (level 3)
 4. Chạy lại `npm run prisma:seed`
+
+
+
+
+
+
+
 
 
 

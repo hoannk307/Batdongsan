@@ -5,7 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { PropertiesModule } from './properties/properties.module';
 import { NewsModule } from './news/news.module';
 import { LocationsModule } from './locations/locations.module';
-import { UploadModule } from './upload/upload.module';
+import { FileModule } from './file/file.module';
 
 @Module({
   imports: [
@@ -17,7 +17,7 @@ import { UploadModule } from './upload/upload.module';
     PropertiesModule,
     NewsModule,
     LocationsModule,
-    UploadModule,
+    FileModule,
   ],
 })
 export class AppModule {}
