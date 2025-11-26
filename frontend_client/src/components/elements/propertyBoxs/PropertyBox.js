@@ -47,7 +47,7 @@ const PropertyBox = ({ data, relativeSlider, video }) => {
 
           <div className="property-details">
             <span className="font-roboto">{data.country || "USA"} </span>
-            <Link href={{ pathname: Array.isArray(data.img) ? "/property/image-slider" :"/property/image-box", query: {id:data.id} }}>
+            <Link href={{ pathname: Array.isArray(data.img) ? "/batdongsan/detail" :"/batdongsan/detail", query: {id:data.id} }}>
               <h3>{data.title}</h3>
             </Link>
             <h6>
@@ -73,7 +73,7 @@ const PropertyBox = ({ data, relativeSlider, video }) => {
               <span>{data.date}</span>
 
               
-              <Link href={{ pathname: Array.isArray(data.img) ? "/property/image-slider" :"/property/image-box", query: {id:data.id} }}>
+              <Link href={{ pathname: Array.isArray(data.img) ? "/batdongsan/detail" :"/batdongsan/detail", query: {id:data.id} }}>
                 <button type="button" className="btn btn-dashed btn-pill">
                   Details
                 </button>

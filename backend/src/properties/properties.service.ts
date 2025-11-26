@@ -3,11 +3,20 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 import { SearchPropertyDto } from './dto/search-property.dto';
-import { Prisma } from '@prisma/client';
+import { Prisma, PropertyStatus } from '@prisma/client';
+import {
+  PropertyStatusDefault,
+  PropertyTypeDefault,
+} from './enums/property-defaults.enum';
+import { FileService } from '../file/file.service';
+import { extname } from 'path';
 
 @Injectable()
 export class PropertiesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly fileService: FileService,
+  ) {}
 
   async create(userId: number, createPropertyDto: CreatePropertyDto) {
     const property = await this.prisma.property.create({
@@ -16,7 +25,6 @@ export class PropertiesService {
         userId,
       },
       include: {
-        images: true,
         user: {
           select: {
             id: true,
@@ -32,45 +40,123 @@ export class PropertiesService {
     return property;
   }
 
+  /**
+   * Tạo bất động sản và đồng thời lưu thông tin file đính kèm (file_attach) trong transaction.
+   * Sau khi transaction DB (property + file_attach) thành công thì mới upload file lên Cloudflare R2.
+   */
+  async createWithFiles(
+    userId: number,
+    createPropertyDto: CreatePropertyDto,
+    files: Express.Multer.File[] = [],
+  ) {
+    // Không có file thì dùng luồng cũ để giữ nguyên hành vi
+    if (!files || files.length === 0) {
+      return this.create(userId, createPropertyDto);
+    }
+
+    // Chuẩn bị metadata cho từng file
+    const fileMetas = files.map((file) => {
+      const originalName = file.originalname;
+      const ext = extname(originalName).replace('.', '').toLowerCase();
+
+      // Xác định loại file (word, excel, image, pdf, other...)
+      let logicalType = 'other';
+      if (['doc', 'docx'].includes(ext)) {
+        logicalType = 'word';
+      } else if (['xls', 'xlsx', 'csv'].includes(ext)) {
+        logicalType = 'excel';
+      } else if (file.mimetype.startsWith('image/') || ['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)) {
+        logicalType = 'image';
+      } else if (ext === 'pdf') {
+        logicalType = 'pdf';
+      }
+
+      // Đường dẫn lưu trên Cloudflare R2 theo yêu cầu
+      const keyPath = `batdongsan/BDS/NHATRANG/${originalName}`;
+
+      return {
+        file,
+        keyPath,
+        ext,
+        logicalType,
+        name: originalName,
+      };
+    });
+
+    // Transaction: tạo property + insert vào bảng file_attach
+    const property = await this.prisma.$transaction(async (tx) => {
+      const createdProperty = await tx.property.create({
+        data: {
+          ...createPropertyDto,
+          userId,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              email: true,
+              fullName: true,
+              phone: true,
+            },
+          },
+        },
+      });
+
+      for (const meta of fileMetas) {
+        await tx.$executeRaw`
+          INSERT INTO file_attach (object_id, path, nghiepvu_code, type, extend, name)
+          VALUES (${createdProperty.id}, ${meta.keyPath}, 'BDS', ${meta.logicalType}, ${meta.ext}, ${meta.name})
+        `;
+      }
+
+      return createdProperty;
+    });
+
+    // Sau khi transaction DB thành công, mới upload file lên Cloudflare
+    for (const meta of fileMetas) {
+      await this.fileService.uploadFileWithKey(meta.file, meta.keyPath);
+    }
+
+    return property;
+  }
+
   async findAll(query: SearchPropertyDto) {
     const {
       page = 1,
       limit = 20,
-      purpose,
-      types,
-      provinces,
-      districts,
+      propertyStatus,
+      propertyTypes,
+      cities,
+      wards,
       minPrice,
       maxPrice,
       minArea,
       maxArea,
-      bedrooms,
-      houseDirections,
-      balconyDirections,
+      minBeds,
+      minBaths,
       sort = 'newest',
     } = query;
 
     const skip = (page - 1) * limit;
 
     // Build where clause
-    const where: Prisma.PropertyWhereInput = {
-      status: 'ACTIVE',
-    };
+    const where: Prisma.PropertyWhereInput = {};
 
-    if (purpose && purpose !== 'all') {
-      where.purpose = purpose as any;
+    if (propertyStatus) {
+      where.propertyStatus = propertyStatus;
     }
 
-    if (types && types.length > 0) {
-      where.type = { in: types as any[] };
+    if (propertyTypes && propertyTypes.length > 0) {
+      where.propertyType = { in: propertyTypes };
     }
 
-    if (provinces && provinces.length > 0) {
-      where.province = { in: provinces };
+    if (cities && cities.length > 0) {
+      where.anyCity = { in: cities };
     }
 
-    if (districts && districts.length > 0) {
-      where.district = { in: districts };
+    if (wards && wards.length > 0) {
+      where.anyWard = { in: wards };
     }
 
     if (minPrice || maxPrice) {
@@ -85,16 +171,12 @@ export class PropertiesService {
       if (maxArea) where.area.lte = new Prisma.Decimal(maxArea);
     }
 
-    if (bedrooms) {
-      where.bedrooms = { gte: bedrooms };
+    if (minBeds) {
+      where.beds = { gte: minBeds };
     }
 
-    if (houseDirections && houseDirections.length > 0) {
-      where.houseDirection = { in: houseDirections };
-    }
-
-    if (balconyDirections && balconyDirections.length > 0) {
-      where.balconyDirection = { in: balconyDirections };
+    if (minBaths) {
+      where.baths = { gte: minBaths };
     }
 
     // Build orderBy
@@ -174,12 +256,6 @@ export class PropertiesService {
       throw new NotFoundException('Property not found');
     }
 
-    // Increment views
-    await this.prisma.property.update({
-      where: { id },
-      data: { views: { increment: 1 } },
-    });
-
     return property;
   }
 
@@ -225,6 +301,27 @@ export class PropertiesService {
 
   async search(searchDto: SearchPropertyDto) {
     return this.findAll(searchDto);
+  }
+
+  getDefaults() {
+    const propertyTypes = Object.values(PropertyTypeDefault).map(
+      (value) => ({
+        id: value,
+        name: value,
+      }),
+    );
+
+    const propertyStatuses = Object.keys(PropertyStatusDefault).map(
+      (key) => ({
+        id: PropertyStatus[key as keyof typeof PropertyStatus],
+        name: PropertyStatusDefault[key as keyof typeof PropertyStatusDefault],
+      }),
+    );
+
+    return {
+      propertyTypes,
+      propertyStatuses,
+    };
   }
 }
 

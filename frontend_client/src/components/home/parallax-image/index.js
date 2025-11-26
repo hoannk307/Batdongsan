@@ -44,7 +44,6 @@ const BodyContent = () => {
       <PropertySection value={value?.PropertyListing} size={3} />
       <PricingSection value={AppPropertyData.PricingPlan} />
       <BannerSection banner={7} />
-      <AboutSection value={clientData?.OurAgentInCorporateLayout} />
       <TestimonialSection value={clientData?.OurClientInCorporateLayout} />
       <BlogSection value={value?.LatestBlogInCorporate} />
     </>

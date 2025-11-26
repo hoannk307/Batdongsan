@@ -1,6 +1,18 @@
-import { IsOptional, IsString, IsNumber, IsArray, Min } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsNumber,
+  IsArray,
+  Min,
+  IsEnum,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
+import { PropertyStatus } from '@prisma/client';
+import {
+  PropertySortDefault,
+  PropertyTypeDefault,
+} from '../enums/property-defaults.enum';
 
 export class SearchPropertyDto {
   @ApiProperty({ example: 1, required: false })
@@ -17,28 +29,37 @@ export class SearchPropertyDto {
   @Min(1)
   limit?: number;
 
-  @ApiProperty({ example: 'sale', enum: ['all', 'sale', 'rent'], required: false })
+  @ApiProperty({
+    enum: PropertyStatus,
+    example: PropertyStatus.FOR_RENT,
+    required: false,
+  })
   @IsOptional()
-  @IsString()
-  purpose?: string;
+  @IsEnum(PropertyStatus)
+  propertyStatus?: PropertyStatus;
 
-  @ApiProperty({ example: ['HOUSE', 'APARTMENT'], required: false })
+  @ApiProperty({
+    enum: PropertyTypeDefault,
+    isArray: true,
+    example: [PropertyTypeDefault.NHADAT, PropertyTypeDefault.NHADAT],
+    required: false,
+  })
   @IsOptional()
   @IsArray()
-  @IsString({ each: true })
-  types?: string[];
+  @IsEnum(PropertyTypeDefault, { each: true })
+  propertyTypes?: PropertyTypeDefault[];
 
   @ApiProperty({ example: ['Hồ Chí Minh', 'Hà Nội'], required: false })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  provinces?: string[];
+  cities?: string[];
 
-  @ApiProperty({ example: ['Quận 1', 'Quận 2'], required: false })
+  @ApiProperty({ example: ['Phường 1', 'Phường 2'], required: false })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  districts?: string[];
+  wards?: string[];
 
   @ApiProperty({ example: 1000000000, required: false })
   @IsOptional()
@@ -73,27 +94,22 @@ export class SearchPropertyDto {
   @Type(() => Number)
   @IsNumber()
   @Min(0)
-  bedrooms?: number;
+  minBeds?: number;
 
-  @ApiProperty({ example: ['south', 'southeast'], required: false })
+  @ApiProperty({ example: 2, required: false })
   @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  houseDirections?: string[];
-
-  @ApiProperty({ example: ['south'], required: false })
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  balconyDirections?: string[];
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  minBaths?: number;
 
   @ApiProperty({
-    example: 'newest',
-    enum: ['newest', 'price_asc', 'price_desc', 'area_asc', 'area_desc'],
+    enum: PropertySortDefault,
+    example: PropertySortDefault.NEWEST,
     required: false,
   })
   @IsOptional()
-  @IsString()
-  sort?: string;
+  @IsEnum(PropertySortDefault)
+  sort?: PropertySortDefault;
 }
 

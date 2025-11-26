@@ -4,7 +4,7 @@ export function middleware(request) {
   const path = request.nextUrl.pathname;
 
   if (path == "/") {
-    return NextResponse.redirect(new URL(`/home/slider-filter-search`, request.url));
+    return NextResponse.redirect(new URL(`/home`, request.url));
   }
 
   return NextResponse.next();

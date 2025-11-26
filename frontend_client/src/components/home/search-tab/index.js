@@ -15,6 +15,8 @@ import SalePropertySection from "../slider-filter-search/SaleProperty";
 import AboutSection from "../classic/About";
 import BrandSection from "../classic/Brand";
 import HomeBannerSection from "./HomeBanner";
+import BlogSection from "../corporate/Blog";
+import PropertySection from "../corporate/Property";
 
 const BodyContent = () => {
   const [value, setValue] = useState();
@@ -37,12 +39,9 @@ const BodyContent = () => {
       <HomeBannerSection />
       <SalePropertySection value={value?.LatestForSalePropertyData} />
       <FeaturedPropertySection value={value?.FeaturedPropertyInClassicLayout} />
-      <PropertyServicesSection value={AppPropertyData.PropertyServicesInClassic} />
       <LatestPropertySection value={value?.LatestPropertyInClassicLayout} />
-      <VideoSection />
-      <TestimonialSection value={clientData?.OurHappyClientInClassicLayout} />
-      <SubscribeSection />
-      <AboutSection value={clientData?.OurAgentInClassicLayout} />
+      <PropertySection value={value?.PropertyListing}  />
+      <BlogSection value={value?.LatestBlogInCorporate} />
       <BrandSection />
     </>
   );

@@ -4,15 +4,17 @@
  */
 import Link from "next/link";
 import React, { Fragment, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { MainNavMenuItems } from "@/data/menu";
 import DropdownMenus from "./mainNavComponents/DropdownMenus";
 import MegaMenu from "./mainNavComponents/MegaMenu";
 
 const MainNav = ({ center, icon }) => {
+  const { t } = useTranslation("common");
   const [openNavbar, setOpenNavbar] = useState(false);
-  const [isOpen, setIsOpen] = useState();
-  const [isOpenChild, setIsOpenChild] = useState();
-  const [isOpenNestedChild, setIsOpenNestedChild] = useState();
+  const [isOpen, setIsOpen] = useState(false);
+  const [isOpenChild, setIsOpenChild] = useState(false);
+  const [isOpenNestedChild, setIsOpenNestedChild] = useState(false);
 
   return (
     <nav>
@@ -43,6 +45,14 @@ const MainNav = ({ center, icon }) => {
                     setIsOpenNestedChild={setIsOpenNestedChild}
                     icon={icon}
                   />
+                ) : navTitle.type === "link" && navTitle.path && (!navTitle.children || navTitle.children.length === 0) ? (
+                  // Simple menu link without sub menu
+                  <li>
+                    <Link href={navTitle.path}  >
+                      {icon && navTitle.icon}
+                      {t(navTitle.title)}
+                    </Link>
+                  </li>
                 ) : (
                   <MegaMenu navTitle={navTitle} isOpen={isOpen} setIsOpen={setIsOpen} i isOpenNestedChild={isOpenNestedChild} setIsOpenNestedChild={setIsOpenNestedChild} />
                 )}

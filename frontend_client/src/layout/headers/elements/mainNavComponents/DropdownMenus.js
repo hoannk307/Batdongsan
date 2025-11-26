@@ -30,7 +30,7 @@ const DropdownMenus = ({ navTitle, isOpen, setIsOpen, isOpenChild, setIsOpenChil
         <span className='according-menu'>{isOpen === navTitle.title ? "-" : "+"}</span>
       </a>
       <ul className={`nav-submenu menu-content ${mobileSize && isOpen === navTitle.title ? "d-block" : "d-none d-xl-block"}`}>
-        {navTitle.children.map((navList, index) => (
+        {navTitle.children != null && navTitle.children.length > 0 && navTitle.children.map((navList, index) => (
           <li key={index}>
             {navList.type === "link" ? (
               <>

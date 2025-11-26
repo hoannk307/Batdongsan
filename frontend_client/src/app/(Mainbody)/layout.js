@@ -18,10 +18,6 @@ export default function RootLayout({ children }) {
   return (
     <Fragment>
       {children}
-      <Customizer />
-      <TapToTop />
-      <StoreOldData />
-      <ToastContainer className={'p-0'} position='bottom-left' autoClose={5000} hideProgressBar={false} newestOnTop closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme={"light"} />
     </Fragment>
   );
 }

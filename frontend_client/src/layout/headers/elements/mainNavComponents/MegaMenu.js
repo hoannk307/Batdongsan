@@ -28,7 +28,7 @@ const MegaMenu = ({ navTitle, isOpen, setIsOpen, isOpenNestedChild, setIsOpenNes
         <Container>
           <Row>
             {/* loop for divide div in 5 columns */}
-            {navTitle.children.map((childNavList, index) => (
+            {navTitle.children != null && navTitle.children.length > 0 && navTitle.children.map((childNavList, index) => (
               <Col className="mega-box" key={index}>
                 {/* loop for child div and title*/}
                 {childNavList.children.map((nestedChildNavList, index) => (
