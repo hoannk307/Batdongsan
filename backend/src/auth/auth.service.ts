@@ -16,20 +16,21 @@ export class AuthService {
     const { password, ...rest } = registerDto;
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await this.prisma.user.create({
+    const user = await this.prisma.users.create({
       data: {
         ...rest,
         password: hashedPassword,
+        updated_at: new Date(),
       },
       select: {
         id: true,
         username: true,
         email: true,
-        fullName: true,
+        full_name: true,
         phone: true,
         role: true,
         avatar: true,
-        createdAt: true,
+        created_at: true,
       },
     });
 
@@ -42,7 +43,7 @@ export class AuthService {
   }
 
   async validateUser(email: string, password: string) {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.users.findUnique({
       where: { email },
     });
 
@@ -70,7 +71,7 @@ export class AuthService {
         id: user.id,
         username: user.username,
         email: user.email,
-        fullName: user.fullName,
+        full_name: user.full_name,
         phone: user.phone,
         role: user.role,
         avatar: user.avatar,
@@ -80,17 +81,17 @@ export class AuthService {
   }
 
   async getProfile(userId: number) {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.users.findUnique({
       where: { id: userId },
       select: {
         id: true,
         username: true,
         email: true,
-        fullName: true,
+        full_name: true,
         phone: true,
         role: true,
         avatar: true,
-        createdAt: true,
+        created_at: true,
       },
     });
 

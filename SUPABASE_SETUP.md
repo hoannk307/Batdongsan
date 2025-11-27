@@ -191,6 +191,10 @@ Sau khi hoàn thành các bước trên, backend của bạn đã được kết
 
 
 
+sudo docker cp ~/Documents/Batdongsan/database.backup postgres_db:/tmp/backup.backup
+
+
+
 
 
 

@@ -17,7 +17,7 @@ export class CreatePropertyDto {
     description: 'Loại bất động sản',
   })
   @IsEnum(PropertyTypeDefault)
-  propertyType: PropertyTypeDefault;
+  property_type: PropertyTypeDefault;
 
   @ApiProperty({
     enum: PropertyStatus,
@@ -25,7 +25,7 @@ export class CreatePropertyDto {
     description: 'Trạng thái giao dịch',
   })
   @IsEnum(PropertyStatus)
-  propertyStatus: PropertyStatus;
+  property_status: PropertyStatus;
 
 
   @ApiProperty({ example: 4, description: 'Số phòng ngủ' })
@@ -60,11 +60,11 @@ export class CreatePropertyDto {
 
   @ApiProperty({ example: 'Hồ Chí Minh' })
   @IsString()
-  anyCity: string;
+  any_city: string;
 
   @ApiProperty({ example: 'Phường Bến Nghé' })
   @IsString()
-  anyWard: string;
+  any_ward: string;
 
   @ApiProperty({ example: 'Nhà hát Thành Phố' })
   @IsString()

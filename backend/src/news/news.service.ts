@@ -14,15 +14,16 @@ export class NewsService {
       data: {
         ...createNewsDto,
         slug,
-        userId,
-        publishedAt: createNewsDto.status === 'PUBLISHED' ? new Date() : null,
+        user_id: userId,
+        published_at: createNewsDto.status === 'PUBLISHED' ? new Date() : null,
+        updated_at: new Date(),
       },
       include: {
-        user: {
+        users: {
           select: {
             id: true,
             username: true,
-            fullName: true,
+            full_name: true,
           },
         },
       },
@@ -47,13 +48,13 @@ export class NewsService {
         where,
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { created_at: 'desc' },
         include: {
-          user: {
+          users: {
             select: {
               id: true,
               username: true,
-              fullName: true,
+              full_name: true,
             },
           },
         },
@@ -76,11 +77,11 @@ export class NewsService {
     const news = await this.prisma.news.findUnique({
       where: { id },
       include: {
-        user: {
+        users: {
           select: {
             id: true,
             username: true,
-            fullName: true,
+            full_name: true,
           },
         },
       },
@@ -103,11 +104,11 @@ export class NewsService {
     const news = await this.prisma.news.findUnique({
       where: { slug },
       include: {
-        user: {
+        users: {
           select: {
             id: true,
             username: true,
-            fullName: true,
+            full_name: true,
           },
         },
       },
@@ -139,18 +140,18 @@ export class NewsService {
     }
 
     if (updateNewsDto.status === 'PUBLISHED' && existingNews.status === 'DRAFT') {
-      data.publishedAt = new Date();
+      data.published_at = new Date();
     }
 
     return this.prisma.news.update({
       where: { id },
       data,
       include: {
-        user: {
+        users: {
           select: {
             id: true,
             username: true,
-            fullName: true,
+            full_name: true,
           },
         },
       },

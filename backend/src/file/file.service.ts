@@ -17,9 +17,10 @@ interface FetchedFile {
 
 @Injectable()
 export class FileService {
-  private readonly s3: S3Client;
-  private readonly bucket: string;
+  private readonly s3: S3Client | null = null;
+  private readonly bucket: string = '';
   private readonly publicBaseUrl?: string;
+  private readonly isConfigured: boolean = false;
 
   constructor(private readonly configService: ConfigService) {
     const endpoint = this.configService.get<string>('R2_ENDPOINT');
@@ -28,9 +29,11 @@ export class FileService {
     const bucket = this.configService.get<string>('R2_BUCKET');
 
     if (!endpoint || !accessKeyId || !secretAccessKey || !bucket) {
-      throw new Error('Cloudflare R2 configuration is missing. Please check env variables.');
+      console.warn('⚠️  Cloudflare R2 is not configured. File upload will be disabled.');
+      return;
     }
 
+    this.isConfigured = true;
     this.bucket = bucket;
     this.publicBaseUrl = this.configService.get<string>('R2_PUBLIC_BASE_URL') || undefined;
 
@@ -42,6 +45,12 @@ export class FileService {
         secretAccessKey,
       },
     });
+  }
+
+  private ensureConfigured() {
+    if (!this.isConfigured || !this.s3) {
+      throw new Error('Cloudflare R2 is not configured. Please set R2_ENDPOINT, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET env variables.');
+    }
   }
 
   private buildPublicUrl(key: string): string {
@@ -69,10 +78,11 @@ export class FileService {
   }
 
   async uploadFile(file: Express.Multer.File): Promise<UploadedFileInfo> {
+    this.ensureConfigured();
     const key = `fileservice-${Date.now()}-${file.originalname}`;
     const body = this.resolveBody(file);
 
-    await this.s3.send(
+    await this.s3!.send(
       new PutObjectCommand({
         Bucket: this.bucket,
         Key: key,
@@ -86,9 +96,10 @@ export class FileService {
   }
 
   async uploadFileWithKey(file: Express.Multer.File, key: string): Promise<UploadedFileInfo> {
+    this.ensureConfigured();
     const body = this.resolveBody(file);
 
-    await this.s3.send(
+    await this.s3!.send(
       new PutObjectCommand({
         Bucket: this.bucket,
         Key: key,
@@ -102,7 +113,8 @@ export class FileService {
   }
 
   async getFile(key: string): Promise<FetchedFile> {
-    const result = await this.s3.send(
+    this.ensureConfigured();
+    const result = await this.s3!.send(
       new GetObjectCommand({
         Bucket: this.bucket,
         Key: key,

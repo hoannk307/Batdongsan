@@ -19,21 +19,13 @@ export class PropertiesService {
   ) {}
 
   async create(userId: number, createPropertyDto: CreatePropertyDto) {
-    const property = await this.prisma.property.create({
+    const property = await this.prisma.properties.create({
       data: {
         ...createPropertyDto,
-        userId,
+        user_id: userId,
       },
       include: {
-        user: {
-          select: {
-            id: true,
-            username: true,
-            email: true,
-            fullName: true,
-            phone: true,
-          },
-        },
+        file_attach: true,
       },
     });
 
@@ -85,21 +77,13 @@ export class PropertiesService {
 
     // Transaction: tạo property + insert vào bảng file_attach
     const property = await this.prisma.$transaction(async (tx) => {
-      const createdProperty = await tx.property.create({
+      const createdProperty = await tx.properties.create({
         data: {
           ...createPropertyDto,
-          userId,
+          user_id: userId,
         },
         include: {
-          user: {
-            select: {
-              id: true,
-              username: true,
-              email: true,
-              fullName: true,
-              phone: true,
-            },
-          },
+          file_attach: true,
         },
       });
 
@@ -141,34 +125,34 @@ export class PropertiesService {
     const skip = (page - 1) * limit;
 
     // Build where clause
-    const where: Prisma.PropertyWhereInput = {};
+    const where: Prisma.propertiesWhereInput = {};
 
     if (propertyStatus) {
-      where.propertyStatus = propertyStatus;
+      where.property_status = propertyStatus;
     }
 
     if (propertyTypes && propertyTypes.length > 0) {
-      where.propertyType = { in: propertyTypes };
+      where.property_type = { in: propertyTypes };
     }
 
     if (cities && cities.length > 0) {
-      where.anyCity = { in: cities };
+      where.any_city = { in: cities };
     }
 
     if (wards && wards.length > 0) {
-      where.anyWard = { in: wards };
+      where.any_ward = { in: wards };
     }
 
     if (minPrice || maxPrice) {
       where.price = {};
-      if (minPrice) where.price.gte = new Prisma.Decimal(minPrice);
-      if (maxPrice) where.price.lte = new Prisma.Decimal(maxPrice);
+      if (minPrice) where.price.gte = minPrice;
+      if (maxPrice) where.price.lte = maxPrice;
     }
 
     if (minArea || maxArea) {
       where.area = {};
-      if (minArea) where.area.gte = new Prisma.Decimal(minArea);
-      if (maxArea) where.area.lte = new Prisma.Decimal(maxArea);
+      if (minArea) where.area.gte = minArea;
+      if (maxArea) where.area.lte = maxArea;
     }
 
     if (minBeds) {
@@ -180,7 +164,7 @@ export class PropertiesService {
     }
 
     // Build orderBy
-    let orderBy: Prisma.PropertyOrderByWithRelationInput = {};
+    let orderBy: Prisma.propertiesOrderByWithRelationInput = {};
     switch (sort) {
       case 'price_asc':
         orderBy = { price: 'asc' };
@@ -196,30 +180,21 @@ export class PropertiesService {
         break;
       case 'newest':
       default:
-        orderBy = { createdAt: 'desc' };
+        orderBy = { created_at: 'desc' };
         break;
     }
 
     const [properties, total] = await Promise.all([
-      this.prisma.property.findMany({
+      this.prisma.properties.findMany({
         where,
         skip,
         take: limit,
         orderBy,
         include: {
-          images: {
-            orderBy: { order: 'asc' },
-          },
-          user: {
-            select: {
-              id: true,
-              username: true,
-              fullName: true,
-            },
-          },
+          file_attach: true,
         },
       }),
-      this.prisma.property.count({ where }),
+      this.prisma.properties.count({ where }),
     ]);
 
     return {
@@ -234,21 +209,10 @@ export class PropertiesService {
   }
 
   async findOne(id: number) {
-    const property = await this.prisma.property.findUnique({
+    const property = await this.prisma.properties.findUnique({
       where: { id },
       include: {
-        images: {
-          orderBy: { order: 'asc' },
-        },
-        user: {
-          select: {
-            id: true,
-            username: true,
-            email: true,
-            fullName: true,
-            phone: true,
-          },
-        },
+        file_attach: true,
       },
     });
 
@@ -260,7 +224,7 @@ export class PropertiesService {
   }
 
   async update(id: number, userId: number, updatePropertyDto: UpdatePropertyDto) {
-    const property = await this.prisma.property.findUnique({
+    const property = await this.prisma.properties.findUnique({
       where: { id },
     });
 
@@ -268,21 +232,21 @@ export class PropertiesService {
       throw new NotFoundException('Property not found');
     }
 
-    if (property.userId !== userId) {
+    if (property.user_id !== userId) {
       throw new ForbiddenException('You can only update your own properties');
     }
 
-    return this.prisma.property.update({
+    return this.prisma.properties.update({
       where: { id },
       data: updatePropertyDto,
       include: {
-        images: true,
+        file_attach: true,
       },
     });
   }
 
   async remove(id: number, userId: number) {
-    const property = await this.prisma.property.findUnique({
+    const property = await this.prisma.properties.findUnique({
       where: { id },
     });
 
@@ -290,11 +254,11 @@ export class PropertiesService {
       throw new NotFoundException('Property not found');
     }
 
-    if (property.userId !== userId) {
+    if (property.user_id !== userId) {
       throw new ForbiddenException('You can only delete your own properties');
     }
 
-    return this.prisma.property.delete({
+    return this.prisma.properties.delete({
       where: { id },
     });
   }
@@ -324,4 +288,3 @@ export class PropertiesService {
     };
   }
 }
-

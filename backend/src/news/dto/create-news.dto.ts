@@ -19,7 +19,7 @@ export class CreateNewsDto {
   @ApiProperty({ example: 'https://example.com/image.jpg', required: false })
   @IsOptional()
   @IsString()
-  featuredImage?: string;
+  featured_image?: string;
 
   @ApiProperty({ example: 'market', required: false })
   @IsOptional()

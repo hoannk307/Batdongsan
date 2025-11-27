@@ -19,7 +19,7 @@ export class RegisterDto {
   @ApiProperty({ example: 'John Doe', required: false })
   @IsOptional()
   @IsString()
-  fullName?: string;
+  full_name?: string;
 
   @ApiProperty({ example: '0123456789', required: false })
   @IsOptional()

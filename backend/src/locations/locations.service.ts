@@ -6,7 +6,7 @@ export class LocationsService {
   constructor(private prisma: PrismaService) {}
 
   async getProvinces() {
-    return this.prisma.location.findMany({
+    return this.prisma.locations.findMany({
       where: {
         type: 'PROVINCE',
         level: 1,
@@ -18,11 +18,11 @@ export class LocationsService {
   }
 
   async getWards(provinceId: number) {
-    return this.prisma.location.findMany({
+    return this.prisma.locations.findMany({
       where: {
         type: 'WARD',
         level: 2,
-        parentId: provinceId,
+        parent_id: provinceId,
       },
       orderBy: {
         name: 'asc',
