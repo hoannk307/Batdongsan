@@ -1,77 +1,124 @@
-// Prisma Schema cho Website Bất động sản
-// Database: PostgreSQL
-
 generator client {
   provider = "prisma-client-js"
 }
-
-// Prisma seed configuration
-// Chạy: npm run  :seed
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// ============================================
-// BẢNG NGƯỜI DÙNG
-// ============================================
-model User {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique @db.VarChar(50)
-  email     String   @unique @db.VarChar(100)
-  password  String   @db.VarChar(255)
-  fullName  String?  @map("full_name") @db.VarChar(100)
-  phone     String?  @db.VarChar(20)
-  role      UserRole @default(USER)
-  avatar    String?  @db.VarChar(255)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+model favorites {
+  id          Int        @id @default(autoincrement())
+  user_id     Int
+  property_id Int
+  created_at  DateTime   @default(now())
+  properties  properties @relation(fields: [property_id], references: [id], onDelete: Cascade)
+  users       users      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  // Relations
-  properties Property[]
-  news       News[]
-  favorites  Favorite[]
-
-  @@map("users")
+  @@unique([user_id, property_id])
+  @@index([user_id])
 }
 
-enum UserRole {
-  USER
-  ADMIN
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model file_attach {
+  id            Int        @id(map: "property_images_pkey") @default(autoincrement())
+  object_id     Int
+  path          String     @db.VarChar(500)
+  nghiepvu_code String?    @db.Char(100)
+  name          String?
+  create_user   Int?
+  create_date   DateTime?  @db.Date
+  type          String?    @db.Char(20)
+  extend        String?    @db.Char(20)
+  properties    properties @relation(fields: [object_id], references: [id], onDelete: Cascade, map: "property_images_property_id_fkey")
+
+  @@index([object_id], map: "property_images_property_id_idx")
 }
 
-// ============================================
-// BẢNG BẤT ĐỘNG SẢN
-// ============================================
-model Property {
-  id             Int             @id @default(autoincrement())
-  userId         Int             @map("user_id")
-  propertyType   String          @map("property_type") @db.VarChar(100)
-  propertyStatus PropertyStatus  @map("property_status")
-  beds           Int?            @default(0)
-  baths          Int?            @default(0)
-  area           Decimal         @db.Decimal(10, 2)
-  price          Decimal         @db.Decimal(15, 2)
-  description    String?         @db.Text
-  anyCity        String          @map("any_city") @db.VarChar(100)
-  anyWard        String          @map("any_ward") @db.VarChar(100)
-  landmark       String?         @db.VarChar(255)
-  createdAt      DateTime        @default(now()) @map("created_at")
-  updatedAt      DateTime        @updatedAt @map("updated_at")
+model locations {
+  id              Int          @id @default(autoincrement())
+  code            String       @unique @db.VarChar(20)
+  name            String       @db.VarChar(100)
+  type            LocationType
+  parent_id       Int?
+  level           Int
+  locations       locations?   @relation("locationsTolocations", fields: [parent_id], references: [id])
+  other_locations locations[]  @relation("locationsTolocations")
 
-  // Relations
-  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  images    PropertyImage[]
-  favorites Favorite[]
+  @@index([level])
+  @@index([parent_id])
+  @@index([type])
+}
 
-  // Indexes for search optimization
-  @@index([propertyStatus, createdAt])
-  @@index([propertyType])
-  @@index([anyCity])
-  @@index([price])
+model news {
+  id             Int        @id @default(autoincrement())
+  user_id        Int
+  title          String     @db.VarChar(255)
+  slug           String     @unique @db.VarChar(255)
+  summary        String?
+  content        String
+  featured_image String?    @db.VarChar(500)
+  category       String?    @db.VarChar(50)
+  views          Int        @default(0)
+  status         NewsStatus @default(DRAFT)
+  published_at   DateTime?
+  created_at     DateTime   @default(now())
+  updated_at     DateTime
+  users          users      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([category])
+  @@index([slug])
+  @@index([status, published_at])
+}
+
+model properties {
+  id              Int            @id @default(autoincrement())
+  property_type   String         @db.VarChar(100)
+  property_status PropertyStatus
+  beds            Int            @default(0)
+  baths           Int            @default(0)
+  area            Decimal        @db.Decimal(10, 2)
+  price           Decimal        @db.Decimal(15, 2)
+  description     String?
+  any_city        String         @db.VarChar(100)
+  any_ward        String         @db.VarChar(100)
+  landmark        String?        @db.VarChar(255)
+  created_at      DateTime       @default(now())
+  user_id         Int?
+  updated_at      DateTime?      @db.Date
+  favorites       favorites[]
+  file_attach     file_attach[]
+
+  @@index([any_city])
   @@index([area])
-  @@map("properties")
+  @@index([price])
+  @@index([property_status, created_at], map: "properties_status_created_at_idx")
+  @@index([property_type], map: "properties_type_idx")
+}
+
+model users {
+  id         Int         @id @default(autoincrement())
+  username   String      @unique @db.VarChar(50)
+  email      String      @unique @db.VarChar(100)
+  password   String      @db.VarChar(255)
+  full_name  String?     @db.VarChar(100)
+  phone      String?     @db.VarChar(20)
+  role       UserRole    @default(USER)
+  avatar     String?     @db.VarChar(255)
+  created_at DateTime    @default(now())
+  updated_at DateTime
+  favorites  favorites[]
+  news       news[]
+}
+
+enum LocationType {
+  PROVINCE
+  WARD
+}
+
+enum NewsStatus {
+  PUBLISHED
+  DRAFT
 }
 
 enum PropertyStatus {
@@ -79,97 +126,7 @@ enum PropertyStatus {
   FOR_SALE
 }
 
-// ============================================
-// BẢNG HÌNH ẢNH BẤT ĐỘNG SẢN
-// ============================================
-model PropertyImage {
-  id         Int      @id @default(autoincrement())
-  propertyId Int      @map("property_id")
-  imageUrl   String   @map("image_url") @db.VarChar(500)
-  isPrimary Boolean  @default(false) @map("is_primary")
-  order      Int      @default(0)
-  createdAt  DateTime @default(now()) @map("created_at")
-
-  // Relations
-  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-
-  @@index([propertyId])
-  @@map("property_images")
+enum UserRole {
+  USER
+  ADMIN
 }
-
-// ============================================
-// BẢNG TIN TỨC
-// ============================================
-model News {
-  id           Int        @id @default(autoincrement())
-  userId       Int        @map("user_id")
-  title        String     @db.VarChar(255)
-  slug         String     @unique @db.VarChar(255)
-  summary      String?    @db.Text
-  content      String     @db.Text
-  featuredImage String?   @map("featured_image") @db.VarChar(500)
-  category     String?    @db.VarChar(50)
-  views        Int        @default(0)
-  status       NewsStatus @default(DRAFT)
-  publishedAt  DateTime?  @map("published_at")
-  createdAt    DateTime   @default(now()) @map("created_at")
-  updatedAt    DateTime   @updatedAt @map("updated_at")
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([status, publishedAt])
-  @@index([category])
-  @@index([slug])
-  @@map("news")
-}
-
-enum NewsStatus {
-  PUBLISHED  // Đã xuất bản
-  DRAFT      // Nháp
-}
-
-// ============================================
-// BẢNG ĐỊA ĐIỂM (Tỉnh/Phường)
-// ============================================
-model Location {
-  id       Int          @id @default(autoincrement())
-  code     String       @unique @db.VarChar(20)
-  name     String       @db.VarChar(100)
-  type     LocationType
-  parentId Int?         @map("parent_id")
-  level    Int          // 1=province, 2=ward
-
-  // Self-referential relation
-  parent   Location?    @relation("LocationHierarchy", fields: [parentId], references: [id])
-  children Location[]   @relation("LocationHierarchy")
-
-  @@index([type])
-  @@index([parentId])
-  @@index([level])
-  @@map("locations")
-}
-
-enum LocationType {
-  PROVINCE  // Tỉnh/Thành phố
-  WARD      // Phường/Xã
-}
-
-// ============================================
-// BẢNG YÊU THÍCH (Optional - Tính năng bổ sung)
-// ============================================
-model Favorite {
-  id         Int      @id @default(autoincrement())
-  userId     Int      @map("user_id")
-  propertyId Int      @map("property_id")
-  createdAt  DateTime @default(now()) @map("created_at")
-
-  // Relations
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, propertyId])
-  @@index([userId])
-  @@map("favorites")
-}
-
