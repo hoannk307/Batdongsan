@@ -1,0 +1,64 @@
+services:
+  database:
+    image: postgres:15
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    container_name: nest_backend
+    restart: always
+    depends_on:
+      - database
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}
+      PORT: ${BACKEND_PORT}
+    ports:
+      - "${BACKEND_PORT}:3000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    command: npm run start:dev
+
+  frontend_admin:
+    build: ./frontend_admin
+    container_name: next_frontend_admin
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_ADMIN_PORT}:3001"
+    volumes:
+      - ./frontend_admin:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:${BACKEND_PORT}
+    command: npm run dev
+
+  frontend_client:
+    build: ./frontend_client
+    container_name: next_frontend_client
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_CLIENT_PORT}:3002"
+    volumes:
+      - ./frontend_client:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:${BACKEND_PORT}
+    command: npm run dev
+
+volumes:
+  postgres_data:
