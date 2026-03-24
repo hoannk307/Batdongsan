@@ -165,23 +165,43 @@ const AddPropertyForm = () => {
       return;
     }
 
-    const payload = { ...values };
+    // Map từ field trên form (camelCase) sang DTO backend (snake_case)
+    const {
+      propertyType,
+      propertyStatus,
+      beds,
+      baths,
+      area,
+      price,
+      description,
+      anyCity,
+      anyWard,
+      landmark,
+      // mp4Link: bỏ qua vì backend chưa hỗ trợ
+    } = values;
 
-    // mp4Link hiện chưa được backend hỗ trợ trong DTO nên không gửi lên API
-    delete payload.mp4Link;
+    const payload = {
+      property_type: propertyType,
+      property_status: propertyStatus,
+      beds: beds !== undefined && beds !== null && beds !== "" ? Number(beds) : undefined,
+      baths: baths !== undefined && baths !== null && baths !== "" ? Number(baths) : undefined,
+      area: area !== undefined && area !== null && area !== "" ? Number(area) : undefined,
+      price: price !== undefined && price !== null && price !== "" ? Number(price) : undefined,
+      description,
+      any_city: anyCity,
+      any_ward: anyWard,
+      landmark,
+    };
 
-    // Chuẩn hóa dữ liệu số để backend dễ validate (ValidationPipe cũng sẽ hỗ trợ)
-    const numericFields = ["beds", "baths", "area", "price"];
-    numericFields.forEach((field) => {
-      if (payload[field] !== undefined && payload[field] !== null && payload[field] !== "") {
-        payload[field] = Number(payload[field]);
+    // Loại bỏ các field undefined để tránh gửi rác lên backend
+    Object.keys(payload).forEach((key) => {
+      if (payload[key] === undefined) {
+        delete payload[key];
       }
     });
 
     try {
-      //const token = getStoredToken();
-      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiaG9hbm5rMzA3QGdtYWlsLmNvbSIsImlhdCI6MTc2NDA4ODA1NiwiZXhwIjoxNzY0NjkyODU2fQ.3Nakxha5p0l5rEovl9o9lIeWkuYUHH7Jvvlofq7zdTU"
-
+      const token = getStoredToken();
       // Nếu có file thì gửi dạng multipart/form-data tới API tạo property + file_attach + upload Cloudflare
       if (uploadedFiles.length > 0) {
         const formData = new FormData();

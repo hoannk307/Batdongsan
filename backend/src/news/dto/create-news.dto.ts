@@ -7,6 +7,11 @@ export class CreateNewsDto {
   @IsString()
   title: string;
 
+  @ApiProperty({ example: 'thi-truong-bat-dong-san-2024', required: false })
+  @IsOptional()
+  @IsString()
+  slug?: string;
+
   @ApiProperty({ example: 'Tóm tắt bài viết...', required: false })
   @IsOptional()
   @IsString()

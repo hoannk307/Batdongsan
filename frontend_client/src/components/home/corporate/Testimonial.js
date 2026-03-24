@@ -21,9 +21,9 @@ const TestimonialSection = ({ value }) => {
                 <use xlinkHref="/assets/svg/icons.svg#title-line"></use>
               </svg>
               <h2>
-                Our <span>Client</span>
+                CÁC DỰ ÁN LỚN
               </h2>
-              <p className="font-roboto">{PropertyServicesDetail}</p>
+              {/* <p className="font-roboto">{PropertyServicesDetail}</p> */}
             </div>
             <NoSsr>
               <Slider className="testimonial-3 modern-dot" {...testimonial3}>

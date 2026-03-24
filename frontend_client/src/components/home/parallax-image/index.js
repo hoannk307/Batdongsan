@@ -18,10 +18,12 @@ import HomeBannerSection from "./HomeBanner";
 const BodyContent = () => {
   const [value, setValue] = useState();
   const [clientData, setClientData] = useState();
+   const [latestBlogInCorporate, setLatestBlogInCorporate] = useState();
 
   useEffect(() => {
-    getData(`/api/property`)
+    getData(`/api/property?page=1`)
       .then((res) => {
+        console.log('-----------------------------------',res.data);
         setValue(res.data);
       })
       .catch((error) => console.error("Error", error));
@@ -30,6 +32,12 @@ const BodyContent = () => {
         setClientData(res.data);
       })
       .catch((error) => console.error("Error", error));
+      
+    getData(`/api/news/latest`)
+      .then((res) => {
+        setLatestBlogInCorporate(res.data || res);
+      })
+      .catch((error) => console.error("Error fetching latest news", error));
   }, []);
   return (
     <>
@@ -38,14 +46,14 @@ const BodyContent = () => {
         <PropertySection value={value?.PropertyListing} />
       </div>
       <FeaturePropertySection value={value?.FeaturedPropertyInCorporateLayout} />
-      <div className="service-section-pt-0">
+      {/* <div className="service-section-pt-0">
         <ServiceSection value={AppPropertyData.ProvidedServices} />
-      </div>
+      </div> */}
       <PropertySection value={value?.PropertyListing} size={3} />
-      <PricingSection value={AppPropertyData.PricingPlan} />
+      {/* <PricingSection value={AppPropertyData.PricingPlan} /> */}
       <BannerSection banner={7} />
       <TestimonialSection value={clientData?.OurClientInCorporateLayout} />
-      <BlogSection value={value?.LatestBlogInCorporate} />
+      <BlogSection value={latestBlogInCorporate} />
     </>
   );
 };

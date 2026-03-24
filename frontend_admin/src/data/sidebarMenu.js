@@ -1,4 +1,4 @@
-import { Airplay, BarChart, CreditCard, Grid, Layout, Lock, MapPin, UserPlus, Users } from "react-feather";
+import { Airplay, BarChart, CreditCard, FileText, Grid, Layout, Lock, MapPin, UserPlus, Users } from "react-feather";
 
 export const SidebarMenuItem = [
     {
@@ -63,6 +63,23 @@ export const SidebarMenuItem = [
             {
                 path: "/manage-users/allusers",
                 title: 'All Users',
+                type: 'link'
+            }
+        ]
+    },
+    {
+        title: 'News',
+        icon: <FileText />,
+        type: 'sub',
+        children: [
+            {
+                path: "/news/list",
+                title: 'All News',
+                type: 'link'
+            },
+            {
+                path: "/news/add",
+                title: 'Add News',
                 type: 'link'
             }
         ]

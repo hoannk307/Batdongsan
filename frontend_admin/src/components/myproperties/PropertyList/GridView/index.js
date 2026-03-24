@@ -16,24 +16,26 @@ import FilterTag from "../../elements/FilterTag";
 import GridLayout from "../../elements/GridLayout";
 import { gridReducer, initialGrid } from "./gridReducer";
 
+const FALLBACK_API_URL = "http://localhost:3000/api";
+
 const GridView = ({ side, size, gridType, listSize, mapModal, mapView, relativeSlider, gridBar, video, tabHeader, setMapModal, children, AdvancedSearchShow, infiniteScroll, myList }) => {
     const [value, setValue] = useState();
     const [grid, gridDispatch] = useReducer(gridReducer, initialGrid);
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || FALLBACK_API_URL;
 
     useEffect(() => {
-        getData(`${process.env.API_URL}/property`)
+        if (!apiBaseUrl) {
+            console.warn("API_URL is not defined. Cannot fetch properties.");
+            return;
+        }
+
+        getData(`${apiBaseUrl}/properties`)
             .then((res) => {
-                relativeSlider
-                    ? setValue(res.data?.LatestPropertyListingInEnterprise)
-                    : setValue(
-                        Object.keys(res.data)
-                            .map((key) => [res.data[key]])
-                            .flat(2)
-                            .filter((arrData) => Array.isArray(arrData.img)),
-                    );
+                const list = res?.data?.data || [];
+                setValue(list);
             })
-            .catch((error) => console.error("Error", error));
-    }, [relativeSlider]);
+            .catch((error) => console.error("Error fetching properties", error));
+    }, [relativeSlider, apiBaseUrl]);
     return (
         <section className={`property-section  ${mapView && mapModal === "view" ? "section-sm" : ""}  ${relativeSlider ? "property-list-thumbnail" : ""}`}>
             <Container>

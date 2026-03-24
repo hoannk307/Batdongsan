@@ -18,6 +18,32 @@ export class PropertiesService {
     private readonly fileService: FileService,
   ) {}
 
+  async findLatest(params: { page?: number; limit?: number }) {
+    const page = params?.page && params.page > 0 ? params.page : 1;
+    const limit = params?.limit && params.limit > 0 ? params.limit : 6;
+    const skip = (page - 1) * limit;
+
+    const [properties, total] = await Promise.all([
+      this.prisma.properties.findMany({
+        skip,
+        take: limit,
+        orderBy: { created_at: 'desc' },
+        include: { file_attach: true },
+      }),
+      this.prisma.properties.count(),
+    ]);
+
+    return {
+      data: properties,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
   async create(userId: number, createPropertyDto: CreatePropertyDto) {
     const property = await this.prisma.properties.create({
       data: {
@@ -64,7 +90,7 @@ export class PropertiesService {
       }
 
       // Đường dẫn lưu trên Cloudflare R2 theo yêu cầu
-      const keyPath = `batdongsan/BDS/NHATRANG/${originalName}`;
+      const keyPath = `BDS/NHATRANG/${originalName}`;
 
       return {
         file,

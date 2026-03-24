@@ -1,20 +1,4 @@
-# HƯỚNG DẪN KẾT NỐI VỚI SUPABASE
 
-## Supabase là gì?
-
-[Supabase](https://supabase.com/) là một nền tảng Backend-as-a-Service (BaaS) cung cấp PostgreSQL database trên cloud, cùng với các tính năng như Authentication, Storage, Realtime, và Edge Functions.
-
-## Bước 1: Tạo Project trên Supabase
-
-1. Truy cập https://supabase.com/
-2. Đăng ký/Đăng nhập tài khoản
-3. Click **"Start your project"** hoặc **"New Project"**
-4. Điền thông tin:
-   - **Name**: Tên project (ví dụ: `batdongsan`)
-   - **Database Password**: Đặt mật khẩu mạnh cho database (lưu lại mật khẩu này!)
-   - **Region**: Chọn region gần bạn nhất (ví dụ: `Southeast Asia (Singapore)`)
-   - **Pricing Plan**: Chọn plan phù hợp (Free tier có sẵn)
-5. Click **"Create new project"** và đợi Supabase setup (khoảng 2-3 phút)
 
 ## Bước 2: Lấy Connection String
 

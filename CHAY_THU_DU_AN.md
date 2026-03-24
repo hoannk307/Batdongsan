@@ -8,9 +8,6 @@
 
 ## Bước 1: Kiểm tra Database Connection
 
-### Nếu dùng Supabase:
-1. Đảm bảo đã có file `backend/.env` với `DATABASE_URL` đúng format
-2. Xem hướng dẫn trong `SUPABASE_SETUP.md` nếu chưa setup
 
 ### Nếu dùng PostgreSQL local:
 1. Đảm bảo PostgreSQL đã chạy
@@ -51,11 +48,34 @@ npm run prisma:migrate
 
 Khi chạy migration lần đầu, Prisma sẽ hỏi tên migration, nhập: `init`
 
-### 2.4. Chạy Backend Server
+
+### 2.4. Khi cập nhật database, hoặc database thay đổi cần update schema.prisma
+Cách 1: Kéo cấu trúc DB vào schema (database thay đổi → cập nhật schema)
+Trong thư mục backend:
+```bash
+cd backendnpx prisma db pull
+```
+Prisma đọc DB từ DATABASE_URL (trong .env) và ghi đè prisma/schema.prisma theo cấu trúc hiện tại của DB.
+Sau đó nên chạy npx prisma generate để tạo lại client cho đúng schema mới.
+Lưu ý: db pull tạo schema từ DB nên có thể mất một số thứ bạn tự thêm (comment, relation names, v.v.). Nên backup hoặc commit schema.prisma trước khi chạy.
+
+Cách 2: Bạn sửa schema trước, rồi đẩy thay đổi lên DB (schema là nguồn sự thật)
+Nếu bạn sửa schema.prisma trước rồi muốn DB thay đổi theo:
+```bash
+cd backendnpx prisma migrate dev --name mo_ta_thay_doi
+```
+Hoặc chỉ tạo file migration mà chưa apply:
+```bash
+npx prisma migrate dev --create-only --name ten_migration
+```
+
+### 2.5. Chạy Backend Server
 
 ```bash
 npm run start:dev
 ```
+
+
 
 Backend sẽ chạy tại: **http://localhost:3000**
 

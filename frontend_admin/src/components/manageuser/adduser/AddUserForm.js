@@ -1,14 +1,19 @@
 import { Field, Form, Formik } from 'formik';
-import React from 'react'
+import React from 'react';
 import * as Yup from 'yup';
 import { Button, Col, Row } from 'reactstrap';
 import { ReactstrapInput, ReactstrapSelect } from '../../utils/ReactStarpInputsValidation';
 import DropZones from '@/components/Common/Dropzones';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+
+const FALLBACK_API_URL = "http://localhost:3000/api";
 
 const AddUserForm = () => {
     const getUploadParams = () => {
         return { url: 'https://httpbin.org/post' }
     }
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || FALLBACK_API_URL;
     return (
         <Formik
             initialValues={{
@@ -25,20 +30,56 @@ const AddUserForm = () => {
                 zip: ""
             }}
             validationSchema={Yup.object().shape({
-                firstname: Yup.string().required(),
-                lastname: Yup.string().required(),
-                gender: Yup.string().required(),
-                phone: Yup.number().required(),
-                dob: Yup.string().required(),
-                email: Yup.string().required(),
-                password: Yup.string().required(),
-                confirmPW: Yup.string().required(),
-                description: Yup.string().required(),
-                address: Yup.string().required(),
-                zip: Yup.string().min(6).max(6).required()
+                firstname: Yup.string().required('First name is required'),
+                lastname: Yup.string().required('Last name is required'),
+                gender: Yup.string().required('Gender is required'),
+                phone: Yup.string().required('Phone number is required'),
+                dob: Yup.string().required('Date of birth is required'),
+                email: Yup.string().email('Enter valid Email..!').required('Email is required'),
+                password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
+                confirmPW: Yup.string()
+                    .oneOf([Yup.ref('password'), null], 'Confirm Password does not match')
+                    .required('Confirm Password is required'),
+                description: Yup.string().required('Description is required'),
+                address: Yup.string().required('Address is required'),
+                zip: Yup.string().min(6, 'Zip code must be 6 characters').max(6, 'Zip code must be 6 characters').required('Zip code is required')
             })}
-            onSubmit={(values) => {
-                alert("Your data is submitted check console");
+            onSubmit={async (values, { setSubmitting, resetForm }) => {
+                if (!apiBaseUrl) {
+                    toast.error('API_URL chưa được cấu hình.');
+                    return;
+                }
+
+                const payload = {
+                    username: values.email,
+                    email: values.email,
+                    password: values.password,
+                    full_name: `${values.firstname} ${values.lastname}`.trim(),
+                    phone: values.phone ? String(values.phone) : undefined,
+                };
+
+                try {
+                    const response = await axios.post(`${apiBaseUrl}/auth/register`, payload, {
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    });
+
+                    if (response?.data?.user) {
+                        toast.success('Tạo user thành công.');
+                        resetForm();
+                    } else {
+                        toast.warn('Tạo user thành công nhưng không nhận được dữ liệu trả về.');
+                    }
+                } catch (error) {
+                    const messageFromApi = error?.response?.data?.message;
+                    const normalizedMessage = Array.isArray(messageFromApi)
+                        ? messageFromApi.join(", ")
+                        : messageFromApi;
+                    toast.error(normalizedMessage || 'Không thể tạo user. Vui lòng thử lại.');
+                } finally {
+                    setSubmitting(false);
+                }
             }}>
              {(props) => (
                 <Form>

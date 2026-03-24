@@ -26,9 +26,9 @@ const FeaturePropertySection = ({ value }) => {
                 <use xlinkHref="/assets/svg/icons.svg#title-line"></use>
               </svg>
               <h2>
-                Featured <span>Property</span>
+                BĐS nổi bật
               </h2>
-              <p className="font-roboto">Residences can be classified into different type of housing tenure can used for same physical type.</p>
+              {/* <p className="font-roboto">Residences can be classified into different type of housing tenure can used for same physical type.</p> */}
             </div>
             <Gallery>
               <NoSsr>

@@ -4,15 +4,26 @@ import PropertyBox from "../../Common/Propertybox/PropertyBox";
 import { getData } from "../../utils/getData";
 import usePagination from "../../utils/usePagination";
 
+const FALLBACK_API_URL = "http://localhost:3000/api";
+
 const Listview = () => {
   const [value, setValue] = useState();
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || FALLBACK_API_URL;
+
   useEffect(() => {
-    getData(`/api/property`)
+    if (!apiBaseUrl) {
+      console.warn("API_URL is not defined. Cannot fetch properties.");
+      return;
+    }
+
+
+    getData(`${apiBaseUrl}/properties`)
       .then((res) => {
-        setValue(res.data?.LatestPropertyListingInEnterprise);
+        const list = res?.data?.data || [];
+        setValue(list);
       })
-      .catch((error) => console.error("error", error));
-  }, []);
+      .catch((error) => console.error("error fetching properties", error));
+  }, [apiBaseUrl]);
 
   const [Pagination, data] = usePagination(value && value);
   return (

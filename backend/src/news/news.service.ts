@@ -8,11 +8,13 @@ export class NewsService {
   constructor(private prisma: PrismaService) {}
 
   async create(userId: number, createNewsDto: CreateNewsDto) {
-    const slug = this.generateSlug(createNewsDto.title);
+    const slug =
+      createNewsDto.slug?.trim() ? createNewsDto.slug.trim() : this.generateSlug(createNewsDto.title);
 
     const news = await this.prisma.news.create({
       data: {
         ...createNewsDto,
+        // Ensure slug is always set (required by DB) while still allowing manual override from DTO.
         slug,
         user_id: userId,
         published_at: createNewsDto.status === 'PUBLISHED' ? new Date() : null,
@@ -135,7 +137,12 @@ export class NewsService {
 
     const data: any = { ...updateNewsDto };
 
-    if (updateNewsDto.title && updateNewsDto.title !== existingNews.title) {
+    // Priority:
+    // 1) If client provided slug explicitly, use it.
+    // 2) Otherwise, if title changed, regenerate slug from title.
+    if (updateNewsDto.slug?.trim()) {
+      data.slug = updateNewsDto.slug.trim();
+    } else if (updateNewsDto.title && updateNewsDto.title !== existingNews.title) {
       data.slug = this.generateSlug(updateNewsDto.title);
     }
 
@@ -164,6 +171,28 @@ export class NewsService {
     });
   }
 
+  async findLatest(limit = 6, category?: string) {
+    return this.prisma.news.findMany({
+      where: {
+        status: 'PUBLISHED',
+        ...(category ? { category } : { category: 'NORMAL' }),
+      },
+      take: limit,
+      orderBy: {
+        published_at: 'desc',
+      },
+      include: {
+        users: {
+          select: {
+            id: true,
+            username: true,
+            full_name: true,
+          },
+        },
+      },
+    });
+  }
+
   private generateSlug(title: string): string {
     return title
       .toLowerCase()
@@ -173,4 +202,3 @@ export class NewsService {
       .replace(/(^-|-$)/g, '');
   }
 }
-

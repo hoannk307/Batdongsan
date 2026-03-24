@@ -3,16 +3,25 @@ import { getData } from "@/components/utils/getData";
 import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 
+const FALLBACK_API_URL = "http://localhost:3000/api";
+
 const CondominiumList = () => {
   const [Condominiumdata, setCondominiumdata] = useState();
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || FALLBACK_API_URL;
 
   useEffect(() => {
-    getData(`/api/property`)
+    if (!apiBaseUrl) {
+      console.warn("API_URL is not defined. Cannot fetch properties.");
+      return;
+    }
+
+    getData(`${apiBaseUrl}/properties`)
       .then((resp) => {
-        setCondominiumdata(resp.data?.CondominiumProperty);
+        const list = resp?.data?.data || [];
+        setCondominiumdata(list);
       })
       .catch((error) => console.error("Error", error));
-  }, []);
+  }, [apiBaseUrl]);
 
   return (
     <Row className='property-2 row column-sm zoom-gallery property-label property-grid mt-0'>

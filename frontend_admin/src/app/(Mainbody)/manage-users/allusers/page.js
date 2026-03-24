@@ -3,17 +3,53 @@ import React, { Fragment, useEffect, useState } from "react";
 import { Col, Container, Row } from "reactstrap";
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import PropertyBoxFour from "@/components/Common/Propertybox/PropertyBoxOne";
-import { getData } from "@/components/utils/getData";
+import axios from "axios";
+import { toast } from "react-toastify";
+
+const FALLBACK_API_URL = "http://localhost:3000/api";
 
 const AllUsers = () => {
-  const [userlist, setUserlist] = useState();
+  const [userlist, setUserlist] = useState([]);
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || FALLBACK_API_URL;
+
   useEffect(() => {
-    getData(`/api/userdata`)
-      .then((res) => {
-        setUserlist(res.data);
-      })
-      .catch((error) => console.error("Error", error));
-  }, []);
+    if (!apiBaseUrl) {
+      toast.error("API_URL chưa được cấu hình.");
+      return;
+    }
+
+    const fetchUsers = async () => {
+      try {
+        const res = await axios.get(`${apiBaseUrl}/users`, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        const rawUsers = res?.data || [];
+        const mappedUsers = rawUsers.map((user) => ({
+          img: user.avatar || "/assets/images/avatar/5.jpg",
+          properties: "",
+          label: false,
+          name: user.full_name || user.username || user.email,
+          mobile: user.phone || "",
+          mail: user.email,
+          pinCode: String(user.id),
+        }));
+
+        setUserlist(mappedUsers);
+      } catch (error) {
+        const messageFromApi = error?.response?.data?.message;
+        const normalizedMessage = Array.isArray(messageFromApi)
+          ? messageFromApi.join(", ")
+          : messageFromApi;
+        toast.error(normalizedMessage || "Không thể tải danh sách user.");
+        console.error("Error", error);
+      }
+    };
+
+    fetchUsers();
+  }, [apiBaseUrl]);
 
   return (
     <Fragment>

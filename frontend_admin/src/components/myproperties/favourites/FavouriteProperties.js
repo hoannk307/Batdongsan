@@ -3,16 +3,25 @@ import { Col, Row } from "reactstrap";
 import PropertyBox from "@/components/Common/Propertybox/PropertyBox";
 import { getData } from "@/components/utils/getData";
 
+const FALLBACK_API_URL = "http://localhost:3000/api";
+
 const FavouriteProperties = () => {
   const [propertyList, setPropertyList] = useState();
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || FALLBACK_API_URL;
 
   useEffect(() => {
-    getData(`/api/property`)
+    if (!apiBaseUrl) {
+      console.warn("API_URL is not defined. Cannot fetch properties.");
+      return;
+    }
+
+    getData(`${apiBaseUrl}/properties`)
       .then((res) => {
-        setPropertyList(res.data?.LatestPropertyListingInEnterprise);
+        const list = res?.data?.data || [];
+        setPropertyList(list);
       })
       .catch((error) => console.error("Error", error));
-  }, []);
+  }, [apiBaseUrl]);
 
   return (
     <Col xl='12'>

@@ -1,24 +1,23 @@
 "use client";
 import { Field, Form, Formik } from 'formik'
 import Link from 'next/link'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import * as Yup from 'yup';
 import { Lock, Mail } from 'react-feather'
 import { Card, CardBody, Col, Container, Row } from 'reactstrap'
 import { toast } from 'react-toastify';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Img from '@/components/Common/Image';
+import axios from 'axios';
+import Cookies from 'js-cookie';
+
+const FALLBACK_API_URL = "http://localhost:3000/api";
 
 const LogIn = () => {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [showpassword, setShowpassword] = useState(false);
-    const [data, setData] = useState();
-    useEffect(() => {
-        const userdata = JSON.parse(localStorage.getItem('user'))
-        if (userdata) {
-            setData(userdata);
-        }
-    }, [])
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || FALLBACK_API_URL;
     return (
         <div className="authentication-box">
             <Container fluid={true} className="container-fluid">
@@ -38,12 +37,37 @@ const LogIn = () => {
                                         email: Yup.string().required('Enter valid Email..!'),
                                         password: Yup.string().required('Password is required..!')
                                     })}
-                                    onSubmit={(values) => {
-                                        if (data.email === values.email && data.password === values.password) {
+                                    onSubmit={async (values, { setSubmitting }) => {
+                                        if (!apiBaseUrl) {
+                                            toast.error('API_URL chưa được cấu hình.');
+                                            return;
+                                        }
+
+                                        try {
+                                            const response = await axios.post(`${apiBaseUrl}/auth/login`, values, {
+                                                headers: {
+                                                    "Content-Type": "application/json",
+                                                },
+                                            });
+
+                                            const { user, token } = response?.data || {};
+
+                                            if (typeof window !== "undefined" && token && user) {
+                                                Cookies.set("accessToken", token);
+                                                localStorage.setItem("user", JSON.stringify(user));
+                                            }
+
                                             toast.success('Login successful');
-                                            router.push('/dashboard');
-                                        } else {
-                                            toast.errors('Please check your email and password..!');
+                                            const returnTo = searchParams.get('returnTo');
+                                            router.push(returnTo || '/dashboard');
+                                        } catch (error) {
+                                            const messageFromApi = error?.response?.data?.message;
+                                            const normalizedMessage = Array.isArray(messageFromApi)
+                                                ? messageFromApi.join(", ")
+                                                : messageFromApi;
+                                            toast.error(normalizedMessage || 'Please check your email and password..!');
+                                        } finally {
+                                            setSubmitting(false);
                                         }
                                     }}>
                                     {({ errors, touched }) => (

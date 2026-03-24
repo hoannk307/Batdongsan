@@ -19,6 +19,7 @@ import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 import { SearchPropertyDto } from './dto/search-property.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PropertySortDefault } from './enums/property-defaults.enum';
 
 @ApiTags('properties')
 @Controller('properties')
@@ -75,6 +76,17 @@ export class PropertiesController {
   @ApiOperation({ summary: 'Lấy danh sách bất động sản' })
   findAll(@Query() query: SearchPropertyDto) {
     return this.propertiesService.findAll(query);
+  }
+
+  @Get('latest')
+  @ApiOperation({ summary: 'Lấy danh sách bất động sản mới nhất (6 item/trang)' })
+  findLatest(@Query('page') page?: string) {
+    const pageNumber = page ? Number(page) : 1;
+    return this.propertiesService.findAll({
+      page: Number.isFinite(pageNumber) && pageNumber > 0 ? pageNumber : 1,
+      limit: 6,
+      sort: PropertySortDefault.NEWEST,
+    });
   }
 
   @Post('search')

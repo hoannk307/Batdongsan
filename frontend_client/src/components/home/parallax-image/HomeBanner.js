@@ -19,21 +19,27 @@ const HomeBannerSection = () => {
 
   return (
     <section className="parallax-home video-layout">
+      <div className="parallax-right" aria-hidden="true">
+        <img
+          src="/assets/images/layout/nhatrang.png"
+          alt=""
+          className="img-fluid"
+        />
+      </div>
       <Container>
-        <Row>
-          <Col lg="7" md="9">
-            <div className="parallax-content">
+        <Row className="justify-content-end">
+          <Col lg="7" md="9" className="ms-auto">
+            <div className="parallax-content text-end">
               <div className="box text-affect">
                 <div className="title">
                   <span className="block"></span>
-                  <h1>
-                    Luxury
-                    <br /> Apartment
-                  </h1>
+                   <p style={{fontSize: '24px', fontWeight: 'bold'}}>
+                  NHA TRANG
+                  </p>
                 </div>
                 <div className="role">
                   <div className="block"></div>
-                  <p className="font-roboto">Limited time offer.Hurry up !!</p>
+                  <p className="font-roboto">Điểm đến đầu tư, nơi an cư lý tưởng</p>
                 </div>
               </div>
               <form className="video-search">
@@ -120,15 +126,6 @@ const HomeBannerSection = () => {
                   </Link>
                 </div>
               </form>
-            </div>
-          </Col>
-          <Col lg="5">
-            <div className="parallax-right">
-              <img
-                src="/assets/images/layout/playing.svg"
-                alt=""
-                className="img-fluid"
-              />
             </div>
           </Col>
         </Row>

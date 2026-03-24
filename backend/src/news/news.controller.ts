@@ -45,6 +45,12 @@ export class NewsController {
     );
   }
 
+  @Get('latest')
+  @ApiOperation({ summary: 'Lấy danh sách 6 tin tức mới nhất' })
+  findLatest(@Query('category') category?: string) {
+    return this.newsService.findLatest(6, category);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Lấy chi tiết tin tức theo ID' })
   findOne(@Param('id') id: string) {
@@ -73,4 +79,3 @@ export class NewsController {
     return this.newsService.remove(+id);
   }
 }
-

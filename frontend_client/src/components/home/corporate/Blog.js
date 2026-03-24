@@ -23,9 +23,8 @@ const BlogSection = ({ value }) => {
                 <use xlinkHref="/assets/svg/icons.svg#title-line"></use>
               </svg>
               <h2>
-                Latest <span>Blog</span>
+                Tin tức
               </h2>
-              <p className="font-roboto">{LatestPropertyDetail}</p>
             </div>
             <NoSsr>
               <Slider className="blog-2" {...blog2}>
