@@ -3,6 +3,8 @@
  * @param props - This is the props object that is passed to the component.
  * @returns A function that returns a component
  */
+ "use client";
+
 import React, { useEffect, useRef } from "react";
 
 const Img = (props) => {

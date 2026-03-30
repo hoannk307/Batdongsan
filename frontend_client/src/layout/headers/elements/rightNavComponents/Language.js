@@ -1,3 +1,5 @@
+ "use client";
+
 import React, { useEffect, useState } from "react";
 import { Globe } from "react-feather";
 import useOutsideDropdown from "@/utils/useOutsideDropdown";

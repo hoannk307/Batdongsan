@@ -22,12 +22,19 @@ function generateSlug(title) {
 function normalizePayload(values, isManualSlug) {
   const slugTrimmed = values.slug?.trim() || "";
   const slugForPayload = isManualSlug ? slugTrimmed : slugTrimmed || generateSlug(values.title);
+
+  const parsedTags = String(values.tagsText || "")
+    .split(/[;,]/g)
+    .map((t) => t.trim())
+    .filter(Boolean);
+
   return {
     title: values.title?.trim() || "",
     summary: values.summary?.trim() || undefined,
     content: values.content || "",
     featured_image: values.featured_image?.trim() || undefined,
     category: values.category?.trim() || undefined,
+    tags: Array.from(new Set(parsedTags)),
     // Backend schema requires slug.
     // - Nếu user tự sửa slug (`isManualSlug`) thì payload dùng đúng slug user nhập.
     // - Nếu user chưa tự sửa thì tự generate từ title.
@@ -79,6 +86,9 @@ export default function NewsForm({ mode, initialValues, newsId, tinymceApiKey: t
     featured_image: initialValues?.featured_image || "",
     category: initialValues?.category || "",
     status: initialValues?.status || "DRAFT",
+    tagsText: Array.isArray(initialValues?.tags)
+      ? initialValues.tags.map((t) => t?.name || t).filter(Boolean).join(", ")
+      : "",
   }));
 
   // Tự động tạo slug khi người dùng gõ Title (nếu chưa tự sửa Slug).
@@ -208,6 +218,19 @@ export default function NewsForm({ mode, initialValues, newsId, tinymceApiKey: t
           <FormGroup>
             <Label>Category</Label>
             <Input name="category" value={values.category} onChange={onChange} placeholder="VD: market, policy..." />
+          </FormGroup>
+        </Col>
+        <Col md="12">
+          <FormGroup>
+            <Label>Tags (comma separated)</Label>
+            <Input
+              type="textarea"
+              rows="2"
+              name="tagsText"
+              value={values.tagsText}
+              onChange={onChange}
+              placeholder="vd: market, policy, real-estate"
+            />
           </FormGroup>
         </Col>
         <Col md="6">

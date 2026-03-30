@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsEnum } from 'class-validator';
+import { IsArray, IsEnum, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { NewsStatus } from '@prisma/client';
 
@@ -35,5 +35,11 @@ export class CreateNewsDto {
   @IsOptional()
   @IsEnum(NewsStatus)
   status?: NewsStatus;
+
+  @ApiProperty({ example: ['market', 'policy'], required: false })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags?: string[];
 }
 

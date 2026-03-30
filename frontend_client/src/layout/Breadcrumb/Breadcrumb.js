@@ -1,4 +1,5 @@
- 
+ "use client";
+
 import React, { Fragment, useEffect, useState } from "react";
 import { Container } from "reactstrap";
 import Img from "../../utils/BackgroundImageRatio";

@@ -1,3 +1,5 @@
+ "use client";
+
 /**
  * It renders a navbar with a list of menu items
  * @returns A navbar with a dropdown menu and a mega menu.

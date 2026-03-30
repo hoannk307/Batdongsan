@@ -3,6 +3,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateNewsDto } from './dto/create-news.dto';
 import { UpdateNewsDto } from './dto/update-news.dto';
 
+function normalizeTagName(tag: string) {
+  return String(tag || '').trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+function normalizeTagNames(tags?: string[]) {
+  if (!Array.isArray(tags)) return [];
+  return Array.from(new Set(tags.map(normalizeTagName).filter(Boolean)));
+}
+
 @Injectable()
 export class NewsService {
   constructor(private prisma: PrismaService) {}
@@ -11,14 +20,27 @@ export class NewsService {
     const slug =
       createNewsDto.slug?.trim() ? createNewsDto.slug.trim() : this.generateSlug(createNewsDto.title);
 
+    const { tags: rawTags, ...restDto } = createNewsDto as any;
+    const tagNames = normalizeTagNames(rawTags);
+
     const news = await this.prisma.news.create({
       data: {
-        ...createNewsDto,
+        ...restDto,
         // Ensure slug is always set (required by DB) while still allowing manual override from DTO.
         slug,
         user_id: userId,
         published_at: createNewsDto.status === 'PUBLISHED' ? new Date() : null,
         updated_at: new Date(),
+        ...(tagNames.length > 0
+          ? {
+              tags: {
+                connectOrCreate: tagNames.map((name) => ({
+                  where: { name },
+                  create: { name },
+                })),
+              },
+            }
+          : {}),
       },
       include: {
         users: {
@@ -28,6 +50,7 @@ export class NewsService {
             full_name: true,
           },
         },
+        tags: { select: { id: true, name: true, slug: true } },
       },
     });
 
@@ -59,6 +82,7 @@ export class NewsService {
               full_name: true,
             },
           },
+          tags: { select: { id: true, name: true, slug: true } },
         },
       }),
       this.prisma.news.count({ where }),
@@ -86,6 +110,7 @@ export class NewsService {
             full_name: true,
           },
         },
+        tags: { select: { id: true, name: true, slug: true } },
       },
     });
 
@@ -113,6 +138,7 @@ export class NewsService {
             full_name: true,
           },
         },
+        tags: { select: { id: true, name: true, slug: true } },
       },
     });
 
@@ -135,7 +161,10 @@ export class NewsService {
       throw new NotFoundException('News not found');
     }
 
-    const data: any = { ...updateNewsDto };
+    const { tags: rawTags, ...restDto } = updateNewsDto as any;
+    const data: any = { ...restDto };
+    const shouldSyncTags = updateNewsDto.tags !== undefined;
+    const tagNames = shouldSyncTags ? normalizeTagNames(rawTags) : [];
 
     // Priority:
     // 1) If client provided slug explicitly, use it.
@@ -150,6 +179,66 @@ export class NewsService {
       data.published_at = new Date();
     }
 
+    // Sync tags only when client provided `tags` field (even empty array => clear).
+    if (shouldSyncTags) {
+      await this.prisma.$transaction(async (tx) => {
+        if (tagNames.length > 0) {
+          const existingTags = await tx.tags.findMany({
+            where: { name: { in: tagNames } },
+            select: { id: true, name: true },
+          });
+          const existingNames = new Set(existingTags.map((t) => t.name));
+          const toCreate = tagNames.filter((name) => !existingNames.has(name));
+
+          if (toCreate.length > 0) {
+            await tx.tags.createMany({
+              data: toCreate.map((name) => ({ name })),
+              skipDuplicates: true,
+            });
+          }
+
+          const finalTags = await tx.tags.findMany({
+            where: { name: { in: tagNames } },
+            select: { id: true, name: true },
+          });
+
+          data.tags = { set: finalTags.map((t) => ({ id: t.id })) };
+        } else {
+          data.tags = { set: [] };
+        }
+
+        await tx.news.update({
+          where: { id },
+          data,
+          include: {
+            users: {
+              select: {
+                id: true,
+                username: true,
+                full_name: true,
+              },
+            },
+            tags: { select: { id: true, name: true, slug: true } },
+          },
+        });
+      });
+
+      // Re-fetch after tag sync to return tags accurately.
+      return this.prisma.news.findUnique({
+        where: { id },
+        include: {
+          users: {
+            select: {
+              id: true,
+              username: true,
+              full_name: true,
+            },
+          },
+          tags: { select: { id: true, name: true, slug: true } },
+        },
+      });
+    }
+
     return this.prisma.news.update({
       where: { id },
       data,
@@ -161,6 +250,7 @@ export class NewsService {
             full_name: true,
           },
         },
+        tags: { select: { id: true, name: true, slug: true } },
       },
     });
   }
@@ -189,6 +279,7 @@ export class NewsService {
             full_name: true,
           },
         },
+        tags: { select: { id: true, name: true, slug: true } },
       },
     });
   }

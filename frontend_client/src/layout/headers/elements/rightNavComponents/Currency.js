@@ -1,3 +1,5 @@
+ "use client";
+
 import React from "react";
 import { DollarSign } from "react-feather";
 import { useDispatch } from "react-redux";
