@@ -9,8 +9,11 @@ import Img from "@/utils/BackgroundImageRatio";
 import NoSsr from "@/utils/NoSsr";
 import TopTitle from "./TopTitle";
 
-const SliderBreadcrumbSection = () => {
-  const breadcrumbBg = ["/assets/images/property/4.jpg", "/assets/images/property/5.jpg", "/assets/images/property/4.jpg", "/assets/images/property/2.jpg"];
+const SliderBreadcrumbSection = ({ singleData }) => {
+  const breadcrumbBg =
+    singleData?.images?.length > 0
+      ? singleData.images.map((image) => image.url)
+      : ["/assets/images/property/4.jpg", "/assets/images/property/5.jpg", "/assets/images/property/4.jpg", "/assets/images/property/2.jpg"];
   return (
     <section className="ratio_40 breadcrumb-section p-0 single-property-images">
       <NoSsr>
@@ -24,7 +27,7 @@ const SliderBreadcrumbSection = () => {
           ))}
         </Slider>
       </NoSsr>
-      <TopTitle />
+      <TopTitle singleData={singleData} />
     </section>
   );
 };

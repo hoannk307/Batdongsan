@@ -21,18 +21,18 @@ const Exploration = () => {
 
   return (
     <div className="advance-card">
-      <h6>Request exploration</h6>
+      <h6>Liên hệ</h6>
       <div className="category-property">
         <Form onSubmit={handleSubmit}>
           <FormGroup>
-            <Input type="text" className="form-control" placeholder="Your Name" required name="name" value={inputs.name} onChange={handleChange} />
+            <Input type="text" className="form-control" placeholder="Họ tên" required name="name" value={inputs.name} onChange={handleChange} />
           </FormGroup>
           <FormGroup className="form-group">
-            <Input type="email" className="form-control" placeholder="Email Address" required name="email" value={inputs.email} onChange={handleChange} />
+            <Input type="email" className="form-control" placeholder="Email" required name="email" value={inputs.email} onChange={handleChange} />
           </FormGroup>
           <FormGroup className="form-group">
             <Input
-              placeholder="phone number"
+              placeholder="Số điện thoại"
               className="form-control"
               name="mobnumber"
               required
@@ -46,7 +46,7 @@ const Exploration = () => {
             <Input type="textarea" placeholder="Message" className="form-control" rows="3" name="message" value={inputs.message} onChange={handleChange}></Input>
           </FormGroup>
           <Button type="submit" className="btn btn-gradient btn-block btn-pill">
-            Submit Request
+            Gửi
           </Button>
         </Form>
       </div>

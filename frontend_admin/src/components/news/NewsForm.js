@@ -41,7 +41,7 @@ const newsSchema = z.object({
   title: z
     .string()
     .min(10, "Tiêu đề quá ngắn")
-    .max(65, "Cảnh báo: Tiêu đề > 65 ký tự có thể bị cắt trên Google"),
+    .max(200, "Tiêu đề không được dài quá 200 ký tự"),
   slug: z.string().min(1, "Slug không được để trống"),
   summary: z
     .string()
@@ -174,6 +174,11 @@ export default function NewsForm({ mode, initialValues, newsId, tinymceApiKey: t
           <FormGroup>
             <Label>Title *</Label>
             <Input name="title" value={values.title} onChange={onChange} placeholder="Nhập tiêu đề..." />
+            {values.title.length > 65 && (
+              <small className="text-warning">
+                Gợi ý SEO: Tiêu đề dài hơn 65-70 ký tự có thể bị Google cắt bớt khi hiển thị.
+              </small>
+            )}
           </FormGroup>
         </Col>
         <Col md="4">

@@ -11,7 +11,7 @@ import SearchBarDeskBox from "./SearchBarDeskBox";
 import VideoDeskBox from "./VideoDeskBox";
 import ReviewsDeskBox from "./ReviewsDeskBox";
 
-const SinglePropertySection = () => {
+const SinglePropertySection = ({ singleData }) => {
   const fix = useStickyBar();
   useActiveLinkInStickyBar();
   return (
@@ -19,13 +19,13 @@ const SinglePropertySection = () => {
       <div className='description-section'>
         <div className='description-details'>
           <SearchBarDeskBox fix={fix} />
-          <FeatureDeskBox />
-          <GalleryDeskBox />
-          <VideoDeskBox />
-          <DetailsDeskBox />
-          <FloorPlanDeskBox />
-          <LocationMapDeskBox />
-          <ReviewsDeskBox />
+          <FeatureDeskBox singleData={singleData} />
+          <GalleryDeskBox singleData={singleData} />
+          <VideoDeskBox singleData={singleData} />
+          <DetailsDeskBox singleData={singleData} />
+          <FloorPlanDeskBox singleData={singleData} />
+          <LocationMapDeskBox singleData={singleData} />
+          <ReviewsDeskBox singleData={singleData} />
         </div>
       </div>
     </Col>

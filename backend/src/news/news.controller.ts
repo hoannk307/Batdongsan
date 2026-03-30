@@ -45,7 +45,7 @@ export class NewsController {
     );
   }
 
-  @Get('latest')
+  @Get()
   @ApiOperation({ summary: 'Lấy danh sách 6 tin tức mới nhất' })
   findLatest(@Query('category') category?: string) {
     return this.newsService.findLatest(6, category);

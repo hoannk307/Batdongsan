@@ -1,4 +1,6 @@
-import React from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+"use client";
+import React, { useEffect, useState } from "react";
 import { Col, Container, Row } from "reactstrap";
 import Category from "@/layout/sidebarLayout/Category";
 import PopularTags from "@/layout/sidebarLayout/PopularTags";
@@ -8,9 +10,23 @@ import Sidebar from "@/layout/sidebarLayout/Sidebar";
 import BlogTitle from "./BlogTitle";
 import CommentSection from "./CommentSection";
 import DetailsProperty from "./DetailsProperty";
-import LeaveComment from "./LeaveComment";
+import { getData } from "@/utils/getData";
+import { useSearchParams } from "next/navigation";
 
 const BodyContent = (props) => {
+  const [value, setValue] = useState(null);
+  const searchParams = useSearchParams();
+  const id = props?.id || searchParams?.get?.("id");
+
+  useEffect(() => {
+    if (!id) return;
+
+    // Use the existing endpoint `/api/news` and pass `id` via query string.
+    getData(`/api/news?id=${encodeURIComponent(id)}`)
+      .then((res) => setValue(res.data))
+      .catch((error) => console.error("Error fetching news data:", error));
+  }, [id]);
+
   return (
     <section className="ratio_40">
       <Container>
@@ -18,17 +34,14 @@ const BodyContent = (props) => {
           <Col xl={props.side ? "9" : "12"} lg={props.side ? "8" : ""} className=" order-lg-1">
             <div className="blog-single-detail theme-card">
               {props.children}
-              <BlogTitle />
-              <DetailsProperty />
-              <CommentSection />
-              <LeaveComment />
+              <BlogTitle news={value} />
+              <DetailsProperty news={value} />
             </div>
           </Col>
           {props.side && (
             <Sidebar side={props.side}>
               <SearchBar />
               <Category />
-              <RecentlyAdded />
               <PopularTags />
             </Sidebar>
           )}

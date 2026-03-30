@@ -12,7 +12,7 @@ export async function GET(req) {
     process.env.BACKEND_API_URL ||
     FALLBACK_BACKEND_API_URL;
 
-  const targetUrl = `${backendApiBaseUrl}/properties/latest?page=${encodeURIComponent(
+  const targetUrl = `${backendApiBaseUrl}/properties?page=${encodeURIComponent(
     page
   )}`;
 

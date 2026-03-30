@@ -78,7 +78,7 @@ export class PropertiesController {
     return this.propertiesService.findAll(query);
   }
 
-  @Get('latest')
+  @Get()
   @ApiOperation({ summary: 'Lấy danh sách bất động sản mới nhất (6 item/trang)' })
   findLatest(@Query('page') page?: string) {
     const pageNumber = page ? Number(page) : 1;

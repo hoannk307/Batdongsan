@@ -16,8 +16,8 @@ const PropertySection = ({ value, size }) => {
               <svg className='title-svg'>
                 <use xlinkHref='/assets/svg/icons.svg#title-line'></use>
               </svg>
-              <h2 dangerouslySetInnerHTML={{ __html: propertyListing }}></h2>
-              <p className='font-roboto'>{propertyDescription}</p>
+              <h2 >TIN BẤT ĐỘNG SẢN</h2>
+              {/* <p className='font-roboto'>{propertyDescription}</p> */}
             </div>
             <Row className={`column-space ${size && "no-slider-property"}`}>
               {value &&

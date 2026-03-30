@@ -14,7 +14,7 @@ import { MapPin, PhoneCall } from "react-feather";
 const ContactInfo = () => {
   return (
     <div className='advance-card'>
-      <h6>Contact Info</h6>
+      <h6>Người đăng</h6>
       <div className='category-property'>
         <div className='agent-info'>
           <div className='media'>
@@ -27,12 +27,8 @@ const ContactInfo = () => {
         </div>
         <ul>
           <li>
-            <MapPin className='me-2' />
-            A-32, Albany, Newyork.
-          </li>
-          <li>
             <PhoneCall className='me-2' />
-            (+066) 518 - 457 - 5181
+           0977307986
           </li>
         </ul>
       </div>
