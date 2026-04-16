@@ -26,7 +26,7 @@ const BodyContent = (props) => {
     <>
       {props.children}
       <section className="without-top property-main small-section">
-        <TopTitle singleData={props.singleData} id={props.id}/>
+        <TopTitle singleData={props.singleData} id={props.id} />
       </section>
       <section className="single-property mt-0 pt-0">
         <Container>
@@ -36,16 +36,14 @@ const BodyContent = (props) => {
                 {props.imgSection && <ImageSection />}
                 <GalleryBox exploration={props.exploration} />
                 <SinglePropertySection />
-                <ReviewsDeskBox />
+                {/* <ReviewsDeskBox /> */}
               </div>
             </Col>
             <Sidebar>
               <ContactInfo />
               <Exploration />
-              <Filter />
+              {/* <Filter /> */}
               <Featured />
-              <RecentlyAdded />
-              <Mortgage />
             </Sidebar>
           </Row>
         </Container>

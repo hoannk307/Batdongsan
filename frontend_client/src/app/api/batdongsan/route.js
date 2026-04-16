@@ -56,7 +56,7 @@ export async function GET(req) {
           : ["/assets/images/property/12.jpg"];
       return NextResponse.json({
         data: {
-          view_count      : p?.view_count ?? 0,
+          view_count: p?.view_count ?? 0,
           // --- Ảnh ---
           img: images,
           file_attach: p?.file_attach || [],
@@ -146,4 +146,4 @@ export async function GET(req) {
 }
 
 
- 
+

@@ -249,6 +249,19 @@ export class PropertiesService {
     return property;
   }
 
+  /**
+   * Tăng lượt xem +1 theo kiểu atomic (tránh race condition).
+   * Dùng Prisma update với increment thay vì đọc rồi ghi.
+   */
+  async incrementViewCount(id: number): Promise<{ view_count: number }> {
+    const updated = await this.prisma.properties.update({
+      where: { id },
+      data: { view_count: { increment: 1 } },
+      select: { view_count: true },
+    });
+    return updated;
+  }
+
   async update(id: number, userId: number, updatePropertyDto: UpdatePropertyDto) {
     const property = await this.prisma.properties.findUnique({
       where: { id },

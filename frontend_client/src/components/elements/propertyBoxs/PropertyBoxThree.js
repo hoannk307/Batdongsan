@@ -30,7 +30,7 @@ const PropertyBoxThree = ({ data }) => {
       </div>
       <div className="property-details">
         <h3>
-          <Link href={`/property/left-sidebar?id=${data?.id}`}>{data?.title}</Link>
+          <Link href={`/batdongsan/detail?id=${data?.id}`}>{data?.title}</Link>
         </h3>
         <p className="font-roboto">{data?.details}</p>
         <ul className="icon-property">
@@ -79,7 +79,7 @@ const PropertyBoxThree = ({ data }) => {
           </li>
         </ul>
         <div className="mt-3 text-start">
-          <Link href={`/property/left-sidebar?id=${data?.id}`}>
+          <Link href={`/batdongsan/detail?id=${data?.id}`}>
             <button type="button" className="btn btn-light-bg btn-flat">
               View Details
             </button>

@@ -12,7 +12,7 @@ const RelatedProperty = () => {
   const [value, setValue] = useState();
 
   useEffect(() => {
-    getData(`/api/property`)
+    getData(`/api/batdongsan`)
       .then((res) => {
         setValue(res.data?.LatestPropertyData);
       })

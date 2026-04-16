@@ -8,7 +8,7 @@ const SearchSuggestionBox = ({ searchDropDown, className, searchInput }) => {
   const [filterData, setFilterData] = useState([]);
 
   useEffect(() => {
-    getData(`/api/property`)
+    getData(`/api/batdongsan`)
       .then((res) => {
         setValue(
           Object.keys(res.data)

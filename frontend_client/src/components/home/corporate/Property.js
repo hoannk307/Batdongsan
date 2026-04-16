@@ -20,8 +20,8 @@ const PropertySection = ({ value, size }) => {
               {/* <p className='font-roboto'>{propertyDescription}</p> */}
             </div>
             <Row className={`column-space ${size && "no-slider-property"}`}>
-              {value &&
-                value.slice(0, `${size ? 8 : 6}`).map((data, i) => (
+              {Array.isArray(value) &&
+                value.slice(0, size ? 8 : 6).map((data, i) => (
                   <Col xl='4' md='6' xxl={size && size} className='wow fadeInUp' key={i}>
                     <PropertyBoxThree data={data} />
                   </Col>

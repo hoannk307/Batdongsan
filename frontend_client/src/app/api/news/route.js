@@ -93,9 +93,13 @@ export async function GET(req) {
   const rawId = searchParams.get("id");
   const id = typeof rawId === "string" ? rawId.trim() : "";
 
+
+  console.log('-----------------------------------searchParams:', searchParams);
   // If `id` exists -> return a single news item.
   // This keeps the API surface as `/api/news` only (no dynamic segment route).
   if (id) {
+
+
     const backendApiBaseUrl = getBackendApiBaseUrl();
 
     try {
@@ -141,6 +145,8 @@ export async function GET(req) {
     const res = await fetch(targetUrl, { cache: "no-store" });
     const payload = await res.json().catch(() => null);
     const list = payload?.data;
+
+    console.log('-----------------------------------res:', res);
 
     if (!res.ok || !Array.isArray(list)) {
       return NextResponse.json([]);

@@ -11,7 +11,7 @@ import React from "react";
 import { Container } from "reactstrap";
 import AboutDeskBox from "./AboutDeskBox";
 
-const SearchBarDeskBox = ({ fix }) => {
+const SearchBarDeskBox = ({ fix, singleData }) => {
   return (
     <div className="desc-box" id="navigation">
       <div className={`menu-top ${fix ? "sticky" : ""}`}>
@@ -19,18 +19,18 @@ const SearchBarDeskBox = ({ fix }) => {
           <ul className="nav">
             <li className="active">
               <a className="" href="#navigation">
-                about
+                Giới thiệu
               </a>
             </li>
 
-            <li>
+            {/* <li>
               <a className="" href="#feature">
                 feature
               </a>
-            </li>
+            </li> */}
             <li>
               <a className="" href="#gallery">
-                gallery
+                Ảnh
               </a>
             </li>
             <li>
@@ -40,23 +40,23 @@ const SearchBarDeskBox = ({ fix }) => {
             </li>
             <li>
               <a className="" href="#details">
-                details
+                Thông tin chi tiết
               </a>
             </li>
             <li>
               <a className="" href="#floor_plan">
-                Floor plan
+                Mặt bằng
               </a>
             </li>
             <li>
               <a className="" href="#location-map">
-                Location
+                Vị trí
               </a>
             </li>
           </ul>
         </Container>
       </div>
-      <AboutDeskBox />
+      <AboutDeskBox singleData={singleData} />
     </div>
   );
 };

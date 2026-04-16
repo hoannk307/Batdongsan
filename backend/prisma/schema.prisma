@@ -95,6 +95,7 @@ model properties {
   any_city        String         @db.VarChar(100)
   any_ward        String         @db.VarChar(100)
   landmark        String?        @db.VarChar(255)
+  view_count      Int            @default(0)
   created_at      DateTime       @default(now())
   user_id         Int?
   updated_at      DateTime?      @db.Date

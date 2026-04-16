@@ -16,7 +16,7 @@ function getCanonicalUrl({ siteUrl, id }) {
 
 export async function generateMetadata({ searchParams }) {
   const siteUrl = getSiteUrl();
-  const id = searchParams?.id;
+  const id = (await searchParams)?.id;
   const news = await fetchNewsItemById(id);
   const canonicalUrl = getCanonicalUrl({ siteUrl, id });
 
@@ -50,7 +50,7 @@ export async function generateMetadata({ searchParams }) {
 }
 
 const LeftSidebar = async ({ searchParams }) => {
-  const id = searchParams?.id;
+  const id = (await searchParams)?.id;
   const siteUrl = getSiteUrl();
   const canonicalUrl = getCanonicalUrl({ siteUrl, id });
   const news = await fetchNewsItemById(id);

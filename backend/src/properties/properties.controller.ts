@@ -24,7 +24,7 @@ import { PropertySortDefault } from './enums/property-defaults.enum';
 @ApiTags('properties')
 @Controller('properties')
 export class PropertiesController {
-  constructor(private readonly propertiesService: PropertiesService) {}
+  constructor(private readonly propertiesService: PropertiesService) { }
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -104,7 +104,21 @@ export class PropertiesController {
   @Get(':id')
   @ApiOperation({ summary: 'Lấy chi tiết bất động sản' })
   findOne(@Param('id') id: string) {
-    return this.propertiesService.findOne(+id);
+    const numId = +id;
+    if (!Number.isFinite(numId) || numId <= 0) {
+      return { error: 'ID không hợp lệ', statusCode: 400 };
+    }
+    return this.propertiesService.findOne(numId);
+  }
+
+  @Patch(':id/view')
+  @ApiOperation({ summary: 'Tăng lượt xem bất động sản +1' })
+  incrementView(@Param('id') id: string) {
+    const numId = +id;
+    if (!Number.isFinite(numId) || numId <= 0) {
+      return { error: 'ID không hợp lệ', statusCode: 400 };
+    }
+    return this.propertiesService.incrementViewCount(numId);
   }
 
   @Patch(':id')

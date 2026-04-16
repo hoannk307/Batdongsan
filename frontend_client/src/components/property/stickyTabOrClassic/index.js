@@ -25,11 +25,20 @@ const BodyContent = ({ side }) => {
 
   useEffect(() => {
     if (id) {
-      getData(`/api/property/${id}`)
+      getData(`/api/batdongsan?id=${id}`)
         .then((res) => {
-          // The API response might be the data object itself, or it might be wrapped in a 'data' property.
-          // This also handles cases where `res` is undefined after the API call.
-          setSingleData(res?.data || res);
+          // API trả về: { data: { img, title, price, bed, bath, ... } }
+          // res.data = axios response data = { data: { ... } }
+          // res.data.data = object property thực
+          const propertyObj = res?.data?.data ?? res?.data ?? null;
+          console.log("[SingleProperty] Loaded:", propertyObj);
+          setSingleData(propertyObj);
+
+          // Tăng lượt xem +1 (fire-and-forget, không block UI)
+          const backendUrl = process.env.NEXT_PUBLIC_BACKEND_API_URL ||
+            'http://localhost:3000/api';
+          fetch(`${backendUrl}/properties/${id}/view`, { method: 'PATCH' })
+            .catch(() => { }); // im lặng nếu backend offline
         })
         .catch((error) =>
           console.error("Error fetching property data:", error)

@@ -18,14 +18,13 @@ const SinglePropertySection = ({ singleData }) => {
     <Col xl='9' lg='8'>
       <div className='description-section'>
         <div className='description-details'>
-          <SearchBarDeskBox fix={fix} />
-          <FeatureDeskBox singleData={singleData} />
+          <SearchBarDeskBox fix={fix} singleData={singleData} />
+          {/* <FeatureDeskBox singleData={singleData} /> */}
           <GalleryDeskBox singleData={singleData} />
           <VideoDeskBox singleData={singleData} />
           <DetailsDeskBox singleData={singleData} />
           <FloorPlanDeskBox singleData={singleData} />
           <LocationMapDeskBox singleData={singleData} />
-          <ReviewsDeskBox singleData={singleData} />
         </div>
       </div>
     </Col>

@@ -4,7 +4,7 @@ import { Container } from "reactstrap";
 import ReviewStarr from "../../elements/ReviewStarr";
 import { useSelector } from "react-redux";
 
-const TopTitle = ({ singleData,id }) => {
+const TopTitle = ({ singleData, id }) => {
   const [like, setLike] = useState(false);
   const { symbol, currencyValue } = useSelector((state) => state.currencyReducer);
   return (
@@ -13,43 +13,34 @@ const TopTitle = ({ singleData,id }) => {
         <div className="single-title">
           <div className="left-single">
             <div className="d-flex">
-              <h2 className="mb-0">{singleData?.title || "Orchard House"}</h2>
-              <span>
-                <span className="label label-shadow ms-2">For Sale</span>
-              </span>
+              <h2 className="mb-0">{singleData?.property_type || "Bất động sản"}</h2>
+              {/* <span>
+                <span className="label label-shadow ms-2">{singleData?.property_status || "For Sale"}</span>
+              </span> */}
             </div>
-            <p className="mt-1">Mina Road, Bur Dubai, Dubai, United Arab Emirates</p>
+            <p className="mt-1">
+              {[singleData?.landmark, singleData?.any_ward, singleData?.any_city].filter(Boolean).join(", ") || "Mina Road, Bur Dubai, Dubai, United Arab Emirates"}
+            </p>
             <ul>
               <li>
                 <div>
                   <img src="/assets/images/svg/icon/double-bed.svg" className="img-fluid" alt="" />
-                  <span>{singleData?.bed || 4} Bedrooms</span>
+                  <span>{singleData?.beds ?? 0} Phòng ngủ</span>
                 </div>
               </li>
               <li>
                 <div>
                   <img src="/assets/images/svg/icon/bathroom.svg" className="img-fluid" alt="" />
-                  <span>{singleData?.bath || 4} Bathrooms</span>
-                </div>
-              </li>
-              <li>
-                <div>
-                  <img src="/assets/images/svg/icon/sofa.svg" className="img-fluid" alt="" />
-                  <span>{singleData?.halls || 4} Halls</span>
+                  <span>{singleData?.baths ?? 0} Phòng tắm</span>
                 </div>
               </li>
               <li>
                 <div>
                   <img src="/assets/images/svg/icon/square-ruler-tool.svg" className="img-fluid ruler-tool" alt="" />
-                  <span>{singleData?.sqft || 5000} Sq ft</span>
+                  <span>{singleData?.area ?? 0} m²</span>
                 </div>
               </li>
-              <li>
-                <div>
-                  <img src="/assets/images/svg/icon/garage.svg" className="img-fluid" alt="" />
-                  <span>1 Garage</span>
-                </div>
-              </li>
+              {/* Chỉ hiển thị Bedrooms, Bathrooms, Rooms, Sqft — ẩn Garage vì không có dữ liệu */}
             </ul>
             <div className="share-buttons">
               <div className="d-inline-block">
@@ -90,14 +81,23 @@ const TopTitle = ({ singleData,id }) => {
           <div className="right-single">
             <ReviewStarr rating={4} />
             <h2 className="price">
-            {symbol}
-            {singleData?.price? (singleData?.price * currencyValue).toFixed(2):("20,45,472")}
-              <span>/ start From</span>
+              {singleData?.price
+                ? <>{symbol}{(singleData.price * currencyValue).toLocaleString("vi-VN")}</>
+                : <>{symbol}0</>
+              }
+              {/* <span>/ Giá niêm yết</span> */}
             </h2>
-            <div className="feature-label">
-              <span className="btn btn-dashed btn-pill">Wi-fi</span>
-              <span className="btn btn-dashed ms-1 btn-pill">Swimming Pool</span>
-            </div>
+            {singleData?.view_count && (
+              <div className="feature-label">
+                <span className="btn btn-dashed btn-pill">
+                  <i className="fa fa-eye me-1"></i>
+                  {singleData.view_count} Lượt xem
+                </span>
+                {/* {singleData?.property_status && (
+                  <span className="btn btn-dashed ms-1 btn-pill">{singleData.property_status}</span>
+                )} */}
+              </div>
+            )}
           </div>
         </div>
       </Container>

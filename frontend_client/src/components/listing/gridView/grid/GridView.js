@@ -26,16 +26,11 @@ const GridView = ({ side, size, gridType, listSize, mapModal, mapView, relativeS
   }, []);
 
   useEffect(() => {
-    getData(`/api/property`)
+    getData(`/api/batdongsan?page=1&limit=25`)
       .then((res) => {
+        console.log('-----------------------------------LatestPropertyData:', res.data.data.LatestPropertyData);
         relativeSlider
-          ? setValue(res.data?.LatestPropertyListingInEnterprise)
-          : setValue(
-              Object.keys(res.data)
-                .map((key) => [res.data[key]])
-                .flat(2)
-                .filter((arrData) => Array.isArray(arrData.img))
-            );
+          ? setValue(res.data.data.LatestPropertyData) : setValue(res.data.data.LatestPropertyData);
       })
       .catch((error) => console.error("Error", error));
   }, [relativeSlider]);

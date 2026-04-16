@@ -1,67 +1,81 @@
 import React from "react";
 import { Col, Row } from "reactstrap";
 
-const DetailsDeskBox = () => {
+const DetailsDeskBox = ({ singleData }) => {
+  const address = [singleData?.landmark, singleData?.any_ward, singleData?.any_city]
+    .filter(Boolean)
+    .join(", ");
+  const mapsUrl = address
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
+    : "https://www.google.com/maps";
+
   return (
     <div className='desc-box' id='details'>
       <div className='page-section'>
         <h4 className='content-title'>
-          Property Details
-          <a
-            href='https://www.google.com/maps/place/New+York,+NY,+USA/@40.697488,-73.979681,8z/data=!4m5!3m4!1s0x89c24fa5d33f083b:0xc80b8f06e177fe62!8m2!3d40.7127753!4d-74.0059728?hl=en'
-            target='_blank'
-            rel='noreferrer'>
-            <i className='fa fa-map-marker-alt'></i> view on map
+          Chi tiết bất động sản
+          <a href={mapsUrl} target='_blank' rel='noreferrer'>
+            <i className='fa fa-map-marker-alt'></i> Xem trên bản đồ
           </a>
         </h4>
         <Row>
           <Col md='6' xl='4'>
             <ul className='property-list-details'>
               <li>
-                <span>Property Type :</span> House
+                <span>Loại BĐS :</span> {singleData?.property_type || "—"}
               </li>
+              {/* <li>
+                <span>Mã BĐS :</span> #{singleData?.id || "—"}
+              </li> */}
+              {/* <li>
+                <span>Trạng thái :</span> {singleData?.property_status || "—"}
+              </li> */}
               <li>
-                <span>Property ID :</span> ZOEA245
-              </li>
-              <li>
-                <span>Property status :</span> For sale
-              </li>
-              <li>
-                <span>Operating Since :</span> 2008
-              </li>
-            </ul>
-          </Col>
-          <Col md='6' xl='4'>
-            <ul className='property-list-details'>
-              <li>
-                <span>Price :</span> $ 1,50,000
-              </li>
-              <li>
-                <span>Property Size :</span> 1730 sq / ft
-              </li>
-              <li>
-                <span>Balcony :</span> 2
+                <span>Ngày đăng :</span> {singleData?.created_at ? new Date(singleData.created_at).toLocaleDateString("vi-VN") : "—"}
               </li>
             </ul>
           </Col>
           <Col md='6' xl='4'>
             <ul className='property-list-details'>
               <li>
-                <span>City :</span> Newyork
+
+                <span>Tỉnh/Thành phố :</span> {singleData?.any_city || "—"}
               </li>
               <li>
-                <span>Bedrooms :</span> 8
+                <span>Diện tích :</span>{" "}
+                {singleData?.area ? `${singleData.area} m²` : "—"}
               </li>
               <li>
-                <span>Bathrooms :</span> 4
+                <span>Phòng ngủ :</span> {singleData?.beds ?? "—"}
+              </li>
+            </ul>
+          </Col>
+          <Col md='6' xl='4'>
+            <ul className='property-list-details'>
+              <li>
+                <span>Phường/Xã :</span> {singleData?.any_ward || "—"}
+              </li>
+              <li>
+                <span>Phòng tắm :</span> {singleData?.baths ?? "—"}
+              </li>
+              <li>
+                <span>Giá :</span>{" "}
+                {singleData?.price
+                  ? Number(singleData.price).toLocaleString("vi-VN") + " VNĐ"
+                  : "—"}
+
               </li>
             </ul>
           </Col>
         </Row>
-        <h4 className='content-title mt-4'>Attachments</h4>
-        <a className='attach-file'>
-          <i className='far fa-file-pdf'></i>Demo Property Document{" "}
-        </a>
+
+        {/* Mô tả */}
+        {/* {singleData?.description && (
+          <>
+            <h4 className='content-title mt-4'>Mô tả</h4>
+            <p style={{ lineHeight: "1.8", color: "#555" }}>{singleData.description}</p>
+          </>
+        )} */}
       </div>
     </div>
   );
