@@ -21,7 +21,7 @@ const BodyContent = () => {
   const [latestBlogInCorporate, setLatestBlogInCorporate] = useState();
 
   useEffect(() => {
-    getData(`/api/batdongsan?page=1`)
+    getData(`/api/batdongsan?page=1&limit=6`)
       .then((res) => {
         setValue(res.data.data);
       })

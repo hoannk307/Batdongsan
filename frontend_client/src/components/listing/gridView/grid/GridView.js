@@ -17,23 +17,15 @@ import FilterTag from "../../elements/FilterTag";
 import GridLayout from "../../elements/GridLayout";
 import { gridReducer, initialGrid } from "./gridReducer";
 
-const GridView = ({ side, size, gridType, listSize, mapModal, mapView, relativeSlider, gridBar, video, tabHeader, setMapModal, children, AdvancedSearchShow, infiniteScroll, myList }) => {
-  const [value, setValue] = useState();
+const GridView = ({ value, side, size, gridType, listSize, mapModal, mapView, relativeSlider, gridBar, video, tabHeader, setMapModal, children, AdvancedSearchShow, infiniteScroll, myList }) => {
+
   const [grid, gridDispatch] = useReducer(gridReducer, initialGrid);
   useEffect(() => {
     gridDispatch({ type: "gridSize", payload: size });
     gridDispatch({ type: "gridStyle", payload: gridType });
   }, []);
 
-  useEffect(() => {
-    getData(`/api/batdongsan?page=1&limit=25`)
-      .then((res) => {
-        console.log('-----------------------------------LatestPropertyData:', res.data.data.LatestPropertyData);
-        relativeSlider
-          ? setValue(res.data.data.LatestPropertyData) : setValue(res.data.data.LatestPropertyData);
-      })
-      .catch((error) => console.error("Error", error));
-  }, [relativeSlider]);
+
   return (
     <section className={`property-section  ${mapView && mapModal === "view" ? "section-sm" : ""}  ${relativeSlider ? "property-list-thumbnail" : ""}`}>
       <Container>
@@ -41,7 +33,7 @@ const GridView = ({ side, size, gridType, listSize, mapModal, mapView, relativeS
           {side && (
             <Sidebar side={side}>
               <Filter value={value} sm={12} lg={12} /> <Category value={value} />
-              <ContactInfo />
+              {/* <ContactInfo /> */}
               <RecentlyAdded />
             </Sidebar>
           )}

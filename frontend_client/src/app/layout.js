@@ -7,8 +7,8 @@ import { detectLanguage } from "./i18n/server";
 import { I18nProvider } from "./i18n/i18n-context";
 
 export const metadata = {
-  title: "Sheltos - Real Estate Next 15",
-  description: "Sheltos - Real Estate Next 15",
+  title: "BĐS Nha Trang",
+  description: "BĐS Nha Trang",
 };
 
 export default async function RootLayout({ children }) {

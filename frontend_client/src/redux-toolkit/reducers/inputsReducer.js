@@ -3,8 +3,8 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   sortBy: null,
   propertyStatus: null,
-  price: [2500, 8500],
-  area: [2500, 8500],
+  price: null,
+  area: null,
 };
 
 const inputsReducer = createSlice({

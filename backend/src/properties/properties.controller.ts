@@ -73,20 +73,9 @@ export class PropertiesController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Lấy danh sách bất động sản' })
+  @ApiOperation({ summary: 'Lấy danh sách bất động sản (hỗ trợ ?page=&limit=&sort=)' })
   findAll(@Query() query: SearchPropertyDto) {
     return this.propertiesService.findAll(query);
-  }
-
-  @Get()
-  @ApiOperation({ summary: 'Lấy danh sách bất động sản mới nhất (6 item/trang)' })
-  findLatest(@Query('page') page?: string) {
-    const pageNumber = page ? Number(page) : 1;
-    return this.propertiesService.findAll({
-      page: Number.isFinite(pageNumber) && pageNumber > 0 ? pageNumber : 1,
-      limit: 6,
-      sort: PropertySortDefault.NEWEST,
-    });
   }
 
   @Post('search')

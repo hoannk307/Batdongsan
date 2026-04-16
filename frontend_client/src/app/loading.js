@@ -10,13 +10,13 @@ const Loading = () => {
           </div>
           <div className='col-12'>
             <div>
-              <h3 className='mb-0'>Please wait Real estate Template loading...</h3>
+              <h3 className='mb-0'>Đang tải...</h3>
             </div>
           </div>
         </div>
       </div>
-     
-       
+
+
     </Fragment>
   );
 };

@@ -11,7 +11,6 @@ const useFilterProducts = ({ value }) => {
   const dispatch = useDispatch();
 
   const searchParams = useSearchParams();
-
   // Function to parse query parameters from searchParams
   const parseQueryParams = () => {
     const parsedData = {};
@@ -40,14 +39,43 @@ const useFilterProducts = ({ value }) => {
     setShowProduct(
       value
         ?.filter((product) => {
-          let status = propertyStatus ? (propertyStatus === "Property Status" && true) || (product.propertyStatus === propertyStatus ? true : false) : true;
-          let type = propertyType ? (propertyType === "Property Type" && true) || (product.propertyType === propertyType ? true : false) : true;
-          let room = maxRooms ? (maxRooms === "Max Rooms" && true) || (product.rooms === Number(maxRooms) ? true : false) : true;
-          let beds = bed ? (bed === "Bed" && true) || (product.bed === Number(bed) ? true : false) : true;
-          let baths = bath ? (bath === "Bath" && true) || (product.bath === Number(bath) ? true : false) : true;
-          let agencie = agencies ? (agencies === "Agencies" && true) || (product.agencies === agencies ? true : false) : true;
-          let priceMatch = price ? price[0] <= product.price && price[1] >= product.price && true : true;
-          let SqftMatch = area ? area[0] <= product.sqft && area[1] >= product.sqft && true : true;
+          // propertyStatus → product.propertyStatus (route: property_status → propertyStatus)
+          let status = propertyStatus
+            ? propertyStatus === "Property Status" || product.propertyStatus === propertyStatus
+            : true;
+
+          // propertyType → product.title (route: property_type → title)
+          let type = propertyType
+            ? propertyType === "Property Type" || product.title === propertyType
+            : true;
+
+          // maxRooms → product.rooms (route: beds + baths → rooms)
+          let room = maxRooms
+            ? maxRooms === "Max Rooms" || product.rooms === Number(maxRooms)
+            : true;
+
+          // bed → product.bed (route: beds → bed)
+          let beds = bed
+            ? bed === "Bed" || product.bed === Number(bed)
+            : true;
+
+          // bath → product.bath (route: baths → bath)
+          let baths = bath
+            ? bath === "Bath" || product.bath === Number(bath)
+            : true;
+
+          // agencies: không có trong route mapping → bỏ qua (luôn true)
+          let agencie = true;
+
+          // price → product.price (route: price → price)
+          let priceMatch = price
+            ? price[0] <= product.price && price[1] >= product.price
+            : true;
+
+          // area → product.sqft (route: area → sqft)
+          let SqftMatch = area
+            ? area[0] <= product.sqft && area[1] >= product.sqft
+            : true;
 
           return status && type && room && beds && baths && agencie && priceMatch && SqftMatch;
         })
