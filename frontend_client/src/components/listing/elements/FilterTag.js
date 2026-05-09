@@ -10,7 +10,7 @@ const FilterTag = () => {
   const clearFilterhandle = (filterType) => {
     dispatch(clearFilter(filterType));
   };
-   
+
 
   const StringConvert = (str) => {
     return str.charAt(0).toUpperCase() + str.slice(1);

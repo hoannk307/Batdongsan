@@ -3,14 +3,14 @@ import { Clipboard, Home, Layers, Link, MapPin, User, Zap } from "react-feather"
 export const MainNavMenuItems = [
   {
     title: "BÁN NHÀ ĐẤT",
-    icon: <Home />,       
-    path: "/batdongsan",
+    icon: <Home />,
+    path: "/batdongsan?property_status=FOR_SALE",
     type: "link",
   },
   {
     title: "THUÊ NHÀ ĐẤT",
-    icon: <Home />,       
-    path: "/batdongsan",
+    icon: <Home />,
+    path: "/batdongsan?property_status=FOR_RENT",
     type: "link",
   },
   {

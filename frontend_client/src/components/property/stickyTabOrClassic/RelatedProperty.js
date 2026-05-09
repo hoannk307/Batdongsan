@@ -14,7 +14,7 @@ const RelatedProperty = () => {
   useEffect(() => {
     getData(`/api/batdongsan`)
       .then((res) => {
-        setValue(res.data?.LatestPropertyData);
+        setValue(res.data?.data); // shape: { data: PropertyCard[], pagination: {} }
       })
       .catch((error) => console.error("Error", error));
   }, []);

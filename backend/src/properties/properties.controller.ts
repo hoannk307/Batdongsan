@@ -12,12 +12,14 @@ import {
   UseInterceptors,
   UploadedFiles,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { PropertiesService } from './properties.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 import { SearchPropertyDto } from './dto/search-property.dto';
+import { FilterPropertyDto } from './dto/filter-property.dto';
+import { SearchResultDto } from './dto/search-result.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PropertySortDefault } from './enums/property-defaults.enum';
 
@@ -78,8 +80,72 @@ export class PropertiesController {
     return this.propertiesService.findAll(query);
   }
 
+  /**
+   * POST /properties/search
+   *
+   * Tìm kiếm bất động sản nâng cao bằng POST body (JSON).
+   * Tương ứng với frontend route: POST /api/batdongsan/search
+   *
+   * Tất cả các trường trong body đều optional.
+   * Ví dụ body:
+   * {
+   *   "propertyStatus": "FOR_SALE",
+   *   "propertyTypes": ["Nhà đất"],
+   *   "cities": ["Nha Trang"],
+   *   "minPrice": 1000000000,
+   *   "maxPrice": 5000000000,
+   *   "minBeds": 2,
+   *   "minBaths": 1,
+   *   "minArea": 50,
+   *   "maxArea": 200,
+   *   "sort": "price_asc",
+   *   "page": 1,
+   *   "limit": 20
+   * }
+   */
   @Post('search')
-  @ApiOperation({ summary: 'Tìm kiếm bất động sản nâng cao' })
+  @ApiOperation({
+    summary: 'Tìm kiếm bất động sản nâng cao (POST body)',
+    description:
+      'Gửi bộ lọc qua POST body JSON. Tất cả các trường đều optional. ' +
+      'Hỗ trợ: propertyStatus, propertyTypes[], cities[], wards[], ' +
+      'minPrice, maxPrice, minArea, maxArea, minBeds, minBaths, sort, page, limit.',
+  })
+  @ApiBody({
+    type: SearchPropertyDto,
+    examples: {
+      forSale: {
+        summary: 'Tìm bất động sản đang bán',
+        value: {
+          propertyStatus: 'FOR_SALE',
+          propertyTypes: ['Nhà đất'],
+          cities: ['Nha Trang'],
+          minPrice: 500000000,
+          maxPrice: 5000000000,
+          minBeds: 2,
+          sort: 'price_asc',
+          page: 1,
+          limit: 20,
+        },
+      },
+      forRent: {
+        summary: 'Tìm bất động sản cho thuê',
+        value: {
+          propertyStatus: 'FOR_RENT',
+          minBeds: 1,
+          sort: 'newest',
+          page: 1,
+          limit: 10,
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Danh sách bất động sản phù hợp với bộ lọc',
+    type: SearchResultDto,
+  })
+  @ApiResponse({ status: 400, description: 'Body không hợp lệ' })
   search(@Body() searchDto: SearchPropertyDto) {
     return this.propertiesService.search(searchDto);
   }
@@ -88,6 +154,29 @@ export class PropertiesController {
   @ApiOperation({ summary: 'Lấy các tùy chọn mặc định cho form bất động sản' })
   getDefaults() {
     return this.propertiesService.getDefaults();
+  }
+
+  /**
+   * GET /properties/filter
+   *
+   * Lấy danh sách bất động sản theo bộ lọc (filter search).
+   * Tất cả params đều optional, truyền qua query string.
+   *
+   * Ví dụ:
+   *   GET /properties/filter?property_type=Nhà đất&property_status=FOR_SALE&beds=2&price_min=500000000&sort=price_asc
+   *
+   * QUAN TRỌNG: Route này phải đứng TRƯỚC @Get(':id') để tránh NestJS
+   * nhận nhầm chữ "filter" là một :id.
+   */
+  @Get('filter')
+  @ApiOperation({
+    summary: 'Lọc danh sách bất động sản theo thuộc tính',
+    description:
+      'Hỗ trợ lọc theo: property_type, property_status, beds, baths, area_min/max, price_min/max, any_city, any_ward, landmark, sort, page, limit',
+  })
+  findByFilter(@Query() filterDto: FilterPropertyDto) {
+    console.log("filterDto", filterDto);
+    return this.propertiesService.findByFilter(filterDto);
   }
 
   @Get(':id')

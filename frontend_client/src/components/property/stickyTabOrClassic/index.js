@@ -25,20 +25,18 @@ const BodyContent = ({ side }) => {
 
   useEffect(() => {
     if (id) {
-      getData(`/api/batdongsan?id=${id}`)
+      getData(`/api/batdongsan/${id}`)
         .then((res) => {
-          // API trả về: { data: { img, title, price, bed, bath, ... } }
-          // res.data = axios response data = { data: { ... } }
-          // res.data.data = object property thực
-          const propertyObj = res?.data?.data ?? res?.data ?? null;
+          const propertyObj = res?.data?.data ?? null;
           console.log("[SingleProperty] Loaded:", propertyObj);
           setSingleData(propertyObj);
 
-          // Tăng lượt xem +1 (fire-and-forget, không block UI)
-          const backendUrl = process.env.NEXT_PUBLIC_BACKEND_API_URL ||
-            'http://localhost:3000/api';
-          fetch(`${backendUrl}/properties/${id}/view`, { method: 'PATCH' })
-            .catch(() => { }); // im lặng nếu backend offline
+          // Tăng lượt xem +1 qua proxy route (fire-and-forget, không block UI)
+          fetch("/api/batdongsan/view", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id }),
+          }).catch(() => {}); // im lặng nếu lỗi
         })
         .catch((error) =>
           console.error("Error fetching property data:", error)

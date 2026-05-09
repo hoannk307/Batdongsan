@@ -10,11 +10,7 @@ const SearchSuggestionBox = ({ searchDropDown, className, searchInput }) => {
   useEffect(() => {
     getData(`/api/batdongsan`)
       .then((res) => {
-        setValue(
-          Object.keys(res.data)
-            .map((key) => [res.data[key]])
-            .flat(2),
-        );
+        setValue(res.data?.data ?? []); // shape: { data: PropertyCard[], pagination: {} }
       })
       .catch((error) => console.error("Error", error));
   }, []);

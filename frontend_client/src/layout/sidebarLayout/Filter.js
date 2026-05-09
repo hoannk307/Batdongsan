@@ -7,15 +7,16 @@
 import React from "react";
 import InputForm from "../../components/home/slider-filter-search/homeElements/InputForm";
 
-const Filter = ({ value, sm, lg }) => {
+const Filter = ({ value, sm, lg, propertyStatus }) => {
+  console.log(propertyStatus);
   return (
     <>
       <div className='advance-card mt-0'>
         <h5 className='mb-0 advance-title '>Advance search </h5>
       </div>
       <div className='advance-card'>
-        <h6>filter</h6>
-        <InputForm label={false} value={value} sm={sm} lg={lg}/>
+        <h6>Tìm kiếm</h6>
+        <InputForm label={false} value={value} sm={sm} lg={lg} propertyStatus={propertyStatus} />
       </div>
     </>
   );

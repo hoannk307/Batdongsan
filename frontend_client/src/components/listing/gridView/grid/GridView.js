@@ -17,14 +17,18 @@ import FilterTag from "../../elements/FilterTag";
 import GridLayout from "../../elements/GridLayout";
 import { gridReducer, initialGrid } from "./gridReducer";
 
-const GridView = ({ value, side, size, gridType, listSize, mapModal, mapView, relativeSlider, gridBar, video, tabHeader, setMapModal, children, AdvancedSearchShow, infiniteScroll, myList }) => {
+const GridView = ({ propertyStatus, value, side, size, gridType, listSize, mapModal, mapView, relativeSlider, gridBar, video, tabHeader, setMapModal, children, AdvancedSearchShow, infiniteScroll, myList }) => {
 
   const [grid, gridDispatch] = useReducer(gridReducer, initialGrid);
+  const [title, setTitle] = useState(propertyStatus === "FOR_SALE" ? "Bất Động Sản Bán" : "Bất Động Sản Cho Thuê");
   useEffect(() => {
     gridDispatch({ type: "gridSize", payload: size });
     gridDispatch({ type: "gridStyle", payload: gridType });
   }, []);
 
+  useEffect(() => {
+    setTitle(propertyStatus === "FOR_SALE" ? "Bán nhà đất" : "Cho thuê nhà đất");
+  }, [propertyStatus]);
 
   return (
     <section className={`property-section  ${mapView && mapModal === "view" ? "section-sm" : ""}  ${relativeSlider ? "property-list-thumbnail" : ""}`}>
@@ -32,14 +36,15 @@ const GridView = ({ value, side, size, gridType, listSize, mapModal, mapView, re
         <Row className=' ratio_63'>
           {side && (
             <Sidebar side={side}>
-              <Filter value={value} sm={12} lg={12} /> <Category value={value} />
+              <Filter propertyStatus={propertyStatus} value={value} sm={12} lg={12} />
+              {/* <Category value={value} /> */}
               {/* <ContactInfo /> */}
-              <RecentlyAdded />
+              {/* <RecentlyAdded /> */}
             </Sidebar>
           )}
 
           <Col xl={side ? "9" : ""} lg={side ? "8" : ""} className={`${relativeSlider ? "property-grid-3" : "property-grid-2"}  property-grid-slider`}>
-            <Header grid={grid} gridDispatch={gridDispatch} title={"Properties Listing"} mapModal={mapModal} gridBar={gridBar} tabHeader={tabHeader} AdvancedSearchShow={AdvancedSearchShow} value={value} setMapModal={setMapModal} />
+            <Header grid={grid} gridDispatch={gridDispatch} title={title} mapModal={mapModal} gridBar={gridBar} tabHeader={tabHeader} AdvancedSearchShow={AdvancedSearchShow} value={value} setMapModal={setMapModal} />
             <FilterTag />
             {children}
             <div className={`property-wrapper-grid ${grid.gridStyle ? "list-view" : ""}`}>

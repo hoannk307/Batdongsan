@@ -1,0 +1,10 @@
+{
+  "name": "@batdongsan/shared",
+  "version": "1.0.0",
+  "description": "Shared constants and enums for Batdongsan project",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {},
+  "keywords": [],
+  "license": "MIT"
+}

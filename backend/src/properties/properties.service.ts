@@ -3,9 +3,11 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 import { SearchPropertyDto } from './dto/search-property.dto';
+import { FilterPropertyDto } from './dto/filter-property.dto';
 import { Prisma, PropertyStatus } from '@prisma/client';
 import {
   PropertyStatusDefault,
+  PropertySortDefault,
   PropertyTypeDefault,
 } from './enums/property-defaults.enum';
 import { FileService } from '../file/file.service';
@@ -302,8 +304,258 @@ export class PropertiesService {
     });
   }
 
+  /**
+   * Tìm kiếm bất động sản nâng cao qua POST body.
+   * Tương ứng với frontend route: POST /api/batdongsan/search
+   *
+   * Sử dụng SearchPropertyDto (camelCase) thay vì FilterPropertyDto (snake_case)
+   * để keep consistent với convention NestJS / class-validator.
+   */
   async search(searchDto: SearchPropertyDto) {
-    return this.findAll(searchDto);
+    const {
+      page = 1,
+      limit = 20,
+      propertyStatus,
+      propertyTypes,
+      cities,
+      wards,
+      minPrice,
+      maxPrice,
+      minArea,
+      maxArea,
+      minBeds,
+      minBaths,
+      sort = 'newest',
+    } = searchDto;
+
+    const skip = (page - 1) * limit;
+
+    // ── Build where clause ──────────────────────────────────────────────────
+    const where: Prisma.propertiesWhereInput = {};
+
+    if (propertyStatus) {
+      where.property_status = propertyStatus;
+    }
+
+    if (propertyTypes && propertyTypes.length > 0) {
+      where.property_type = { in: propertyTypes };
+    }
+
+    if (cities && cities.length > 0) {
+      where.any_city = { in: cities };
+    }
+
+    if (wards && wards.length > 0) {
+      where.any_ward = { in: wards };
+    }
+
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      where.price = {};
+      if (minPrice !== undefined) where.price.gte = minPrice;
+      if (maxPrice !== undefined) where.price.lte = maxPrice;
+    }
+
+    if (minArea !== undefined || maxArea !== undefined) {
+      where.area = {};
+      if (minArea !== undefined) where.area.gte = minArea;
+      if (maxArea !== undefined) where.area.lte = maxArea;
+    }
+
+    if (minBeds !== undefined) {
+      where.beds = { gte: minBeds };
+    }
+
+    if (minBaths !== undefined) {
+      where.baths = { gte: minBaths };
+    }
+
+    // ── Build orderBy ───────────────────────────────────────────────────────
+    let orderBy: Prisma.propertiesOrderByWithRelationInput;
+    switch (sort) {
+      case PropertySortDefault.PRICE_ASC:
+        orderBy = { price: 'asc' };
+        break;
+      case PropertySortDefault.PRICE_DESC:
+        orderBy = { price: 'desc' };
+        break;
+      case PropertySortDefault.AREA_ASC:
+        orderBy = { area: 'asc' };
+        break;
+      case PropertySortDefault.AREA_DESC:
+        orderBy = { area: 'desc' };
+        break;
+      case PropertySortDefault.NEWEST:
+      default:
+        orderBy = { created_at: 'desc' };
+        break;
+    }
+
+    // ── Query DB ────────────────────────────────────────────────────────────
+    const [properties, total] = await Promise.all([
+      this.prisma.properties.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy,
+        include: { file_attach: true },
+      }),
+      this.prisma.properties.count({ where }),
+    ]);
+
+    // ── Resolve address từ bảng locations (batch, tránh N+1) ────────────────
+    // any_city / any_ward lưu id (số nguyên dạng string), map theo id
+    const locationIds = [
+      ...new Set([
+        ...properties.map((p) => p.any_city).filter(Boolean),
+        ...properties.map((p) => p.any_ward).filter(Boolean),
+      ]),
+    ]
+      .map(Number)
+      .filter((n) => !isNaN(n));
+
+    const locationMap = new Map<string, string>(); // key: String(id), value: name
+    if (locationIds.length > 0) {
+      const locations = await this.prisma.locations.findMany({
+        where: { id: { in: locationIds } },
+        select: { id: true, name: true },
+      });
+      locations.forEach((loc) => locationMap.set(String(loc.id), loc.name));
+    }
+
+    const dataWithAddress = properties.map((p) => {
+      const cityName = locationMap.get(p.any_city) ?? p.any_city ?? '';
+      const wardName = locationMap.get(p.any_ward) ?? p.any_ward ?? '';
+      const address = [cityName, wardName].filter(Boolean).join(', ');
+      const price_string = this.formatPriceVND(Number(p.price));
+      return { ...p, address, price_string };
+    });
+
+    return {
+      data: dataWithAddress,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  /**
+   * Lấy danh sách bất động sản theo các điều kiện lọc (flat query params)
+   * Dùng cho endpoint GET /properties/filter
+   *
+   * @param filterDto - Các tham số lọc truyền qua query string
+   */
+  async findByFilter(filterDto: FilterPropertyDto) {
+    const {
+      page = 1,
+      limit = 10,
+      property_type,
+      property_status,
+      beds,
+      baths,
+      area_min,
+      area_max,
+      price_min,
+      price_max,
+      any_city,
+      any_ward,
+      landmark,
+      sort = PropertySortDefault.NEWEST,
+    } = filterDto;
+
+    const skip = (page - 1) * limit;
+
+    // ── Build where clause ──────────────────────────────────────────────────
+    const where: Prisma.propertiesWhereInput = {};
+
+    if (property_type) {
+      where.property_type = property_type;
+    }
+
+    if (property_status) {
+      where.property_status = property_status;
+    }
+
+    // Số phòng ngủ / phòng tắm tối thiểu
+    if (beds !== undefined) {
+      where.beds = { gte: beds };
+    }
+
+    if (baths !== undefined) {
+      where.baths = { gte: baths };
+    }
+
+    // Khoảng diện tích
+    if (area_min !== undefined || area_max !== undefined) {
+      where.area = {};
+      if (area_min !== undefined) where.area.gte = area_min;
+      if (area_max !== undefined) where.area.lte = area_max;
+    }
+
+    // Khoảng giá
+    if (price_min !== undefined || price_max !== undefined) {
+      where.price = {};
+      if (price_min !== undefined) where.price.gte = price_min;
+      if (price_max !== undefined) where.price.lte = price_max;
+    }
+
+    // Vị trí — tìm kiếm gần đúng (contains) để linh hoạt hơn
+    if (any_city) {
+      where.any_city = { contains: any_city };
+    }
+
+    if (any_ward) {
+      where.any_ward = { contains: any_ward };
+    }
+
+    if (landmark) {
+      where.landmark = { contains: landmark };
+    }
+
+    // ── Build orderBy ───────────────────────────────────────────────────────
+    let orderBy: Prisma.propertiesOrderByWithRelationInput;
+    switch (sort) {
+      case PropertySortDefault.PRICE_ASC:
+        orderBy = { price: 'asc' };
+        break;
+      case PropertySortDefault.PRICE_DESC:
+        orderBy = { price: 'desc' };
+        break;
+      case PropertySortDefault.AREA_ASC:
+        orderBy = { area: 'asc' };
+        break;
+      case PropertySortDefault.AREA_DESC:
+        orderBy = { area: 'desc' };
+        break;
+      case PropertySortDefault.NEWEST:
+      default:
+        orderBy = { created_at: 'desc' };
+        break;
+    }
+
+    // ── Query DB ────────────────────────────────────────────────────────────
+    const [properties, total] = await Promise.all([
+      this.prisma.properties.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy,
+        include: { file_attach: true },
+      }),
+      this.prisma.properties.count({ where }),
+    ]);
+
+    return {
+      data: properties,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   getDefaults() {
@@ -325,5 +577,19 @@ export class PropertiesService {
       propertyTypes,
       propertyStatuses,
     };
+  }
+
+  /**
+   * Chuyển đổi giá (VND) sang chuỗi dạng "X tỷ Y triệu".
+   * Chỉ dừng ở hàng tỷ và triệu, bỏ qua phần nhỏ hơn triệu.
+   */
+  private formatPriceVND(price: number): string {
+    if (!price || price <= 0) return '';
+    const ty = Math.floor(price / 1_000_000_000);
+    const trieu = Math.floor((price % 1_000_000_000) / 1_000_000);
+    const parts: string[] = [];
+    if (ty > 0) parts.push(`${ty} tỷ`);
+    if (trieu > 0) parts.push(`${trieu} triệu`);
+    return parts.join(' ') || '0';
   }
 }

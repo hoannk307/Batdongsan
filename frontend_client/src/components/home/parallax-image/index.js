@@ -23,7 +23,7 @@ const BodyContent = () => {
   useEffect(() => {
     getData(`/api/batdongsan?page=1&limit=6`)
       .then((res) => {
-        setValue(res.data.data);
+        setValue(res.data); // shape: { data: PropertyCard[], pagination: {} }
       })
       .catch((error) => console.error("Error", error));
     getData(`/api/client-agent`)
@@ -43,13 +43,13 @@ const BodyContent = () => {
     <>
       <HomeBannerSection />
       <div className="section-pb">
-        <PropertySection value={value?.LatestPropertyData} />
+        <PropertySection value={value?.data} />
       </div>
-      <FeaturePropertySection value={value?.FeaturedPropertyInCorporateLayout} />
+      <FeaturePropertySection value={value?.data} />
       {/* <div className="service-section-pt-0">
         <ServiceSection value={AppPropertyData.ProvidedServices} />
       </div> */}
-      <PropertySection value={value?.LatestPropertyData} size={3} />
+      <PropertySection value={value?.data} size={3} />
       {/* <PricingSection value={AppPropertyData.PricingPlan} /> */}
       <BannerSection banner={7} />
       <TestimonialSection value={clientData?.OurClientInCorporateLayout} />
