@@ -11,7 +11,7 @@
 import React from "react";
 import { MapPin, PhoneCall } from "react-feather";
 
-const ContactInfo = () => {
+const ContactInfo = ({ userData }) => {
   return (
     <div className='advance-card'>
       <h6>Người đăng</h6>
@@ -20,15 +20,15 @@ const ContactInfo = () => {
           <div className='media'>
             <img src='/assets/images/testimonial/3.png' className='img-50' alt='' />
             <div className='media-body ms-2'>
-              <h6>Jonathan Scott</h6>
-              <p>Contact@gmail.com</p>
+              <h6>{userData?.full_name || "N/A"}</h6>
+              <p>{userData?.email || "N/A"}</p>
             </div>
           </div>
         </div>
         <ul>
           <li>
             <PhoneCall className='me-2' />
-           0977307986
+            {userData?.phone || "N/A"}
           </li>
         </ul>
       </div>

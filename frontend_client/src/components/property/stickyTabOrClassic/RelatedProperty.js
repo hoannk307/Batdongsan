@@ -22,7 +22,7 @@ const RelatedProperty = () => {
     <section className="property-section pt-0">
       <Container>
         <div className="title-3 text-start inner-title">
-          <h2>Related Properties</h2>
+          <h2>BĐS liên quan</h2>
         </div>
         <Row className=" ratio_55">
           <Col sm="12" className=" property-grid-3">

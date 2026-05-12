@@ -20,6 +20,7 @@ import SliderBreadcrumbSection from "./SliderBreadcrumb";
 
 const BodyContent = ({ side }) => {
   const [singleData, setSingleData] = useState(null);
+  const [userData, setUserData] = useState(null);
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
@@ -31,12 +32,23 @@ const BodyContent = ({ side }) => {
           console.log("[SingleProperty] Loaded:", propertyObj);
           setSingleData(propertyObj);
 
+          // Lấy thông tin chi tiết user (chủ bất động sản)
+          if (propertyObj?.user_id) {
+            fetch(`/api/user/${propertyObj.user_id}`)
+              .then((r) => r.json())
+              .then((userRes) => {
+                setUserData(userRes?.data ?? null);
+                console.log("[SingleProperty] User:", userRes?.data);
+              })
+              .catch(() => { });
+          }
+
           // Tăng lượt xem +1 qua proxy route (fire-and-forget, không block UI)
           fetch("/api/batdongsan/view", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id }),
-          }).catch(() => {}); // im lặng nếu lỗi
+          }).catch(() => { }); // im lặng nếu lỗi
         })
         .catch((error) =>
           console.error("Error fetching property data:", error)
@@ -51,8 +63,8 @@ const BodyContent = ({ side }) => {
         <Container>
           <Row className=" ratio_65">
             <Sidebar mortgage={true} side={side} singleProperty={true}>
-              <ContactInfo />
-              <Exploration />
+              <ContactInfo userData={userData} />
+              <Exploration userData={userData} singleData={singleData} />
             </Sidebar>
             <SinglePropertySection singleData={singleData} />
           </Row>

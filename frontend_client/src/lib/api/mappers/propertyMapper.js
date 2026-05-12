@@ -44,7 +44,7 @@ export function mapPropertyToCard(p) {
     // any_ward: p?.any_ward || "",
     // landmark: p?.landmark || "",
     date: p?.created_at ? (() => { const d = new Date(p.created_at); return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`; })() : "",
-    price_string: p?.price_string || "",
+    price_string: p?.property_status === 'FOR_SALE' ? p?.price_string : p?.price_string + "/tháng",
     created_at: p?.created_at || null,
     address: p?.address || "",
   };
@@ -76,6 +76,9 @@ export function mapPropertyToDetail(p) {
     created_at: p?.created_at || null,
     updated_at: p?.updated_at || null,
     user_id: p?.user_id || null,
+    date: p?.created_at ? (() => { const d = new Date(p.created_at); return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`; })() : "",
+    price_string: p?.property_status === 'FOR_SALE' ? p?.price_string : p?.price_string + "/tháng",
+    address: p?.address || "",
   };
 }
 

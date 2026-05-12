@@ -35,8 +35,35 @@ export class PropertiesService {
       this.prisma.properties.count(),
     ]);
 
+    // ── Resolve address từ bảng locations (batch, tránh N+1) ────────────────
+    const locationIds = [
+      ...new Set([
+        ...properties.map((p) => p.any_city).filter(Boolean),
+        ...properties.map((p) => p.any_ward).filter(Boolean),
+      ]),
+    ]
+      .map(Number)
+      .filter((n) => !isNaN(n));
+
+    const locationMap = new Map<string, string>();
+    if (locationIds.length > 0) {
+      const locations = await this.prisma.locations.findMany({
+        where: { id: { in: locationIds } },
+        select: { id: true, name: true },
+      });
+      locations.forEach((loc) => locationMap.set(String(loc.id), loc.name));
+    }
+
+    const dataWithAddress = properties.map((p) => {
+      const cityName = locationMap.get(p.any_city) ?? p.any_city ?? '';
+      const wardName = locationMap.get(p.any_ward) ?? p.any_ward ?? '';
+      const address = [cityName, wardName].filter(Boolean).join(', ');
+      const price_string = this.formatPriceVND(Number(p.price));
+      return { ...p, address, price_string };
+    });
+
     return {
-      data: properties,
+      data: dataWithAddress,
       pagination: {
         page,
         limit,
@@ -225,8 +252,35 @@ export class PropertiesService {
       this.prisma.properties.count({ where }),
     ]);
 
+    // ── Resolve address từ bảng locations (batch, tránh N+1) ────────────────
+    const locationIds = [
+      ...new Set([
+        ...properties.map((p) => p.any_city).filter(Boolean),
+        ...properties.map((p) => p.any_ward).filter(Boolean),
+      ]),
+    ]
+      .map(Number)
+      .filter((n) => !isNaN(n));
+
+    const locationMap = new Map<string, string>();
+    if (locationIds.length > 0) {
+      const locations = await this.prisma.locations.findMany({
+        where: { id: { in: locationIds } },
+        select: { id: true, name: true },
+      });
+      locations.forEach((loc) => locationMap.set(String(loc.id), loc.name));
+    }
+
+    const dataWithAddress = properties.map((p) => {
+      const cityName = locationMap.get(p.any_city) ?? p.any_city ?? '';
+      const wardName = locationMap.get(p.any_ward) ?? p.any_ward ?? '';
+      const address = [cityName, wardName].filter(Boolean).join(', ');
+      const price_string = this.formatPriceVND(Number(p.price));
+      return { ...p, address, price_string };
+    });
+
     return {
-      data: properties,
+      data: dataWithAddress,
       pagination: {
         page,
         limit,
@@ -248,7 +302,27 @@ export class PropertiesService {
       throw new NotFoundException('Property not found');
     }
 
-    return property;
+    // ── Resolve address & price_string ──────────────────────────────────────
+    const locationIds = [property.any_city, property.any_ward]
+      .filter(Boolean)
+      .map(Number)
+      .filter((n) => !isNaN(n));
+
+    const locationMap = new Map<string, string>();
+    if (locationIds.length > 0) {
+      const locations = await this.prisma.locations.findMany({
+        where: { id: { in: locationIds } },
+        select: { id: true, name: true },
+      });
+      locations.forEach((loc) => locationMap.set(String(loc.id), loc.name));
+    }
+
+    const cityName = locationMap.get(property.any_city) ?? property.any_city ?? '';
+    const wardName = locationMap.get(property.any_ward) ?? property.any_ward ?? '';
+    const address = [cityName, wardName].filter(Boolean).join(', ');
+    const price_string = this.formatPriceVND(Number(property.price));
+
+    return { ...property, address, price_string };
   }
 
   /**
@@ -547,8 +621,35 @@ export class PropertiesService {
       this.prisma.properties.count({ where }),
     ]);
 
+    // ── Resolve address từ bảng locations (batch, tránh N+1) ────────────────
+    const locationIds = [
+      ...new Set([
+        ...properties.map((p) => p.any_city).filter(Boolean),
+        ...properties.map((p) => p.any_ward).filter(Boolean),
+      ]),
+    ]
+      .map(Number)
+      .filter((n) => !isNaN(n));
+
+    const locationMap = new Map<string, string>(); // key: String(id), value: name
+    if (locationIds.length > 0) {
+      const locations = await this.prisma.locations.findMany({
+        where: { id: { in: locationIds } },
+        select: { id: true, name: true },
+      });
+      locations.forEach((loc) => locationMap.set(String(loc.id), loc.name));
+    }
+
+    const dataWithAddress = properties.map((p) => {
+      const cityName = locationMap.get(p.any_city) ?? p.any_city ?? '';
+      const wardName = locationMap.get(p.any_ward) ?? p.any_ward ?? '';
+      const address = [cityName, wardName].filter(Boolean).join(', ');
+      const price_string = this.formatPriceVND(Number(p.price));
+      return { ...p, address, price_string };
+    });
+
     return {
-      data: properties,
+      data: dataWithAddress,
       pagination: {
         page,
         limit,

@@ -60,10 +60,7 @@ const DetailsDeskBox = ({ singleData }) => {
               </li>
               <li>
                 <span>Giá :</span>{" "}
-                {singleData?.price
-                  ? Number(singleData.price).toLocaleString("vi-VN") + " VNĐ"
-                  : "—"}
-
+                {singleData?.price_string}
               </li>
             </ul>
           </Col>

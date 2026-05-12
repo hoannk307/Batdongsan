@@ -175,7 +175,6 @@ export class PropertiesController {
       'Hỗ trợ lọc theo: property_type, property_status, beds, baths, area_min/max, price_min/max, any_city, any_ward, landmark, sort, page, limit',
   })
   findByFilter(@Query() filterDto: FilterPropertyDto) {
-    console.log("filterDto", filterDto);
     return this.propertiesService.findByFilter(filterDto);
   }
 

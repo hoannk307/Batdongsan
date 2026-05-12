@@ -19,7 +19,7 @@ const TopTitle = ({ singleData, id }) => {
               </span> */}
             </div>
             <p className="mt-1">
-              {[singleData?.landmark, singleData?.any_ward, singleData?.any_city].filter(Boolean).join(", ") || "Mina Road, Bur Dubai, Dubai, United Arab Emirates"}
+              {singleData?.address}
             </p>
             <ul>
               <li>
@@ -81,11 +81,7 @@ const TopTitle = ({ singleData, id }) => {
           <div className="right-single">
             <ReviewStarr rating={4} />
             <h2 className="price">
-              {singleData?.price
-                ? <>{symbol}{(singleData.price * currencyValue).toLocaleString("vi-VN")}</>
-                : <>{symbol}0</>
-              }
-              {/* <span>/ Giá niêm yết</span> */}
+              {singleData?.price_string}
             </h2>
             {singleData?.view_count && (
               <div className="feature-label">
