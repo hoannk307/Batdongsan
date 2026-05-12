@@ -12,7 +12,7 @@ const NavbarFour = () => {
           <div className="col">
             <div className="menu">
               <div className="brand-logo">
-                <Link href="/home/slider-filter-search">
+                <Link href="/home">
                   <img src="/assets/images/logo/4.png" alt="" className="img-fluid for-light" />
                   <img src="/assets/images/logo/9.png" alt="" className="img-fluid for-dark" />
                 </Link>

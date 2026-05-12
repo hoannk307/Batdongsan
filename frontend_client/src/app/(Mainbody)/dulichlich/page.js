@@ -10,11 +10,12 @@ import Breadcrumb from "@/layout/Breadcrumb/Breadcrumb";
 import BodyContent from "@/components/pages/blogPage/sidebarPage";
 import FooterThree from "@/layout/footers/FooterThree";
 import NavbarThree from "@/layout/headers/NavbarThree";
+import NavbarFour from "@/layout/headers/NavbarFour";
 
 const LeftSidebar = () => {
   return (
     <Fragment>
-      <NavbarThree />
+      <NavbarFour />
       <Breadcrumb />
       <BodyContent side={"left"} />
       <FooterThree />

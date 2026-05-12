@@ -11,17 +11,18 @@ import Breadcrumb from "@/layout/Breadcrumb/Breadcrumb";
 import GridView from "@/components/listing/gridView/grid/GridView";
 
 import { useSearchParams } from "next/navigation";
+import NavbarFour from "@/layout/headers/NavbarFour";
 
 /** Các filter params mà InputForm có thể push lên URL */
 /** Mapping từ URL param → filterBody key + hàm transform tương ứng */
 const PARAM_MAP = [
   { param: "property_type", key: "propertyTypes", transform: (v) => [v] },
-  { param: "min_baths",     key: "minBaths",      transform: Number },
-  { param: "min_beds",      key: "minBeds",       transform: Number },
-  { param: "min_area",      key: "minArea",       transform: Number },
-  { param: "max_area",      key: "maxArea",       transform: Number },
-  { param: "min_price",     key: "minPrice",      transform: Number },
-  { param: "max_price",     key: "maxPrice",      transform: Number },
+  { param: "min_baths", key: "minBaths", transform: Number },
+  { param: "min_beds", key: "minBeds", transform: Number },
+  { param: "min_area", key: "minArea", transform: Number },
+  { param: "max_area", key: "maxArea", transform: Number },
+  { param: "min_price", key: "minPrice", transform: Number },
+  { param: "max_price", key: "maxPrice", transform: Number },
 ];
 
 /** Các filter params mà InputForm có thể push lên URL */
@@ -96,7 +97,7 @@ const LeftSidebar = () => {
 
   return (
     <Fragment>
-      <NavbarThree />
+      <NavbarFour />
       <Breadcrumb />
       <GridView
         value={value}
