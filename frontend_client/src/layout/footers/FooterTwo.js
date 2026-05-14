@@ -20,7 +20,7 @@ const FooterTwo = () => {
               setIsActive={setIsActive}
               logo={
                 <a>
-                  <img src="/assets/images/logo/3.png" alt="" />
+                  <img src="/assets/images/logo/4.png" alt="" />
                 </a>
               }
             />

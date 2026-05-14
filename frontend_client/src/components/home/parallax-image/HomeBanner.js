@@ -30,16 +30,16 @@ const HomeBannerSection = () => {
         <Row className="justify-content-end">
           <Col lg="7" md="9" className="ms-auto">
             <div className="parallax-content text-end">
-              <div className="box text-affect">
+              <div className="box text-affect" style={{ width: '600px' }}>
                 <div className="title">
                   <span className="block"></span>
-                   <p style={{fontSize: '24px', fontWeight: 'bold'}}>
-                  NHA TRANG
+                  <p style={{ fontSize: '30px', fontWeight: 'bold', color: '#FFF' }}>
+                    NHA TRANG
                   </p>
                 </div>
                 <div className="role">
                   <div className="block"></div>
-                  <p className="font-roboto">Điểm đến đầu tư, nơi an cư lý tưởng</p>
+                  <p className="font-roboto" style={{ fontSize: '24px', color: '#FFF' }}>Điểm đến đầu tư, nơi an cư lý tưởng</p>
                 </div>
               </div>
               <form className="video-search">

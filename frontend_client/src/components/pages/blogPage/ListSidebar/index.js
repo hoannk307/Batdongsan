@@ -23,8 +23,9 @@ const BodyContent = ({ side }) => {
   useEffect(() => {
     getData(`/api/property`)
       .then((res) => {
-        setValue(res.data.LatestBlogInCorporate);
-        gridDispatch({ type: "totalPages", payload: Math.ceil(res.data.LatestBlogInCorporate.length / 4) });
+        const latestBlogs = res.data?.LatestBlogInCorporate || [];
+        setValue(latestBlogs);
+        gridDispatch({ type: "totalPages", payload: Math.ceil(latestBlogs.length / 4) });
       })
       .catch((error) => console.error("Error", error));
   }, []);
