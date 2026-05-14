@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@batdongsan/shared": "*",
     "@fortawesome/fontawesome-free": "^6.7.2",
     "@south-paw/react-vector-maps": "^3.2.0",
     "@tinymce/tinymce-react": "^6.3.0",

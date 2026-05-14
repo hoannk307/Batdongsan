@@ -13,7 +13,9 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   backend:
-    build: ./backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     container_name: nest_backend
     restart: always
     depends_on:
@@ -31,12 +33,15 @@ services:
     ports:
       - "${BACKEND_PORT}:3000"
     volumes:
-      - ./backend:/app
+      - ./backend:/app/backend
+      - ./shared:/app/shared
       - /app/node_modules
     command: npm run start:dev
 
   frontend_admin:
-    build: ./frontend_admin
+    build:
+      context: .
+      dockerfile: frontend_admin/Dockerfile
     container_name: next_frontend_admin
     restart: always
     depends_on:
@@ -44,15 +49,18 @@ services:
     ports:
       - "${FRONTEND_ADMIN_PORT}:3001"
     volumes:
-      - ./frontend_admin:/app
+      - ./frontend_admin:/app/frontend_admin
+      - ./shared:/app/shared
       - /app/node_modules
-      - /app/.next
+      - /app/frontend_admin/.next
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:${BACKEND_PORT}
     command: npm run dev
 
   frontend_client:
-    build: ./frontend_client
+    build:
+      context: .
+      dockerfile: frontend_client/Dockerfile
     container_name: next_frontend_client
     restart: always
     depends_on:
@@ -60,9 +68,10 @@ services:
     ports:
       - "${FRONTEND_CLIENT_PORT}:3002"
     volumes:
-      - ./frontend_client:/app
+      - ./frontend_client:/app/frontend_client
+      - ./shared:/app/shared
       - /app/node_modules
-      - /app/.next
+      - /app/frontend_client/.next
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:${BACKEND_PORT}
     command: npm run dev

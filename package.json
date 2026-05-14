@@ -1,0 +1,10 @@
+{
+  "name": "batdongsan-monorepo",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend_client",
+    "frontend_admin",
+    "shared"
+  ]
+}
