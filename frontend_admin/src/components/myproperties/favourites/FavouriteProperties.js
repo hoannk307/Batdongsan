@@ -2,12 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import PropertyBox from "@/components/Common/Propertybox/PropertyBox";
 import { getData } from "@/components/utils/getData";
-
-const FALLBACK_API_URL = "http://localhost:3000/api";
+import { API_BASE_URL } from "@/config/apiConfig";
 
 const FavouriteProperties = () => {
   const [propertyList, setPropertyList] = useState();
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || FALLBACK_API_URL;
+  const apiBaseUrl = API_BASE_URL;
 
   useEffect(() => {
     if (!apiBaseUrl) {

@@ -5,12 +5,11 @@ import Breadcrumb from "@/components/Common/Breadcrumb";
 import PropertyBoxFour from "@/components/Common/Propertybox/PropertyBoxOne";
 import axios from "axios";
 import { toast } from "react-toastify";
-
-const FALLBACK_API_URL = "http://localhost:3000/api";
+import { API_BASE_URL } from "@/config/apiConfig";
 
 const AllUsers = () => {
   const [userlist, setUserlist] = useState([]);
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || FALLBACK_API_URL;
+  const apiBaseUrl = API_BASE_URL;
 
   useEffect(() => {
     if (!apiBaseUrl) {

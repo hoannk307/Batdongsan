@@ -15,13 +15,12 @@ import { getData } from "../../../../utils/getData";
 import FilterTag from "../../elements/FilterTag";
 import GridLayout from "../../elements/GridLayout";
 import { gridReducer, initialGrid } from "./gridReducer";
-
-const FALLBACK_API_URL = "http://localhost:3000/api";
+import { API_BASE_URL } from "@/config/apiConfig";
 
 const GridView = ({ side, size, gridType, listSize, mapModal, mapView, relativeSlider, gridBar, video, tabHeader, setMapModal, children, AdvancedSearchShow, infiniteScroll, myList }) => {
     const [value, setValue] = useState();
     const [grid, gridDispatch] = useReducer(gridReducer, initialGrid);
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || FALLBACK_API_URL;
+    const apiBaseUrl = API_BASE_URL;
 
     useEffect(() => {
         if (!apiBaseUrl) {

@@ -1,11 +1,11 @@
 import axios from "axios";
 import { getData } from "@/components/utils/getData";
+import { API_BASE_URL } from "@/config/apiConfig";
 
-const FALLBACK_API_URL = "http://localhost:3000/api";
 const FALLBACK_TOKEN = process.env.NEXT_PUBLIC_DEV_ACCESS_TOKEN || process.env.DEV_ACCESS_TOKEN || "";
 
 export function getApiBaseUrl() {
-  return process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || FALLBACK_API_URL;
+  return API_BASE_URL;
 }
 
 export function getStoredToken() {

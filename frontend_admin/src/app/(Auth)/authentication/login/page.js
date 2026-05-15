@@ -10,14 +10,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Img from '@/components/Common/Image';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-
-const FALLBACK_API_URL = "http://localhost:3000/api";
+import { API_BASE_URL } from '@/config/apiConfig';
 
 const LogIn = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [showpassword, setShowpassword] = useState(false);
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || FALLBACK_API_URL;
+    const apiBaseUrl = API_BASE_URL;
     return (
         <div className="authentication-box">
             <Container fluid={true} className="container-fluid">

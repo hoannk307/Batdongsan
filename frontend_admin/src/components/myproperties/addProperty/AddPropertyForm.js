@@ -10,10 +10,10 @@ import { toast } from "react-toastify";
 import { ReactstrapInput, ReactstrapSelect } from "@/components/utils/ReactStarpInputsValidation";
 import DropZones from "@/components/Common/Dropzones";
 import { getData } from "@/components/utils/getData";
+import { API_BASE_URL } from "@/config/apiConfig";
 
 const DEFAULT_PROVINCE_ID = "93";
 const DEFAULT_WARD_ID = "152";
-const FALLBACK_API_URL = "http://localhost:3000/api";
 const FALLBACK_TOKEN =
   process.env.NEXT_PUBLIC_DEV_ACCESS_TOKEN || process.env.DEV_ACCESS_TOKEN || "";
 
@@ -26,7 +26,7 @@ const AddPropertyForm = () => {
   const [provinces, setProvinces] = useState([]);
   const [wards, setWards] = useState([]);
   const [isLoadingWards, setIsLoadingWards] = useState(false);
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || FALLBACK_API_URL;
+  const apiBaseUrl = API_BASE_URL;
 
   useEffect(() => {
     const fetchDefaults = async () => {

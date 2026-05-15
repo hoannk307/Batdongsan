@@ -6,19 +6,16 @@
  * - Phát hiện lỗi kết nối (ECONNREFUSED / AbortError)
  */
 
-const FALLBACK_BACKEND_API_URL = "http://localhost:3000/api";
+import { API_BASE_URL } from "@/config/env";
+
 const FETCH_TIMEOUT_MS = 5000;
 
 /**
  * Trả về base URL của backend NestJS.
- * Ưu tiên: NEXT_PUBLIC_BACKEND_API_URL → BACKEND_API_URL → localhost fallback
+ * Cấu hình tại: frontend_client/.env.local → NEXT_PUBLIC_API_URL
  */
 export function getBackendBaseUrl() {
-  return (
-    process.env.NEXT_PUBLIC_BACKEND_API_URL ||
-    process.env.BACKEND_API_URL ||
-    FALLBACK_BACKEND_API_URL
-  );
+  return API_BASE_URL;
 }
 
 /**

@@ -2,6 +2,7 @@ import Link from "next/link";
 import React, { useRef, useState } from "react";
 import { Home, User } from "react-feather";
 import SearchSuggestionBox from "@/components/elements/SearchSuggestionBox";
+import { ADMIN_URL } from "@/config/env";
 
 const RightNavTwo = () => {
   const [searchDropDown, setSearchDropDown] = useState(false);
@@ -36,7 +37,7 @@ const RightNavTwo = () => {
       </li>
       <li>
         <Link
-          href="http://localhost:3001/myproperties/add-property"
+          href={`${ADMIN_URL}/myproperties/add-property`}
           className="btn btn-solid btn-flat text-white"
           style={{ fontSize: "16px", fontWeight: 500, padding: "4px 10px", borderRadius: "8px" }}
         >

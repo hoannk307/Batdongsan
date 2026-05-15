@@ -6,14 +6,13 @@ import { ReactstrapInput, ReactstrapSelect } from '../../utils/ReactStarpInputsV
 import DropZones from '@/components/Common/Dropzones';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-
-const FALLBACK_API_URL = "http://localhost:3000/api";
+import { API_BASE_URL } from '@/config/apiConfig';
 
 const AddUserForm = () => {
     const getUploadParams = () => {
         return { url: 'https://httpbin.org/post' }
     }
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || FALLBACK_API_URL;
+    const apiBaseUrl = API_BASE_URL;
     return (
         <Formik
             initialValues={{

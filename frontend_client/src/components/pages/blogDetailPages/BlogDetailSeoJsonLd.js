@@ -1,10 +1,11 @@
 import React from "react";
+import { SITE_URL } from "@/config/env";
 
 // Server-friendly JSON-LD component.
 const BlogDetailSeoJsonLd = ({ news, canonicalUrl, siteUrl }) => {
   if (!news) return null;
 
-  const site = siteUrl || "http://localhost:3000";
+  const site = siteUrl || SITE_URL;
   const absoluteImg = news?.img ? news.img : undefined;
   const imgUrl =
     absoluteImg && (absoluteImg.startsWith("http://") || absoluteImg.startsWith("https://"))

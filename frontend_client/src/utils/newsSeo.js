@@ -1,12 +1,13 @@
-const FALLBACK_BACKEND_API_URL = "http://localhost:3000/api";
+import { API_BASE_URL, SITE_URL } from "@/config/env";
+
 const FALLBACK_IMAGE = "/assets/images/property/11.jpg";
 
 function getBackendApiBaseUrl() {
-  return process.env.NEXT_PUBLIC_BACKEND_API_URL || process.env.BACKEND_API_URL || FALLBACK_BACKEND_API_URL;
+  return API_BASE_URL;
 }
 
 function getSiteUrl() {
-  return process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  return SITE_URL;
 }
 
 function toAbsoluteUrl(maybeUrl, siteUrl) {

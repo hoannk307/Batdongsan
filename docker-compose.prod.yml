@@ -34,8 +34,8 @@ services:
       R2_PUBLIC_BASE_URL: ${R2_PUBLIC_BASE_URL:-}
     # Trên Coolify (sử dụng Traefik), bạn không cần expose port ra ngoài.
     # Traefik sẽ tự động định tuyến từ tên miền (VD: api.domain.com) vào port 3000 bên trong container.
-    # ports:
-    #   - "3000:3000"
+    ports:
+      - "3000:3000"
 
   frontend_admin:
     build:
@@ -49,8 +49,8 @@ services:
       # Biến này rất quan trọng. Trên Coolify, bạn phải truyền tên miền thực tế của backend vào đây
       # Ví dụ: NEXT_PUBLIC_API_URL=https://api.yourdomain.com
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
-    # ports:
-    #   - "3001:3001"
+    ports:
+      - "3001:3001"
 
   frontend_client:
     build:
@@ -64,8 +64,8 @@ services:
       # Truyền tên miền thực tế của backend vào đây
       # Ví dụ: NEXT_PUBLIC_API_URL=https://api.yourdomain.com
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
-    # ports:
-    #   - "3002:3002"
+    ports:
+      - "3002:3002"
 
 volumes:
   postgres_data_prod:
