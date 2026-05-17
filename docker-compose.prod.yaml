@@ -8,9 +8,9 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-    # Không publish port ra host ở môi trường production để đảm bảo bảo mật
-    # Các container vẫn có thể giao tiếp với nhau qua port 5432 nội bộ
-    # ports: "5432:5432"
+    # Mở port cho localhost (127.0.0.1) trên VPS để có thể kết nối pgAdmin qua SSH Tunnel
+    ports:
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data_prod:/var/lib/postgresql/data
 
