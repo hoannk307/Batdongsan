@@ -42,8 +42,6 @@ services:
     build:
       context: .
       dockerfile: frontend_admin/Dockerfile
-      args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     container_name: next_frontend_admin_prod
     restart: always
     depends_on:
@@ -59,8 +57,6 @@ services:
     build:
       context: .
       dockerfile: frontend_client/Dockerfile
-      args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     container_name: next_frontend_client_prod
     restart: always
     depends_on:

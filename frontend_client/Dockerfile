@@ -16,9 +16,6 @@ COPY frontend_client/ ./frontend_client/
 
 WORKDIR /app/frontend_client
 
-ARG NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
-
 RUN npm run build
 EXPOSE 3002
 CMD ["npm", "start"]
