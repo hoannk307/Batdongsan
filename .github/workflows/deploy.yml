@@ -77,20 +77,37 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Verify SSH key format
+      - name: Create .env file for deployment
+        env:
+          GITHUB_REPO_OWNER: ${{ github.repository_owner }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_EXPIRES_IN: ${{ secrets.JWT_EXPIRES_IN }}
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_PUBLIC_BASE_URL: ${{ secrets.R2_PUBLIC_BASE_URL }}
         run: |
-          echo "${{ secrets.VPS_SSH_KEY }}" > /tmp/test_key
-          echo "=== Key file size ==="
-          wc -c /tmp/test_key
-          echo "=== First line ==="
-          head -1 /tmp/test_key
-          echo "=== Last line ==="
-          tail -1 /tmp/test_key
-          echo "=== Line count ==="
-          wc -l /tmp/test_key
-          echo "=== Check if valid PEM ==="
-          ssh-keygen -l -f /tmp/test_key && echo "KEY IS VALID" || echo "KEY IS INVALID"
-          rm -f /tmp/test_key
+          # Use printenv + grep to safely write values (handles all special chars)
+          {
+            echo "GITHUB_REPO_OWNER=${GITHUB_REPO_OWNER}"
+            echo "POSTGRES_USER=${POSTGRES_USER}"
+            echo "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
+            echo "POSTGRES_DB=${POSTGRES_DB}"
+            echo "JWT_SECRET=${JWT_SECRET}"
+            echo "JWT_EXPIRES_IN=${JWT_EXPIRES_IN}"
+            echo "NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}"
+            echo "R2_ENDPOINT=${R2_ENDPOINT}"
+            echo "R2_ACCESS_KEY_ID=${R2_ACCESS_KEY_ID}"
+            echo "R2_SECRET_ACCESS_KEY=${R2_SECRET_ACCESS_KEY}"
+            echo "R2_BUCKET=${R2_BUCKET}"
+            echo "R2_PUBLIC_BASE_URL=${R2_PUBLIC_BASE_URL}"
+          } > deploy.env
+          echo "=== .env file created ($(wc -l < deploy.env) lines) ==="
 
       - name: Copy deployment files to VPS
         uses: appleboy/scp-action@v0.1.7
@@ -99,11 +116,10 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
-          source: "docker-compose.deploy.yml,nginx/,scripts/"
+          source: "docker-compose.deploy.yml,nginx/,scripts/,deploy.env"
           target: /opt/batdongsan
           overwrite: true
           strip_components: 0
-          debug: true
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.2.0
@@ -121,21 +137,11 @@ jobs:
             # Navigate to deploy directory
             cd /opt/batdongsan
 
-            # Create .env file with secrets (values quoted for safety)
-            cat > .env <<ENVEOF
-GITHUB_REPO_OWNER="${{ github.repository_owner }}"
-POSTGRES_USER="${{ secrets.POSTGRES_USER }}"
-POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}"
-POSTGRES_DB="${{ secrets.POSTGRES_DB }}"
-JWT_SECRET="${{ secrets.JWT_SECRET }}"
-JWT_EXPIRES_IN="${{ secrets.JWT_EXPIRES_IN }}"
-NEXT_PUBLIC_API_URL="${{ secrets.NEXT_PUBLIC_API_URL }}"
-R2_ENDPOINT="${{ secrets.R2_ENDPOINT }}"
-R2_ACCESS_KEY_ID="${{ secrets.R2_ACCESS_KEY_ID }}"
-R2_SECRET_ACCESS_KEY="${{ secrets.R2_SECRET_ACCESS_KEY }}"
-R2_BUCKET="${{ secrets.R2_BUCKET }}"
-R2_PUBLIC_BASE_URL="${{ secrets.R2_PUBLIC_BASE_URL }}"
-ENVEOF
+            # Move the env file into place
+            mv deploy.env .env
+
+            # Debug: verify .env
+            echo "=== .env has $(wc -l < .env) lines ==="
 
             # Make deploy script executable and run
             chmod +x scripts/deploy.sh
