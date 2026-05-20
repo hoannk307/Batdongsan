@@ -5,8 +5,16 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files first for better Docker layer caching
-COPY package.json ./
+# Copy root package.json, but override workspaces to only include backend & shared
+COPY package.json ./package.json.original
+
+# Create a modified root package.json with only backend + shared workspaces
+RUN node -e " \
+  const pkg = JSON.parse(require('fs').readFileSync('./package.json.original','utf8')); \
+  pkg.workspaces = ['backend','shared']; \
+  require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2));"
+
+# Copy package files for workspace resolution
 COPY backend/package*.json ./backend/
 COPY shared/package*.json ./shared/
 
@@ -25,6 +33,9 @@ RUN npx prisma generate
 # Build NestJS application
 RUN npm run build
 
+# Verify build output exists
+RUN ls -la dist/ && test -f dist/main.js && echo "✅ Build successful: dist/main.js exists"
+
 # ============================================
 # Stage 2: Production
 # ============================================
@@ -32,8 +43,13 @@ FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json ./
+# Same workspace trick for production
+COPY package.json ./package.json.original
+RUN node -e " \
+  const pkg = JSON.parse(require('fs').readFileSync('./package.json.original','utf8')); \
+  pkg.workspaces = ['backend','shared']; \
+  require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2));"
+
 COPY backend/package*.json ./backend/
 COPY shared/package*.json ./shared/
 
