@@ -1,15 +1,32 @@
-frontend_admin/node_modules
+# === Dependencies ===
+node_modules/
+
+# === Build outputs ===
 frontend_admin/.next
-frontend_admin/package-lock.json
-frontend_client/node_modules
 frontend_client/.next
-frontend_client/package-lock.json
-backend/node_modules
 backend/dist
+
+# === Package locks (managed per-service in Docker) ===
+frontend_admin/package-lock.json
+frontend_client/package-lock.json
 backend/package-lock.json
 
+# === Environment files ===
+.env
+.env.local
+.env.production
+.env.*.local
 
+# === Database ===
+postgres_data/
 
+# === OS files ===
+.DS_Store
+Thumbs.db
 
+# === IDE ===
+.vscode/
+.idea/
 
-
+# === Backups ===
+*.backup
