@@ -69,7 +69,7 @@ echo -e "${YELLOW}[4/5] Lấy chứng chỉ SSL từ Let's Encrypt...${NC}"
 rm -rf "$CERT_DIR"
 
 # Chạy certbot để lấy cert thật
-docker compose -f "$COMPOSE_FILE" run --rm certbot certonly \
+docker compose -f "$COMPOSE_FILE" run --rm --entrypoint "certbot" certbot certonly \
     --webroot \
     --webroot-path=/var/www/certbot \
     --email "$EMAIL" \

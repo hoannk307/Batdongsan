@@ -75,7 +75,7 @@ if [ "$NEED_LETSENCRYPT" = true ]; then
     rm -rf "$CERT_DIR"
 
     # Request real cert from Let's Encrypt
-    if docker compose -f "$COMPOSE_FILE" run --rm certbot certonly \
+    if docker compose -f "$COMPOSE_FILE" run --rm --entrypoint "certbot" certbot certonly \
         --webroot \
         --webroot-path=/var/www/certbot \
         --email "$EMAIL" \
