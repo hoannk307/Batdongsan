@@ -65,8 +65,10 @@ echo -e "  ${GREEN}✓ Nginx đã khởi động${NC}"
 # ============================================
 echo -e "${YELLOW}[4/5] Lấy chứng chỉ SSL từ Let's Encrypt...${NC}"
 
-# Xóa cert tạm
-rm -rf "$CERT_DIR"
+# Xóa cert tạm và dữ liệu certbot cũ (tránh tạo suffix -0001)
+rm -rf "certbot/conf/live/$DOMAIN"*
+rm -rf "certbot/conf/renewal/$DOMAIN"*
+rm -rf "certbot/conf/archive/$DOMAIN"*
 
 # Chạy certbot để lấy cert thật
 docker compose -f "$COMPOSE_FILE" run --rm --entrypoint "certbot" certbot certonly \
@@ -76,6 +78,7 @@ docker compose -f "$COMPOSE_FILE" run --rm --entrypoint "certbot" certbot certon
     --agree-tos \
     --no-eff-email \
     --force-renewal \
+    --cert-name "$DOMAIN" \
     $DOMAINS
 
 if [ $? -eq 0 ]; then

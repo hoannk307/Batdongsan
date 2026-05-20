@@ -71,8 +71,10 @@ if [ "$NEED_LETSENCRYPT" = true ]; then
     # Wait for nginx to be ready
     sleep 5
 
-    # Remove self-signed cert
-    rm -rf "$CERT_DIR"
+    # Remove self-signed cert and old certbot data (prevent -0001 suffix)
+    rm -rf "certbot/conf/live/$DOMAIN"*
+    rm -rf "certbot/conf/renewal/$DOMAIN"*
+    rm -rf "certbot/conf/archive/$DOMAIN"*
 
     # Request real cert from Let's Encrypt
     if docker compose -f "$COMPOSE_FILE" run --rm --entrypoint "certbot" certbot certonly \
@@ -82,6 +84,7 @@ if [ "$NEED_LETSENCRYPT" = true ]; then
         --agree-tos \
         --no-eff-email \
         --force-renewal \
+        --cert-name "$DOMAIN" \
         -d "$DOMAIN" \
         -d "www.$DOMAIN" \
         -d "admin.$DOMAIN" \
