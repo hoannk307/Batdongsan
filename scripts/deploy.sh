@@ -75,7 +75,7 @@ HEALTH_OK=true
 sleep 10
 
 # Check backend
-check_service "Backend" "http://localhost:3000/api" "backend" || HEALTH_OK=false
+check_service "Backend" "http://localhost:3000/api/docs" "backend" || HEALTH_OK=false
 
 # Check frontend_admin
 check_service "Frontend Admin" "http://localhost:3001" "frontend_admin" || HEALTH_OK=false
