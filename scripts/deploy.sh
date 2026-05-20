@@ -23,6 +23,23 @@ echo -e "${GREEN}========================================${NC}"
 # Navigate to deploy directory
 cd "$DEPLOY_DIR"
 
+# Step 0: Ensure SSL certificates exist (create self-signed if needed)
+echo -e "${YELLOW}[0/5] Checking SSL certificates...${NC}"
+CERT_DIR="certbot/conf/live/nhatranglands.vn"
+mkdir -p certbot/conf certbot/www
+
+if [ ! -f "$CERT_DIR/fullchain.pem" ] || [ ! -f "$CERT_DIR/privkey.pem" ]; then
+    echo -e "  ${YELLOW}SSL certs not found. Creating self-signed placeholder...${NC}"
+    mkdir -p "$CERT_DIR"
+    openssl req -x509 -nodes -newkey rsa:2048 -days 365 \
+        -keyout "$CERT_DIR/privkey.pem" \
+        -out "$CERT_DIR/fullchain.pem" \
+        -subj "/CN=nhatranglands.vn" 2>/dev/null
+    echo -e "  ${GREEN}✓ Self-signed cert created (run init-ssl.sh for Let's Encrypt)${NC}"
+else
+    echo -e "  ${GREEN}✓ SSL certificates found${NC}"
+fi
+
 # Step 1: Pull latest images
 echo -e "${YELLOW}[1/5] Pulling latest images from GHCR...${NC}"
 docker compose -f "$COMPOSE_FILE" pull backend frontend_admin frontend_client
