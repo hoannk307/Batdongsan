@@ -51,6 +51,8 @@ services:
       - backend
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      # URL nội bộ Docker để server-side API routes gọi backend trực tiếp
+      INTERNAL_API_URL: http://backend:3000/api
     ports:
       - "3001:3001"
     networks:
@@ -64,6 +66,8 @@ services:
       - backend
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      # URL nội bộ Docker để server-side API routes gọi backend trực tiếp
+      INTERNAL_API_URL: http://backend:3000/api
     ports:
       - "3002:3002"
     networks:
