@@ -32,7 +32,7 @@ export const SITE_URL =
 
 /** Base URL công khai của Cloudflare R2 (dùng để ghép với path ảnh từ file_attach) */
 export const R2_PUBLIC_BASE_URL =
-  process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL || "https://batdongsanlands.vn";
+  process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL || "https://nhatranglands.vn";
 
 /** URL của frontend_admin (dùng cho link "Đăng bài") */
 export const ADMIN_URL =
