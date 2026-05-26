@@ -3,18 +3,39 @@
  * Các hàm chuyển đổi dữ liệu property từ backend sang định dạng frontend.
  */
 
+import { R2_PUBLIC_BASE_URL } from "@/config/env";
+
 const FALLBACK_IMAGE = "/assets/images/property/12.jpg";
 
 /**
+ * Ghép base URL vào path ảnh nếu path là đường dẫn tương đối.
+ * Nếu path đã là URL đầy đủ (http/https) thì giữ nguyên.
+ *
+ * @param {string} path
+ * @returns {string}
+ */
+function toFullImageUrl(path) {
+  if (!path) return "";
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  // Loại bỏ dấu "/" thừa ở đầu path
+  const cleanPath = path.startsWith("/") ? path.slice(1) : path;
+  const baseUrl = R2_PUBLIC_BASE_URL.endsWith("/")
+    ? R2_PUBLIC_BASE_URL.slice(0, -1)
+    : R2_PUBLIC_BASE_URL;
+  return `${baseUrl}/${cleanPath}`;
+}
+
+/**
  * Trích xuất mảng đường dẫn ảnh từ file_attach của backend.
+ * Tự động ghép R2_PUBLIC_BASE_URL vào path tương đối.
  *
  * @param {any} p - Property object từ backend
  * @returns {string[]}
  */
 export function extractImages(p) {
   return Array.isArray(p?.file_attach) && p.file_attach.length > 0
-    ? p.file_attach.map((f) => f?.path).filter(Boolean)
-    : [FALLBACK_IMAGE];
+    ? p.file_attach.map((f) => f?.path).filter(Boolean).map(toFullImageUrl)
+    : [];
 }
 
 /**

@@ -30,6 +30,10 @@ export const INTERNAL_API_URL =
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3002";
 
+/** Base URL công khai của Cloudflare R2 (dùng để ghép với path ảnh từ file_attach) */
+export const R2_PUBLIC_BASE_URL =
+  process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL || "https://batdongsanlands.vn";
+
 /** URL của frontend_admin (dùng cho link "Đăng bài") */
 export const ADMIN_URL =
   process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3001";
