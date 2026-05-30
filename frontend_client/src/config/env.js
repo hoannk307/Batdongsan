@@ -36,4 +36,4 @@ export const R2_PUBLIC_BASE_URL =
 
 /** URL của frontend_admin (dùng cho link "Đăng bài") */
 export const ADMIN_URL =
-  process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3001";
+  process.env.NEXT_PUBLIC_ADMIN_URL || "https://admin.nhatranglands.vn";
