@@ -5,6 +5,10 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# NEXT_PUBLIC_* vars phải có tại build time vì Next.js inline chúng vào bundle
+ARG NEXT_PUBLIC_API_URL=https://api.nhatranglands.vn
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
 # Copy package files first for better Docker layer caching
 COPY package.json ./
 COPY frontend_admin/package*.json ./frontend_admin/

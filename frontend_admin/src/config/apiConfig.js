@@ -6,7 +6,7 @@
  * trong file frontend_admin/.env.local
  *
  * Ví dụ:
- *   NEXT_PUBLIC_API_URL=http://103.176.179.151:3001/api   ← production
+ *   NEXT_PUBLIC_API_URL=https://api.nhatranglands.vn      ← production
  *   NEXT_PUBLIC_API_URL=http://localhost:3000/api          ← local dev
  */
 
