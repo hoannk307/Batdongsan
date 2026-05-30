@@ -5,7 +5,7 @@ import Breadcrumb from "@/components/Common/Breadcrumb";
 import PropertyBoxFour from "@/components/Common/Propertybox/PropertyBoxOne";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { API_BASE_URL } from "@/config/apiConfig";
+import { API_BASE_URL } from "@/config/env";
 
 const AllUsers = () => {
   const [userlist, setUserlist] = useState([]);

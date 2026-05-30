@@ -6,10 +6,10 @@
  * file frontend_client/.env.local
  *
  * Ví dụ:
- *   NEXT_PUBLIC_API_URL=http://103.176.179.151:3001/api   ← production
+ *   NEXT_PUBLIC_API_URL=https://api.nhatranglands.vn      ← production
  *   NEXT_PUBLIC_API_URL=http://localhost:3000/api          ← local dev
- *   NEXT_PUBLIC_SITE_URL=http://103.176.179.151:3002       ← production
- *   NEXT_PUBLIC_SITE_URL=http://localhost:3002             ← local dev
+ *   NEXT_PUBLIC_SITE_URL=https://nhatranglands.vn          ← production
+ *   NEXT_PUBLIC_SITE_URL=http://localhost:3002              ← local dev
  */
 
 /** Base URL của backend NestJS API (dùng cho client-side, browser gọi) */
@@ -32,7 +32,7 @@ export const SITE_URL =
 
 /** Base URL công khai của Cloudflare R2 (dùng để ghép với path ảnh từ file_attach) */
 export const R2_PUBLIC_BASE_URL =
-  process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL || "https://nhatranglands.vn";
+  process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL || "https://image.nhatranglands.vn";
 
 /** URL của frontend_admin (dùng cho link "Đăng bài") */
 export const ADMIN_URL =

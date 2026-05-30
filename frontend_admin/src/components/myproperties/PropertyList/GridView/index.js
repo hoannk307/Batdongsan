@@ -15,7 +15,7 @@ import { getData } from "../../../../utils/getData";
 import FilterTag from "../../elements/FilterTag";
 import GridLayout from "../../elements/GridLayout";
 import { gridReducer, initialGrid } from "./gridReducer";
-import { API_BASE_URL } from "@/config/apiConfig";
+import { API_BASE_URL } from "@/config/env";
 
 const GridView = ({ side, size, gridType, listSize, mapModal, mapView, relativeSlider, gridBar, video, tabHeader, setMapModal, children, AdvancedSearchShow, infiniteScroll, myList }) => {
     const [value, setValue] = useState();

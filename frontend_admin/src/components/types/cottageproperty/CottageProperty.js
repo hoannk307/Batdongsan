@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Col, Row } from 'reactstrap'
 import PropertyBox from '../../Common/Propertybox/PropertyBox';
 import { getData } from '../../utils/getData';
-import { API_BASE_URL } from '@/config/apiConfig';
+import { API_BASE_URL } from "@/config/env";
 
 const CottageProperty = () => {
     const [cottagedata, setCottagedata] = useState();

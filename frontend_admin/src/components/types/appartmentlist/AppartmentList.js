@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import PropertyBox from "@/components/Common/Propertybox/PropertyBox";
 import { getData } from "@/components/utils/getData";
-import { API_BASE_URL } from "@/config/apiConfig";
+import { API_BASE_URL } from "@/config/env";
 
 const AppartmentList = () => {
   const [appartmentdata, setAppartmentdata] = useState();

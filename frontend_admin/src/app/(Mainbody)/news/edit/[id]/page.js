@@ -6,8 +6,9 @@ import NewsForm from "@/components/news/NewsForm";
 import { fetchNewsById } from "@/components/news/newsApi";
 import { toast } from "react-toastify";
 import { useParams } from "next/navigation";
+import { TINYMCE_API_KEY } from "@/config/env";
 
-const tinymceApiKey = process.env.NEXT_PUBLIC_TINYMCE_API_KEY;
+const tinymceApiKey = TINYMCE_API_KEY;
 
 export default function EditNewsPage() {
   const params = useParams();

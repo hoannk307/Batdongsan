@@ -10,12 +10,11 @@ import { toast } from "react-toastify";
 import { ReactstrapInput, ReactstrapSelect } from "@/components/utils/ReactStarpInputsValidation";
 import DropZones from "@/components/Common/Dropzones";
 import { getData } from "@/components/utils/getData";
-import { API_BASE_URL } from "@/config/apiConfig";
+import { API_BASE_URL, DEV_ACCESS_TOKEN } from "@/config/env";
 
 const DEFAULT_PROVINCE_ID = "93";
 const DEFAULT_WARD_ID = "152";
-const FALLBACK_TOKEN =
-  process.env.NEXT_PUBLIC_DEV_ACCESS_TOKEN || process.env.DEV_ACCESS_TOKEN || "";
+const FALLBACK_TOKEN = DEV_ACCESS_TOKEN;
 
 const AddPropertyForm = () => {
   const [propertyDefaults, setPropertyDefaults] = useState({

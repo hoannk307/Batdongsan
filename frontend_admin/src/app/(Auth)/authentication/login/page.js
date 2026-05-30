@@ -10,7 +10,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Img from '@/components/Common/Image';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { API_BASE_URL } from '@/config/apiConfig';
+import { API_BASE_URL } from '@/config/env';
 
 const LogIn = () => {
     const router = useRouter();

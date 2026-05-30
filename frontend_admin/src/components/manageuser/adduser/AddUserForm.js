@@ -6,7 +6,7 @@ import { ReactstrapInput, ReactstrapSelect } from '../../utils/ReactStarpInputsV
 import DropZones from '@/components/Common/Dropzones';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { API_BASE_URL } from '@/config/apiConfig';
+import { API_BASE_URL } from '@/config/env';
 
 const AddUserForm = () => {
     const getUploadParams = () => {

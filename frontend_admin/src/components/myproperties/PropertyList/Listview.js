@@ -3,7 +3,7 @@ import { Col, Row } from "reactstrap";
 import PropertyBox from "../../Common/Propertybox/PropertyBox";
 import { getData } from "../../utils/getData";
 import usePagination from "../../utils/usePagination";
-import { API_BASE_URL } from "@/config/apiConfig";
+import { API_BASE_URL } from "@/config/env";
 
 const Listview = () => {
   const [value, setValue] = useState();

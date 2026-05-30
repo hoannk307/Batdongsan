@@ -2,8 +2,9 @@ import React, { Fragment } from "react";
 import { Card, CardBody, CardHeader, Col, Container, Row } from "reactstrap";
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import NewsForm from "@/components/news/NewsForm";
+import { TINYMCE_API_KEY } from "@/config/env";
 
-const tinymceApiKey = process.env.NEXT_PUBLIC_TINYMCE_API_KEY;
+const tinymceApiKey = TINYMCE_API_KEY;
 
 export default function AddNewsPage() {
   return (

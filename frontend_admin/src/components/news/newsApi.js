@@ -1,8 +1,8 @@
 import axios from "axios";
 import { getData } from "@/components/utils/getData";
-import { API_BASE_URL } from "@/config/apiConfig";
+import { API_BASE_URL, DEV_ACCESS_TOKEN } from "@/config/env";
 
-const FALLBACK_TOKEN = process.env.NEXT_PUBLIC_DEV_ACCESS_TOKEN || process.env.DEV_ACCESS_TOKEN || "";
+const FALLBACK_TOKEN = DEV_ACCESS_TOKEN;
 
 export function getApiBaseUrl() {
   return API_BASE_URL;

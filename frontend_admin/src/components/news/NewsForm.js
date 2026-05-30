@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { createNews, updateNews } from "./newsApi";
 import { z } from "zod";
+import { TINYMCE_SCRIPT_SRC } from "@/config/env";
 
 const NEWS_STATUSES = ["DRAFT", "PUBLISHED"];
 
@@ -256,7 +257,7 @@ export default function NewsForm({ mode, initialValues, newsId, tinymceApiKey: t
             <Editor
               apiKey={resolvedTinymceApiKey}
               tinymceScriptSrc={
-                process.env.NEXT_PUBLIC_TINYMCE_SCRIPT_SRC ||
+                TINYMCE_SCRIPT_SRC ||
                 `https://cdn.tiny.cloud/1/${resolvedTinymceApiKey}/tinymce/6/tinymce.min.js`
               }
               value={values.content}
