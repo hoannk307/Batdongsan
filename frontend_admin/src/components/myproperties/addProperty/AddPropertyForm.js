@@ -25,7 +25,7 @@ const AddPropertyForm = () => {
   const [provinces, setProvinces] = useState([]);
   const [wards, setWards] = useState([]);
   const [isLoadingWards, setIsLoadingWards] = useState(false);
-  const apiBaseUrl = API_BASE_URL;
+  const apiBaseUrl = "/api";
 
   useEffect(() => {
     const fetchDefaults = async () => {
@@ -143,6 +143,16 @@ const AddPropertyForm = () => {
   const getStoredToken = () => {
     if (typeof window === "undefined") return null;
 
+    // Check js-cookie first (since login page sets it here)
+    const getCookie = (name) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+      return null;
+    };
+    const cookieToken = getCookie("accessToken") || getCookie("token");
+    if (cookieToken) return cookieToken;
+
     const directToken = localStorage.getItem("accessToken") || localStorage.getItem("token");
     if (directToken) return directToken;
 
@@ -216,7 +226,6 @@ const AddPropertyForm = () => {
 
         await axios.post(`${apiBaseUrl}/properties/with-files`, formData, {
           headers: {
-            "Content-Type": "multipart/form-data",
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
         });

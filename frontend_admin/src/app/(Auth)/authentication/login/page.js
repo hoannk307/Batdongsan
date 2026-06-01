@@ -8,15 +8,48 @@ import { Card, CardBody, Col, Container, Row } from 'reactstrap'
 import { toast } from 'react-toastify';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Img from '@/components/Common/Image';
-import axios from 'axios';
 import Cookies from 'js-cookie';
-import { API_BASE_URL } from '@/config/env';
 
 const LogIn = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [showpassword, setShowpassword] = useState(false);
-    const apiBaseUrl = API_BASE_URL;
+
+    const login = async (values, { setSubmitting }) => {
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(values),
+            });
+
+            const data = await res.json().catch(() => null);
+
+            if (!res.ok) {
+                const message = Array.isArray(data?.message)
+                    ? data.message.join(', ')
+                    : data?.message;
+                throw new Error(message || 'Login failed');
+            }
+
+            const { user, token } = data || {};
+
+            if (typeof window !== "undefined" && token && user) {
+                Cookies.set("accessToken", token);
+                localStorage.setItem("accessToken", token);
+                localStorage.setItem("user", JSON.stringify(user));
+            }
+
+            toast.success('Login successful');
+            const returnTo = searchParams.get('returnTo');
+            router.push(returnTo || '/dashboard');
+        } catch (error) {
+            toast.error(error.message || 'Please check your email and password..!');
+        } finally {
+            setSubmitting(false);
+        }
+    }
+
     return (
         <div className="authentication-box">
             <Container fluid={true} className="container-fluid">
@@ -36,39 +69,7 @@ const LogIn = () => {
                                         email: Yup.string().required('Enter valid Email..!'),
                                         password: Yup.string().required('Password is required..!')
                                     })}
-                                    onSubmit={async (values, { setSubmitting }) => {
-                                        if (!apiBaseUrl) {
-                                            toast.error('API_URL chưa được cấu hình.');
-                                            return;
-                                        }
-
-                                        try {
-                                            const response = await axios.post(`${apiBaseUrl}/auth/login`, values, {
-                                                headers: {
-                                                    "Content-Type": "application/json",
-                                                },
-                                            });
-
-                                            const { user, token } = response?.data || {};
-
-                                            if (typeof window !== "undefined" && token && user) {
-                                                Cookies.set("accessToken", token);
-                                                localStorage.setItem("user", JSON.stringify(user));
-                                            }
-
-                                            toast.success('Login successful');
-                                            const returnTo = searchParams.get('returnTo');
-                                            router.push(returnTo || '/dashboard');
-                                        } catch (error) {
-                                            const messageFromApi = error?.response?.data?.message;
-                                            const normalizedMessage = Array.isArray(messageFromApi)
-                                                ? messageFromApi.join(", ")
-                                                : messageFromApi;
-                                            toast.error(normalizedMessage || 'Please check your email and password..!');
-                                        } finally {
-                                            setSubmitting(false);
-                                        }
-                                    }}>
+                                    onSubmit={login}>
                                     {({ errors, touched }) => (
                                         <Form>
                                             <div className="form-group">

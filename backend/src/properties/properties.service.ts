@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, InternalServerErrorException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
@@ -96,68 +96,75 @@ export class PropertiesService {
     createPropertyDto: CreatePropertyDto,
     files: Express.Multer.File[] = [],
   ) {
-    // Không có file thì dùng luồng cũ để giữ nguyên hành vi
-    if (!files || files.length === 0) {
-      return this.create(userId, createPropertyDto);
-    }
-
-    // Chuẩn bị metadata cho từng file
-    const fileMetas = files.map((file) => {
-      const originalName = file.originalname;
-      const ext = extname(originalName).replace('.', '').toLowerCase();
-
-      // Xác định loại file (word, excel, image, pdf, other...)
-      let logicalType = 'other';
-      if (['doc', 'docx'].includes(ext)) {
-        logicalType = 'word';
-      } else if (['xls', 'xlsx', 'csv'].includes(ext)) {
-        logicalType = 'excel';
-      } else if (file.mimetype.startsWith('image/') || ['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)) {
-        logicalType = 'image';
-      } else if (ext === 'pdf') {
-        logicalType = 'pdf';
+    try {
+      // Không có file thì dùng luồng cũ để giữ nguyên hành vi
+      if (!files || files.length === 0) {
+        return await this.create(userId, createPropertyDto);
       }
 
-      // Đường dẫn lưu trên Cloudflare R2 theo yêu cầu
-      const keyPath = `BDS/NHATRANG/${originalName}`;
+      // Chuẩn bị metadata cho từng file
+      const fileMetas = files.map((file) => {
+        const originalName = file.originalname;
+        const ext = extname(originalName).replace('.', '').toLowerCase();
 
-      return {
-        file,
-        keyPath,
-        ext,
-        logicalType,
-        name: originalName,
-      };
-    });
+        // Xác định loại file (word, excel, image, pdf, other...)
+        let logicalType = 'other';
+        if (['doc', 'docx'].includes(ext)) {
+          logicalType = 'word';
+        } else if (['xls', 'xlsx', 'csv'].includes(ext)) {
+          logicalType = 'excel';
+        } else if (file.mimetype.startsWith('image/') || ['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)) {
+          logicalType = 'image';
+        } else if (ext === 'pdf') {
+          logicalType = 'pdf';
+        }
 
-    // Transaction: tạo property + insert vào bảng file_attach
-    const property = await this.prisma.$transaction(async (tx) => {
-      const createdProperty = await tx.properties.create({
-        data: {
-          ...createPropertyDto,
-          user_id: userId,
-        },
-        include: {
-          file_attach: true,
-        },
+        // Đường dẫn lưu trên Cloudflare R2 theo yêu cầu
+        const keyPath = `BDS/NHATRANG/${originalName}`;
+
+        return {
+          file,
+          keyPath,
+          ext,
+          logicalType,
+          name: originalName,
+        };
       });
 
+      // Transaction: tạo property + insert vào bảng file_attach
+      const property = await this.prisma.$transaction(async (tx) => {
+        const createdProperty = await tx.properties.create({
+          data: {
+            ...createPropertyDto,
+            user_id: userId,
+          },
+          include: {
+            file_attach: true,
+          },
+        });
+
+        for (const meta of fileMetas) {
+          await tx.$executeRaw`
+            INSERT INTO file_attach (object_id, path, nghiepvu_code, type, extend, name)
+            VALUES (${createdProperty.id}, ${meta.keyPath}, 'BDS', ${meta.logicalType}, ${meta.ext}, ${meta.name})
+          `;
+        }
+
+        return createdProperty;
+      });
+
+      // Sau khi transaction DB thành công, mới upload file lên Cloudflare
       for (const meta of fileMetas) {
-        await tx.$executeRaw`
-          INSERT INTO file_attach (object_id, path, nghiepvu_code, type, extend, name)
-          VALUES (${createdProperty.id}, ${meta.keyPath}, 'BDS', ${meta.logicalType}, ${meta.ext}, ${meta.name})
-        `;
+        await this.fileService.uploadFileWithKey(meta.file, meta.keyPath);
       }
 
-      return createdProperty;
-    });
-
-    // Sau khi transaction DB thành công, mới upload file lên Cloudflare
-    for (const meta of fileMetas) {
-      await this.fileService.uploadFileWithKey(meta.file, meta.keyPath);
+      return property;
+    } catch (error) {
+      Logger.error(`Error in createWithFiles: ${error.message}`, error.stack, 'PropertiesService');
+      throw new InternalServerErrorException(
+        error.message || 'Có lỗi xảy ra khi tạo bất động sản với file đính kèm'
+      );
     }
-
-    return property;
   }
 
   async findAll(query: SearchPropertyDto) {

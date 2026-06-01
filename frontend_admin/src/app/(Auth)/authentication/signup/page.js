@@ -5,12 +5,40 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { Lock, Mail, User } from "react-feather";
 import { Card, CardBody, Col, Container, Row } from "reactstrap";
+import { toast } from 'react-toastify';
 import Img from "@/components/Common/Image";
 import { useRouter } from "next/navigation";
 
 const SignUp = () => {
   const [showpassword, setShowpassword] = useState(false);
   const router = useRouter();
+
+  const signup = async (values, { setSubmitting }) => {
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        const message = Array.isArray(data?.message)
+          ? data.message.join(', ')
+          : data?.message;
+        throw new Error(message || 'Registration failed');
+      }
+
+      toast.success('Account created successfully');
+      router.push('/authentication/login');
+    } catch (error) {
+      toast.error(error.message || 'Registration failed. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className='authentication-box'>
       <Container fluid={true}>
@@ -32,10 +60,7 @@ const SignUp = () => {
                     email: Yup.string().required("Enter valid Email..!"),
                     password: Yup.string().required("Password is required..!"),
                   })}
-                  onSubmit={(values) => {
-                    values && localStorage.setItem("user", JSON.stringify(values));
-                    router.push("/authentication/login");
-                  }}
+                  onSubmit={signup}
                 >
                   {({ errors, touched }) => (
                     <Form>
