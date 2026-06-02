@@ -18,7 +18,7 @@ export class PropertiesService {
   constructor(
     private prisma: PrismaService,
     private readonly fileService: FileService,
-  ) {}
+  ) { }
 
   async findLatest(params: { page?: number; limit?: number }) {
     const page = params?.page && params.page > 0 ? params.page : 1;
@@ -329,7 +329,7 @@ export class PropertiesService {
     const address = [cityName, wardName].filter(Boolean).join(', ');
     const price_string = this.formatPriceVND(Number(property.price));
 
-    return { ...property, address, price_string };
+    return { ...property, address, price_string, cityName, wardName };
   }
 
   /**

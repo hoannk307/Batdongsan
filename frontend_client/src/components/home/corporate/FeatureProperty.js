@@ -60,30 +60,31 @@ const FeaturePropertySection = ({ value }) => {
                                   <h3>
                                     <Link href="/property/image-box">{data.title}</Link>
                                   </h3>
-                                  <span>{data.details}</span>
-                                  <p className="font-roboto">{data.moreDetails}</p>
+                                  <h6 >{data.address}</h6>
+                                  {/* <span>
+                                    {data.description}
+                                  </span> */}
                                 </div>
                                 <ul className="detail-list">
                                   <li>
                                     <div className="d-flex">
-                                      <span className="label label-light label-flat label-lg">{data.bedroom}</span>
+                                      <span className="label label-light label-flat label-lg">{data.beds}</span>
                                       <h6>Bedroom</h6>
                                     </div>
                                   </li>
                                   <li>
                                     <div className="d-flex">
-                                      <span className="label label-light label-flat label-lg">{data.bathroom}</span>
+                                      <span className="label label-light label-flat label-lg">{data.baths}</span>
                                       <h6>Bathroom</h6>
                                     </div>
                                   </li>
                                   <li>
-                                    <span className="label label-light label-flat label-lg">{data.sqft} Sq Ft</span>
+                                    <span className="label label-light label-flat label-lg">{data.area} m2</span>
                                   </li>
                                 </ul>
                                 <ul className="feature-price">
                                   <li>
-                                    <h3>${data.price}</h3>
-                                    <h6>Home For Sale</h6>
+                                    <h3>{data.price_string}</h3>
                                   </li>
                                   <li>
                                     <Link href="/agent/submit-property">

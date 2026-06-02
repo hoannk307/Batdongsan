@@ -21,27 +21,29 @@ const PropertyBoxThree = ({ data }) => {
           </a>
         </div>
         <span className="label label-white label-lg label-flat">
-          {symbol}
-          {(data?.price * currencyValue).toFixed(2)}*
+          {data?.price_string}
         </span>
         <div className="labels-left">
           <PropertyLabel labels={data?.label} />
+
         </div>
       </div>
       <div className="property-details">
         <h3>
           <Link href={`/batdongsan/detail?id=${data?.id}`}>{data?.title}</Link>
+
         </h3>
+        {data?.address}
         <p className="font-roboto">{data?.details}</p>
         <ul className="icon-property">
           <li>
             <div className="d-flex">
               <div className="property-icon">
                 <svg className="property-svg">
-                  <use xlinkHref="/assets/svg/icons.svg#home-heart"></use>
+                  <use xlinkHref="/assets/svg/icons.svg#key"></use>
                 </svg>
               </div>
-              <span>{data?.home}</span>
+              <span>{data?.rooms} Rooms</span>
             </div>
           </li>
           <li>
@@ -51,7 +53,7 @@ const PropertyBoxThree = ({ data }) => {
                   <use xlinkHref="/assets/svg/icons.svg#ruler"></use>
                 </svg>
               </div>
-              <span>{data?.sqft} Sq Ft</span>
+              <span>{data?.area ? `${data.area} m²` : ""}</span>
             </div>
           </li>
         </ul>
@@ -61,10 +63,10 @@ const PropertyBoxThree = ({ data }) => {
             <div className="d-flex">
               <div className="property-icon">
                 <svg className="property-svg">
-                  <use xlinkHref="/assets/svg/icons.svg#key"></use>
+                  <use xlinkHref="/assets/svg/icons.svg#home-heart"></use>
                 </svg>
               </div>
-              <span>{data?.rooms} Rooms</span>
+              <span>{data?.beds} Bedrooms</span>
             </div>
           </li>
           <li>
