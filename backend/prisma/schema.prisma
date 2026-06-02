@@ -21,16 +21,15 @@ model favorites {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model file_attach {
-  id            Int        @id(map: "property_images_pkey") @default(autoincrement())
+  id            Int       @id(map: "property_images_pkey") @default(autoincrement())
   object_id     Int
-  path          String     @db.VarChar(500)
-  nghiepvu_code String?    @db.Char(100)
+  path          String    @db.VarChar(500)
+  nghiepvu_code String?   @db.Char(100)
   name          String?
   create_user   Int?
-  create_date   DateTime?  @db.Date
-  type          String?    @db.Char(20)
-  extend        String?    @db.Char(20)
-  properties    properties @relation(fields: [object_id], references: [id], onDelete: Cascade, map: "property_images_property_id_fkey")
+  create_date   DateTime? @db.Date
+  type          String?   @db.Char(20)
+  extend        String?   @db.Char(20)
 
   @@index([object_id], map: "property_images_property_id_idx")
 }
@@ -76,8 +75,7 @@ model tags {
   id   Int     @id @default(autoincrement())
   name String  @unique @db.VarChar(100)
   slug String? @unique @db.VarChar(255)
-
-  news news[] @relation("NewsTags")
+  news news[]  @relation("NewsTags")
 
   @@index([name])
   @@index([slug])
@@ -95,12 +93,12 @@ model properties {
   any_city        String         @db.VarChar(100)
   any_ward        String         @db.VarChar(100)
   landmark        String?        @db.VarChar(255)
-  view_count      Int            @default(0)
   created_at      DateTime       @default(now())
   user_id         Int?
   updated_at      DateTime?      @db.Date
+  view_count      Int            @default(0)
+  outstanding     Boolean?       @default(false)
   favorites       favorites[]
-  file_attach     file_attach[]
 
   @@index([any_city])
   @@index([area])
@@ -122,6 +120,12 @@ model users {
   updated_at DateTime
   favorites  favorites[]
   news       news[]
+}
+
+model news_catelog {
+  id          Int     @id
+  name        String  @db.VarChar(255)
+  description String? @db.VarChar(500)
 }
 
 enum LocationType {

@@ -17,6 +17,7 @@ import HomeBannerSection from "./HomeBanner";
 
 const BodyContent = () => {
   const [value, setValue] = useState();
+  const [featuredProperties, setFeaturedProperties] = useState();
   const [clientData, setClientData] = useState();
   const [latestBlogInCorporate, setLatestBlogInCorporate] = useState();
 
@@ -38,6 +39,14 @@ const BodyContent = () => {
         setLatestBlogInCorporate(res.data || res);
       })
       .catch((error) => console.error("Error fetching latest news", error));
+
+    // Lấy BĐS nổi bật
+    getData(`/api/batdongsan/feature`)
+      .then((res) => {
+        setFeaturedProperties(res.data.data);
+      })
+      .catch((error) => console.error("Error", error));
+
   }, []);
   return (
     <>
@@ -45,7 +54,7 @@ const BodyContent = () => {
       <div className="section-pb">
         <PropertySection value={value?.data} />
       </div>
-      <FeaturePropertySection value={value?.data} />
+      <FeaturePropertySection value={featuredProperties} />
       {/* <div className="service-section-pt-0">
         <ServiceSection value={AppPropertyData.ProvidedServices} />
       </div> */}

@@ -1,4 +1,5 @@
 import { IsArray, IsEnum, IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { NewsStatus } from '@prisma/client';
 
@@ -40,6 +41,17 @@ export class CreateNewsDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [value];
+      } catch {
+        return value.split(',').map((s) => s.trim()).filter(Boolean);
+      }
+    }
+    return value;
+  })
   tags?: string[];
 }
 

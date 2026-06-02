@@ -25,15 +25,73 @@ export class PropertiesService {
     const limit = params?.limit && params.limit > 0 ? params.limit : 6;
     const skip = (page - 1) * limit;
 
-    const [properties, total] = await Promise.all([
+    const [rawProperties, total] = await Promise.all([
       this.prisma.properties.findMany({
         skip,
         take: limit,
         orderBy: { created_at: 'desc' },
-        include: { file_attach: true },
       }),
       this.prisma.properties.count(),
     ]);
+
+    const properties = await this.getPropertiesWithFiles(rawProperties);
+
+    // ── Resolve address từ bảng locations (batch, tránh N+1) ────────────────
+    const locationIds = [
+      ...new Set([
+        ...properties.map((p) => p.any_city).filter(Boolean),
+        ...properties.map((p) => p.any_ward).filter(Boolean),
+      ]),
+    ]
+      .map(Number)
+      .filter((n) => !isNaN(n));
+
+    const locationMap = new Map<string, string>();
+    if (locationIds.length > 0) {
+      const locations = await this.prisma.locations.findMany({
+        where: { id: { in: locationIds } },
+        select: { id: true, name: true },
+      });
+      locations.forEach((loc) => locationMap.set(String(loc.id), loc.name));
+    }
+
+    const dataWithAddress = properties.map((p) => {
+      const cityName = locationMap.get(p.any_city) ?? p.any_city ?? '';
+      const wardName = locationMap.get(p.any_ward) ?? p.any_ward ?? '';
+      const address = [cityName, wardName].filter(Boolean).join(', ');
+      const price_string = this.formatPriceVND(Number(p.price));
+      return { ...p, address, price_string };
+    });
+
+    return {
+      data: dataWithAddress,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async findFeatured(params: { page?: number; limit?: number }) {
+    const page = params?.page && params.page > 0 ? params.page : 1;
+    const limit = params?.limit && params.limit > 0 ? params.limit : 10;
+    const skip = (page - 1) * limit;
+
+    const where = { outstanding: true };
+
+    const [rawProperties, total] = await Promise.all([
+      this.prisma.properties.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { created_at: 'desc' },
+      }),
+      this.prisma.properties.count({ where }),
+    ]);
+
+    const properties = await this.getPropertiesWithFiles(rawProperties);
 
     // ── Resolve address từ bảng locations (batch, tránh N+1) ────────────────
     const locationIds = [
@@ -79,12 +137,9 @@ export class PropertiesService {
         ...createPropertyDto,
         user_id: userId,
       },
-      include: {
-        file_attach: true,
-      },
     });
 
-    return property;
+    return this.getPropertyWithFiles(property);
   }
 
   /**
@@ -138,9 +193,6 @@ export class PropertiesService {
             ...createPropertyDto,
             user_id: userId,
           },
-          include: {
-            file_attach: true,
-          },
         });
 
         for (const meta of fileMetas) {
@@ -158,7 +210,7 @@ export class PropertiesService {
         await this.fileService.uploadFileWithKey(meta.file, meta.keyPath);
       }
 
-      return property;
+      return this.getPropertyWithFiles(property);
     } catch (error) {
       Logger.error(`Error in createWithFiles: ${error.message}`, error.stack, 'PropertiesService');
       throw new InternalServerErrorException(
@@ -246,18 +298,17 @@ export class PropertiesService {
         break;
     }
 
-    const [properties, total] = await Promise.all([
+    const [rawProperties, total] = await Promise.all([
       this.prisma.properties.findMany({
         where,
         skip,
         take: limit,
         orderBy,
-        include: {
-          file_attach: true,
-        },
       }),
       this.prisma.properties.count({ where }),
     ]);
+
+    const properties = await this.getPropertiesWithFiles(rawProperties);
 
     // ── Resolve address từ bảng locations (batch, tránh N+1) ────────────────
     const locationIds = [
@@ -298,16 +349,15 @@ export class PropertiesService {
   }
 
   async findOne(id: number) {
-    const property = await this.prisma.properties.findUnique({
+    const rawProperty = await this.prisma.properties.findUnique({
       where: { id },
-      include: {
-        file_attach: true,
-      },
     });
 
-    if (!property) {
+    if (!rawProperty) {
       throw new NotFoundException('Property not found');
     }
+
+    const property = await this.getPropertyWithFiles(rawProperty);
 
     // ── Resolve address & price_string ──────────────────────────────────────
     const locationIds = [property.any_city, property.any_ward]
@@ -358,13 +408,12 @@ export class PropertiesService {
       throw new ForbiddenException('You can only update your own properties');
     }
 
-    return this.prisma.properties.update({
+    const updatedProperty = await this.prisma.properties.update({
       where: { id },
       data: updatePropertyDto,
-      include: {
-        file_attach: true,
-      },
     });
+
+    return this.getPropertyWithFiles(updatedProperty);
   }
 
   async remove(id: number, userId: number) {
@@ -472,16 +521,17 @@ export class PropertiesService {
     }
 
     // ── Query DB ────────────────────────────────────────────────────────────
-    const [properties, total] = await Promise.all([
+    const [rawProperties, total] = await Promise.all([
       this.prisma.properties.findMany({
         where,
         skip,
         take: limit,
         orderBy,
-        include: { file_attach: true },
       }),
       this.prisma.properties.count({ where }),
     ]);
+
+    const properties = await this.getPropertiesWithFiles(rawProperties);
 
     // ── Resolve address từ bảng locations (batch, tránh N+1) ────────────────
     // any_city / any_ward lưu id (số nguyên dạng string), map theo id
@@ -617,16 +667,17 @@ export class PropertiesService {
     }
 
     // ── Query DB ────────────────────────────────────────────────────────────
-    const [properties, total] = await Promise.all([
+    const [rawProperties, total] = await Promise.all([
       this.prisma.properties.findMany({
         where,
         skip,
         take: limit,
         orderBy,
-        include: { file_attach: true },
       }),
       this.prisma.properties.count({ where }),
     ]);
+
+    const properties = await this.getPropertiesWithFiles(rawProperties);
 
     // ── Resolve address từ bảng locations (batch, tránh N+1) ────────────────
     const locationIds = [
@@ -699,5 +750,43 @@ export class PropertiesService {
     if (ty > 0) parts.push(`${ty} tỷ`);
     if (trieu > 0) parts.push(`${trieu} triệu`);
     return parts.join(' ') || '0';
+  }
+
+  private async getPropertiesWithFiles(properties: any[]) {
+    if (!properties || properties.length === 0) return properties;
+    const propertyIds = properties.map(p => p.id);
+    const fileAttaches = await this.prisma.file_attach.findMany({
+      where: {
+        object_id: { in: propertyIds },
+        nghiepvu_code: 'BDS',
+      }
+    });
+
+    const fileMap = new Map<number, any[]>();
+    for (const file of fileAttaches) {
+      if (!fileMap.has(file.object_id)) {
+        fileMap.set(file.object_id, []);
+      }
+      fileMap.get(file.object_id)!.push(file);
+    }
+
+    return properties.map(p => ({
+      ...p,
+      file_attach: fileMap.get(p.id) || [],
+    }));
+  }
+
+  private async getPropertyWithFiles(property: any) {
+    if (!property) return property;
+    const fileAttaches = await this.prisma.file_attach.findMany({
+      where: {
+        object_id: property.id,
+        nghiepvu_code: 'BDS',
+      }
+    });
+    return {
+      ...property,
+      file_attach: fileAttaches,
+    };
   }
 }

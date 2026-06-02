@@ -3,7 +3,7 @@
 import axios from "axios";
 import { Field, Form, Formik } from "formik";
 import React, { useEffect, useState } from "react";
-import { Button, Col, Row } from "reactstrap";
+import { Button, Col, Row, FormGroup, Label, Input } from "reactstrap";
 import * as Yup from "yup";
 
 import { toast } from "react-toastify";
@@ -186,6 +186,7 @@ const AddPropertyForm = () => {
       anyCity,
       anyWard,
       landmark,
+      outstanding,
       // mp4Link: bỏ qua vì backend chưa hỗ trợ
     } = values;
 
@@ -200,6 +201,7 @@ const AddPropertyForm = () => {
       any_city: anyCity,
       any_ward: anyWard,
       landmark,
+      outstanding: !!outstanding,
     };
 
     // Loại bỏ các field undefined để tránh gửi rác lên backend
@@ -271,6 +273,7 @@ const AddPropertyForm = () => {
         anyWard: DEFAULT_WARD_ID,// phường xã
         landmark: "", // Địa điểm cụ thể
         mp4Link: "",
+        outstanding: false,
       }}
       validationSchema={Yup.object().shape({
         propertyType: Yup.string().required(),
@@ -353,6 +356,18 @@ const AddPropertyForm = () => {
             
             <Col sm='12' className='form-group'>
               <Field type='textarea' name='description' component={ReactstrapInput} className='form-control' rows={4} label='Description' />
+            </Col>
+            <Col sm='4' className='form-group'>
+              <FormGroup switch>
+                <Input
+                  type='switch'
+                  id='outstanding'
+                  name='outstanding'
+                  checked={values.outstanding}
+                  onChange={() => setFieldValue('outstanding', !values.outstanding)}
+                />
+                <Label check htmlFor='outstanding' style={{ cursor: 'pointer' }}>BĐS Nổi bật</Label>
+              </FormGroup>
             </Col>
             <Col sm='4' className='form-group'>
            

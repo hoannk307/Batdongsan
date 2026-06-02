@@ -58,6 +58,33 @@ export async function createNews(payload) {
   return res.data;
 }
 
+export async function createNewsWithFiles(payload, files = []) {
+  const apiBaseUrl = getApiBaseUrl();
+  const formData = new FormData();
+
+  // Append news fields
+  Object.entries(payload).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      if (Array.isArray(value)) {
+        // Gửi array (tags) dưới dạng JSON string
+        formData.append(key, JSON.stringify(value));
+      } else {
+        formData.append(key, value);
+      }
+    }
+  });
+
+  // Append files
+  files.forEach((file) => {
+    formData.append("files", file);
+  });
+
+  const res = await axios.post(`${apiBaseUrl}/news/with-files`, formData, {
+    headers: { ...getAuthHeaders() },
+  });
+  return res.data;
+}
+
 export async function updateNews(id, payload) {
   const apiBaseUrl = getApiBaseUrl();
   const res = await axios.patch(`${apiBaseUrl}/news/${id}`, payload, {

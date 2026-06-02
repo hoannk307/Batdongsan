@@ -1,6 +1,6 @@
 import React from "react";
 import { Field, Form, Formik } from "formik";
-import { Button, Col, Label, Row } from "reactstrap";
+import { Button, Col, Label, Row, FormGroup, Input } from "reactstrap";
 import * as Yup from "yup";
 import { ReactstrapInput, ReactstrapSelect } from "@/components/utils/ReactStarpInputsValidation";
 import DropZones from "@/components/Common/Dropzones";
@@ -26,6 +26,7 @@ const EditPropertyForm = () => {
         anyCity: "",
         landmark: "",
         mp4Link: "",
+        outstanding: false,
         checkBoxes: [],
       }}
       validationSchema={Yup.object().shape({
@@ -49,7 +50,7 @@ const EditPropertyForm = () => {
         alert("Your data is submitted check console");
       }}
     >
-      {(props) => (
+      {({ isSubmitting, setFieldValue, values, ...props }) => (
         <Form>
           <Row className='gx-3'>
             <Col sm='4' className='form-group'>
@@ -126,6 +127,18 @@ const EditPropertyForm = () => {
             </Col>
             <Col sm='12' className='form-group'>
               <Field type='textarea' name='description' component={ReactstrapInput} className='form-control' rows={4} label='Description' />
+            </Col>
+            <Col sm='4' className='form-group'>
+              <FormGroup switch>
+                <Input
+                  type='switch'
+                  id='outstanding-edit'
+                  name='outstanding'
+                  checked={values.outstanding}
+                  onChange={() => setFieldValue('outstanding', !values.outstanding)}
+                />
+                <Label check htmlFor='outstanding-edit' style={{ cursor: 'pointer' }}>BĐS Nổi bật</Label>
+              </FormGroup>
             </Col>
           </Row>
           <div className='form-inputs'>

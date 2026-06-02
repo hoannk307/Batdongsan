@@ -1,9 +1,10 @@
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsString,
   IsNumber,
   IsEnum,
   IsOptional,
+  IsBoolean,
   Min,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
@@ -70,5 +71,14 @@ export class CreatePropertyDto {
   @IsString()
   landmark: string;
 
-}
+  @ApiProperty({ example: false, description: 'BĐS Nổi bật', required: false })
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => {
+    if (value === 'true' || value === true) return true;
+    if (value === 'false' || value === false) return false;
+    return value;
+  })
+  outstanding?: boolean;
 
+}

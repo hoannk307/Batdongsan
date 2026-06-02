@@ -5,7 +5,8 @@ import { Button, Col, Form, FormGroup, Input, Label, Row } from "reactstrap";
 import { Editor } from "@tinymce/tinymce-react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
-import { createNews, updateNews } from "./newsApi";
+import { createNews, createNewsWithFiles, updateNews } from "./newsApi";
+import DropZones from "@/components/Common/Dropzones";
 import { z } from "zod";
 import { TINYMCE_SCRIPT_SRC } from "@/config/env";
 
@@ -63,6 +64,8 @@ export default function NewsForm({ mode, initialValues, newsId, tinymceApiKey: t
   const [resolvedTinymceApiKey, setResolvedTinymceApiKey] = useState(tinymceApiKeyProp || "");
   const [loadingTinymceKey, setLoadingTinymceKey] = useState(false);
   const [isManualSlug, setIsManualSlug] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
 
   useEffect(() => {
     // Nếu server chưa truyền prop key (undefined/empty) thì fetch từ API server.
@@ -78,6 +81,18 @@ export default function NewsForm({ mode, initialValues, newsId, tinymceApiKey: t
         .finally(() => setLoadingTinymceKey(false));
     }
   }, [tinymceApiKeyProp, resolvedTinymceApiKey]);
+
+  // Fetch danh sách danh mục tin tức
+  useEffect(() => {
+    fetch("/api/news/categories")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setCategories(data);
+        }
+      })
+      .catch((err) => console.error("Failed to fetch news categories", err));
+  }, []);
 
   const [values, setValues] = useState(() => ({
     title: initialValues?.title || "",
@@ -163,6 +178,9 @@ export default function NewsForm({ mode, initialValues, newsId, tinymceApiKey: t
       if (mode === "edit") {
         await updateNews(newsId, payload);
         toast.success("Cập nhật bài viết thành công.");
+      } else if (uploadedFiles.length > 0) {
+        await createNewsWithFiles(payload, uploadedFiles);
+        toast.success("Tạo bài viết thành công.");
       } else {
         await createNews(payload);
         toast.success("Tạo bài viết thành công.");
@@ -218,7 +236,14 @@ export default function NewsForm({ mode, initialValues, newsId, tinymceApiKey: t
         <Col md="6">
           <FormGroup>
             <Label>Category</Label>
-            <Input name="category" value={values.category} onChange={onChange} placeholder="VD: market, policy..." />
+            <Input type="select" name="category" value={values.category} onChange={onChange}>
+              <option value="">-- Chọn danh mục --</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.name}>
+                  {cat.name}
+                </option>
+              ))}
+            </Input>
           </FormGroup>
         </Col>
         <Col md="12">
@@ -236,13 +261,12 @@ export default function NewsForm({ mode, initialValues, newsId, tinymceApiKey: t
         </Col>
         <Col md="6">
           <FormGroup>
-            <Label>Featured image URL</Label>
-            <Input
-              name="featured_image"
-              value={values.featured_image}
-              onChange={onChange}
-              placeholder="https://.../image.jpg"
-            />
+            <Label>Ảnh đại diện (Featured Image)</Label>
+            <div className="dropzone" id="newsImageUpload">
+              <div className="dz-message needsclick">
+                <DropZones multiple={false} files={uploadedFiles} onFilesChange={setUploadedFiles} />
+              </div>
+            </div>
           </FormGroup>
         </Col>
         <Col md="12">

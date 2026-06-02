@@ -157,6 +157,27 @@ export class PropertiesController {
   }
 
   /**
+   * GET /properties/featured
+   *
+   * Lấy danh sách BĐS nổi bật (outstanding = true), sắp xếp theo created_at mới nhất.
+   * Hỗ trợ phân trang: ?page=1&limit=10
+   */
+  @Get('featured')
+  @ApiOperation({
+    summary: 'Lấy danh sách BĐS nổi bật (outstanding = true)',
+    description: 'Trả về các bất động sản có outstanding = true, sắp xếp theo ngày tạo mới nhất. Hỗ trợ ?page=&limit=',
+  })
+  findFeatured(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.propertiesService.findFeatured({
+      page: page ? +page : 1,
+      limit: limit ? +limit : 10,
+    });
+  }
+
+  /**
    * GET /properties/filter
    *
    * Lấy danh sách bất động sản theo bộ lọc (filter search).

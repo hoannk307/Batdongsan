@@ -8,9 +8,12 @@ import {
   Delete,
   Query,
   UseGuards,
+  UseInterceptors,
+  UploadedFiles,
   Request,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { NewsService } from './news.service';
 import { CreateNewsDto } from './dto/create-news.dto';
 import { UpdateNewsDto } from './dto/update-news.dto';
@@ -27,6 +30,37 @@ export class NewsController {
   @ApiOperation({ summary: 'Tạo tin tức mới (Admin only)' })
   create(@Request() req, @Body() createNewsDto: CreateNewsDto) {
     return this.newsService.create(req.user.userId, createNewsDto);
+  }
+
+  @Post('with-files')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FilesInterceptor('files'))
+  @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Tạo tin tức mới kèm file đính kèm (transaction + Cloudflare upload)' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string', description: 'Tiêu đề' },
+        slug: { type: 'string', description: 'Slug URL' },
+        summary: { type: 'string', description: 'Tóm tắt' },
+        content: { type: 'string', description: 'Nội dung HTML' },
+        category: { type: 'string', description: 'Danh mục' },
+        status: { type: 'string', description: 'DRAFT hoặc PUBLISHED' },
+        files: {
+          type: 'array',
+          items: { type: 'string', format: 'binary' },
+        },
+      },
+    },
+  })
+  createWithFiles(
+    @Request() req,
+    @Body() createNewsDto: CreateNewsDto,
+    @UploadedFiles() files: Express.Multer.File[],
+  ) {
+    return this.newsService.createWithFiles(req.user.userId, createNewsDto, files);
   }
 
   @Get()
@@ -49,6 +83,12 @@ export class NewsController {
   @ApiOperation({ summary: 'Lấy danh sách 6 tin tức mới nhất' })
   findLatest(@Query('category') category?: string) {
     return this.newsService.findLatest(6, category);
+  }
+
+  @Get('categories')
+  @ApiOperation({ summary: 'Lấy toàn bộ danh sách danh mục tin tức (news_catelog)' })
+  findAllCategories() {
+    return this.newsService.findAllCategories();
   }
 
   @Get(':id')
