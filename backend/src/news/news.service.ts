@@ -193,7 +193,7 @@ export class NewsService {
       where.status = status;
     }
     if (category) {
-      where.category = category;
+      where.category = Number(category);
     }
 
     const [news, total] = await Promise.all([
@@ -398,7 +398,7 @@ export class NewsService {
     const newsList = await this.prisma.news.findMany({
       where: {
         status: 'PUBLISHED',
-        ...(category ? { category } : { category: 'NORMAL' }),
+        ...(category ? { category: Number(category) } : { category: 1 }),
       },
       take: limit,
       orderBy: {

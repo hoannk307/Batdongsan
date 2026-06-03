@@ -46,7 +46,7 @@ export class NewsController {
         slug: { type: 'string', description: 'Slug URL' },
         summary: { type: 'string', description: 'Tóm tắt' },
         content: { type: 'string', description: 'Nội dung HTML' },
-        category: { type: 'string', description: 'Danh mục' },
+        category: { type: 'integer', description: 'ID danh mục (số nguyên)' },
         status: { type: 'string', description: 'DRAFT hoặc PUBLISHED' },
         files: {
           type: 'array',

@@ -1,4 +1,4 @@
-import { IsArray, IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { NewsStatus } from '@prisma/client';
@@ -27,10 +27,11 @@ export class CreateNewsDto {
   @IsString()
   featured_image?: string;
 
-  @ApiProperty({ example: 'market', required: false })
+  @ApiProperty({ example: 1, required: false, description: 'ID danh mục (số nguyên)' })
   @IsOptional()
-  @IsString()
-  category?: string;
+  @IsNumber()
+  @Transform(({ value }) => (value !== undefined && value !== null ? Number(value) : value))
+  category?: number;
 
   @ApiProperty({ enum: NewsStatus, default: NewsStatus.DRAFT })
   @IsOptional()
