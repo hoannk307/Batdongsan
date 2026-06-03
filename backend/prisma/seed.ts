@@ -1,4 +1,6 @@
 import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
 
 /**
  * Script này đồng bộ toàn bộ bảng `locations` từ một database nguồn
@@ -13,21 +15,18 @@ import { PrismaClient } from '@prisma/client';
  * Nếu không khai báo, script sẽ fallback về DATABASE_URL.
  */
 
-const prismaSource = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.SOURCE_DATABASE_URL || process.env.DATABASE_URL!,
-    },
-  },
-});
+function createPrismaClient(url: string): { client: PrismaClient; pool: Pool } {
+  const pool = new Pool({ connectionString: url });
+  const adapter = new PrismaPg(pool);
+  const client = new PrismaClient({ adapter });
+  return { client, pool };
+}
 
-const prismaTarget = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.TARGET_DATABASE_URL || process.env.DATABASE_URL!,
-    },
-  },
-});
+const sourceUrl = process.env.SOURCE_DATABASE_URL || process.env.DATABASE_URL!;
+const targetUrl = process.env.TARGET_DATABASE_URL || process.env.DATABASE_URL!;
+
+const { client: prismaSource, pool: sourcePool } = createPrismaClient(sourceUrl);
+const { client: prismaTarget, pool: targetPool } = createPrismaClient(targetUrl);
 
 async function main() {
   console.log('🚀 Bắt đầu đồng bộ dữ liệu bảng locations...');
@@ -72,5 +71,6 @@ main()
   .finally(async () => {
     await prismaSource.$disconnect();
     await prismaTarget.$disconnect();
+    await sourcePool.end();
+    await targetPool.end();
   });
-
