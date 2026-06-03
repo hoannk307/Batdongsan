@@ -1,3 +1,6 @@
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "public";
+
 -- CreateEnum
 CREATE TYPE "LocationType" AS ENUM ('PROVINCE', 'WARD');
 
@@ -56,12 +59,12 @@ CREATE TABLE "news" (
     "summary" TEXT,
     "content" TEXT NOT NULL,
     "featured_image" VARCHAR(500),
-    "category" VARCHAR(50),
     "views" INTEGER NOT NULL DEFAULT 0,
     "status" "NewsStatus" NOT NULL DEFAULT 'DRAFT',
     "published_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "category" INTEGER NOT NULL DEFAULT 1,
 
     CONSTRAINT "news_pkey" PRIMARY KEY ("id")
 );
@@ -153,9 +156,6 @@ CREATE INDEX "locations_type_idx" ON "locations"("type");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "news_slug_key" ON "news"("slug");
-
--- CreateIndex
-CREATE INDEX "news_category_idx" ON "news"("category");
 
 -- CreateIndex
 CREATE INDEX "news_slug_idx" ON "news"("slug");

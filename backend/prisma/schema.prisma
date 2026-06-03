@@ -56,16 +56,15 @@ model news {
   summary        String?
   content        String
   featured_image String?    @db.VarChar(500)
-  category       String?    @db.VarChar(50)
   views          Int        @default(0)
   status         NewsStatus @default(DRAFT)
   published_at   DateTime?
   created_at     DateTime   @default(now())
   updated_at     DateTime
+  category       Int        @default(1)
   users          users      @relation(fields: [user_id], references: [id], onDelete: Cascade)
   tags           tags[]     @relation("NewsTags")
 
-  @@index([category])
   @@index([slug])
   @@index([status, published_at])
 }
