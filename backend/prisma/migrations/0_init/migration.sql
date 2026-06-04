@@ -27,7 +27,7 @@ CREATE TABLE "favorites" (
 CREATE TABLE "file_attach" (
     "id" SERIAL NOT NULL,
     "object_id" INTEGER NOT NULL,
-    "path" VARCHAR(500) NOT NULL,
+    "path" VARCHAR(500),
     "nghiepvu_code" CHAR(100),
     "name" TEXT,
     "create_user" INTEGER,
@@ -58,7 +58,7 @@ CREATE TABLE "news" (
     "slug" VARCHAR(255) NOT NULL,
     "summary" TEXT,
     "content" TEXT NOT NULL,
-    "featured_image" VARCHAR(500),
+
     "views" INTEGER NOT NULL DEFAULT 0,
     "status" "NewsStatus" NOT NULL DEFAULT 'DRAFT',
     "published_at" TIMESTAMP(3),

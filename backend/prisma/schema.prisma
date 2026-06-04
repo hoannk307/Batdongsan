@@ -22,13 +22,13 @@ model favorites {
 model file_attach {
   id            Int       @id(map: "property_images_pkey") @default(autoincrement())
   object_id     Int
-  path          String    @db.VarChar(500)
   nghiepvu_code String?   @db.Char(100)
   name          String?
   create_user   Int?
   create_date   DateTime? @db.Date
   type          String?   @db.Char(20)
   extend        String?   @db.Char(20)
+  path          String?   @db.VarChar(500)
 
   @@index([object_id], map: "property_images_property_id_idx")
 }
@@ -49,21 +49,20 @@ model locations {
 }
 
 model news {
-  id             Int        @id @default(autoincrement())
-  user_id        Int
-  title          String     @db.VarChar(255)
-  slug           String     @unique @db.VarChar(255)
-  summary        String?
-  content        String
-  featured_image String?    @db.VarChar(500)
-  views          Int        @default(0)
-  status         NewsStatus @default(DRAFT)
-  published_at   DateTime?
-  created_at     DateTime   @default(now())
-  updated_at     DateTime
-  category       Int        @default(1)
-  users          users      @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  tags           tags[]     @relation("NewsTags")
+  id           Int        @id @default(autoincrement())
+  user_id      Int
+  title        String     @db.VarChar(255)
+  slug         String     @unique @db.VarChar(255)
+  summary      String?
+  content      String
+  views        Int        @default(0)
+  status       NewsStatus @default(DRAFT)
+  published_at DateTime?
+  created_at   DateTime   @default(now())
+  updated_at   DateTime
+  category     Int        @default(1)
+  users        users      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  tags         tags[]     @relation("NewsTags")
 
   @@index([slug])
   @@index([status, published_at])

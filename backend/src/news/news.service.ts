@@ -159,15 +159,6 @@ export class NewsService {
           `;
         }
 
-        // Cập nhật featured_image bằng đường dẫn file ảnh đầu tiên (nếu có)
-        const firstImage = fileMetas.find((m) => m.logicalType === 'image');
-        if (firstImage) {
-          await tx.news.update({
-            where: { id: createdNews.id },
-            data: { featured_image: firstImage.keyPath },
-          });
-        }
-
         return createdNews;
       });
 
