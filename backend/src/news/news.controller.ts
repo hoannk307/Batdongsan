@@ -70,16 +70,18 @@ export class NewsController {
     @Query('limit') limit?: string,
     @Query('status') status?: string,
     @Query('category') category?: string,
+    @Query('tag') tag?: string,
   ) {
     return this.newsService.findAll(
       page ? +page : 1,
       limit ? +limit : 20,
       status,
       category,
+      tag,
     );
   }
 
-  @Get()
+  @Get('latest')
   @ApiOperation({ summary: 'Lấy danh sách 6 tin tức mới nhất' })
   findLatest(@Query('category') category?: string) {
     return this.newsService.findLatest(6, category);

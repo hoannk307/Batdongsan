@@ -176,15 +176,22 @@ export class NewsService {
     }
   }
 
-  async findAll(page = 1, limit = 20, status?: string, category?: string) {
+  async findAll(page = 1, limit = 20, status?: string, category?: string, tag?: string) {
     const skip = (page - 1) * limit;
 
     const where: any = {};
     if (status) {
       where.status = status;
     }
-    if (category) {
+    if (category && !isNaN(Number(category))) {
       where.category = Number(category);
+    }
+    if (tag) {
+      where.tags = {
+        some: {
+          name: tag,
+        },
+      };
     }
 
     const [news, total] = await Promise.all([
@@ -437,10 +444,14 @@ export class NewsService {
       fileMap.get(file.object_id)!.push(file);
     }
 
-    return newsList.map(n => ({
-      ...n,
-      file_attach: fileMap.get(n.id) || [],
-    }));
+    return newsList.map(n => {
+      const files = fileMap.get(n.id) || [];
+      return {
+        ...n,
+        file_attach: files,
+        img: files.length > 0 ? files[0].path : null,
+      };
+    });
   }
 
   private async getNewsWithFiles(newsItem: any) {
@@ -454,6 +465,7 @@ export class NewsService {
     return {
       ...newsItem,
       file_attach: fileAttaches,
+      img: fileAttaches.length > 0 ? fileAttaches[0].path : null,
     };
   }
 }
