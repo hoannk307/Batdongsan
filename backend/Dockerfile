@@ -62,8 +62,9 @@ COPY shared/ ./shared/
 # Copy built output from builder
 COPY --from=builder /app/backend/dist ./backend/dist
 
-# Copy Prisma schema and migrations (needed for prisma migrate deploy)
+# Copy Prisma schema, migrations, and config (needed for prisma migrate deploy)
 COPY --from=builder /app/backend/prisma ./backend/prisma
+COPY --from=builder /app/backend/prisma.config.ts ./backend/prisma.config.ts
 
 # Copy generated Prisma Client
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
@@ -73,4 +74,5 @@ WORKDIR /app/backend
 
 EXPOSE 3000
 
-CMD ["node", "dist/main"]
+# Run migrations then start the app
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main"]
