@@ -3,6 +3,8 @@
  * Hàm chuyển đổi dữ liệu news từ backend sang định dạng frontend (BlogItem).
  */
 
+import { R2_PUBLIC_BASE_URL } from "@/config/env";
+
 const FALLBACK_IMAGE = "/assets/images/property/11.jpg";
 
 /**
@@ -66,9 +68,20 @@ export function mapNewsToBlogItem(newsItem) {
         ? [String(newsItem.category)]
         : [];
 
+  // Resolve image URL
+  const rawImg = newsItem?.img || newsItem?.featured_image;
+  let finalImg = FALLBACK_IMAGE;
+  if (rawImg) {
+    if (rawImg.startsWith("http")) {
+      finalImg = rawImg;
+    } else {
+      finalImg = `${R2_PUBLIC_BASE_URL}/${rawImg}`;
+    }
+  }
+
   return {
     id: String(newsItem?.id ?? ""),
-    img: newsItem?.featured_image || FALLBACK_IMAGE,
+    img: finalImg,
     date: isValidDate ? String(createdAt.getDate()).padStart(2, "0") : "",
     month: isValidDate
       ? createdAt.toLocaleString("en-US", { month: "short" }).toUpperCase()

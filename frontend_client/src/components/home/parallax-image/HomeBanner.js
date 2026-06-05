@@ -119,7 +119,7 @@ const HomeBannerSection = () => {
 
                 <div>
                   <Link
-                    href="/listing/list-view/listing/left-sidebar"
+                    href="/batdongsan"
                     className="btn btn-solid btn-flat"
                   >
                     Search

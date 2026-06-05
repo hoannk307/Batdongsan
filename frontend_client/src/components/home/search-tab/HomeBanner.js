@@ -45,7 +45,7 @@ const HomeBannerSection = () => {
                     <div className="row review-form gx-3">
                       <DropdownInputFields filterValues={filterValues} setFilterValues={setFilterValues} lg={4} sm={6} start={1} end={6} />
                       <Col lg="4" md="6">
-                        <Link href="/listing/list-view/listing/left-sidebar" className="btn btn-gradient">
+                        <Link href="/batdongsan" className="btn btn-gradient">
                           Search
                         </Link>
                       </Col>
