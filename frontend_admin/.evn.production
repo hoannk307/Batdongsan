@@ -1,6 +1,4 @@
 NEXT_PUBLIC_TINYMCE_API_KEY=mcmutwwa94wa2rykmn43171zsww0c5w7u9qmn5gbg0xql2w0
-NEXT_PUBLIC_API_URL=http://localhost:3001/api
-//NEXT_PUBLIC_API_URL=https://api.nhatranglands.vn
+NEXT_PUBLIC_API_URL=https://api.nhatranglands.vn
 NEXT_PUBLIC_R2_PUBLIC_BASE_URL=https://image.nhatranglands.vn;
-//NEXT_PUBLIC_ADMIN_URL=https://admin.nhatranglands.vn
-NEXT_PUBLIC_ADMIN_URL==http://localhost:3001
+NEXT_PUBLIC_ADMIN_URL=https://admin.nhatranglands.vn
