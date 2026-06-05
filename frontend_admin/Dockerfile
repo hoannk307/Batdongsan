@@ -9,6 +9,8 @@ WORKDIR /app
 ARG NEXT_PUBLIC_API_URL=https://api.nhatranglands.vn
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
+ARG NEXT_PUBLIC_TINYMCE_API_KEY
+ENV NEXT_PUBLIC_TINYMCE_API_KEY=$NEXT_PUBLIC_TINYMCE_API_KEY
 # Copy package files first for better Docker layer caching
 COPY package.json ./
 COPY frontend_admin/package*.json ./frontend_admin/
