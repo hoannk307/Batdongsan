@@ -35,7 +35,7 @@ function normalizePayload(values, isManualSlug) {
     summary: values.summary?.trim() || undefined,
     content: values.content || "",
     featured_image: values.featured_image?.trim() || undefined,
-    category: values.category?.trim() || undefined,
+    category: values.category != null && values.category !== "" ? Number(values.category) : undefined,
     tags: Array.from(new Set(parsedTags)),
     // Backend schema requires slug.
     // - Nếu user tự sửa slug (`isManualSlug`) thì payload dùng đúng slug user nhập.
@@ -239,7 +239,7 @@ export default function NewsForm({ mode, initialValues, newsId, tinymceApiKey: t
             <Input type="select" name="category" value={values.category} onChange={onChange}>
               <option value="">-- Chọn danh mục --</option>
               {categories.map((cat) => (
-                <option key={cat.id} value={cat.name}>
+                <option key={cat.id} value={cat.id}>
                   {cat.name}
                 </option>
               ))}
