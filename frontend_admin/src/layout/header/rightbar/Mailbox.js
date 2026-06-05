@@ -33,7 +33,7 @@ const Mailbox = () => {
                                 <img src="/assets/images/avatar/3.jpg" className="img-fluid" alt='' />
                             </div>
                             <Media body className="media-body">
-                                <Link href='manage-users/profile'>
+                                <Link href='/manage-users/profile'>
                                     <h6>Johan deo</h6>
                                 </Link>
                                 <span>Template Represents simply...</span>
@@ -47,7 +47,7 @@ const Mailbox = () => {
                                 <img src="/assets/images/avatar/4.jpg" className="img-fluid" alt='' />
                             </div>
                             <Media body className="media-body">
-                                <Link href='manage-users/profile'>
+                                <Link href='/manage-users/profile'>
                                     <h6>Greta Life</h6>
                                 </Link>
                                 <span>Template Represents simply...</span>
@@ -61,7 +61,7 @@ const Mailbox = () => {
                                 <img src="/assets/images/avatar/7.jpg" className="img-fluid" alt='' />
                             </div>
                             <Media body className="media-body">
-                                <Link href='manage-users/profile'>
+                                <Link href='/manage-users/profile'>
                                     <h6>Aruna jho</h6>
                                 </Link>
                                 <span>Template Represents simply...</span>

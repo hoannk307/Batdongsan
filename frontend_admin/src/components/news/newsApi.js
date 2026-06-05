@@ -79,7 +79,7 @@ export async function createNewsWithFiles(payload, files = []) {
     formData.append("files", file);
   });
 
-  const res = await axios.post(`${apiBaseUrl}/news/with-files`, formData, {
+  const res = await axios.post(`/api/news/with-files`, formData, {
     headers: { ...getAuthHeaders() },
   });
   return res.data;
