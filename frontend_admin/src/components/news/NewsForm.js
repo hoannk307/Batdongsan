@@ -5,12 +5,20 @@ import { Button, Col, Form, FormGroup, Input, Label, Row } from "reactstrap";
 import { Editor } from "@tinymce/tinymce-react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
-import { createNews, createNewsWithFiles, updateNews } from "./newsApi";
 import DropZones from "@/components/Common/Dropzones";
 import { z } from "zod";
 import { TINYMCE_SCRIPT_SRC } from "@/config/env";
+import axios from "axios";
 
 const NEWS_STATUSES = ["DRAFT", "PUBLISHED"];
+
+function getAuthHeaders() {
+  if (typeof window === "undefined") return {};
+  const token = localStorage.getItem("accessToken") || localStorage.getItem("token") || (() => {
+    try { return JSON.parse(localStorage.getItem("user") || "{}")?.token; } catch { return null; }
+  })();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 function generateSlug(title) {
   return (title || "")
@@ -175,14 +183,27 @@ export default function NewsForm({ mode, initialValues, newsId, tinymceApiKey: t
     setSubmitting(true);
     try {
       const payload = normalizePayload(values, isManualSlug);
+      const headers = getAuthHeaders();
+
       if (mode === "edit") {
-        await updateNews(newsId, payload);
+        await axios.patch(`/api/news/${newsId}`, payload, { headers });
         toast.success("Cập nhật bài viết thành công.");
       } else if (uploadedFiles.length > 0) {
-        await createNewsWithFiles(payload, uploadedFiles);
+        const formData = new FormData();
+        Object.entries(payload).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== "") {
+            if (Array.isArray(value)) {
+              formData.append(key, JSON.stringify(value));
+            } else {
+              formData.append(key, value);
+            }
+          }
+        });
+        uploadedFiles.forEach((file) => formData.append("files", file));
+        await axios.post(`/api/news/with-files`, formData, { headers });
         toast.success("Tạo bài viết thành công.");
       } else {
-        await createNews(payload);
+        await axios.post(`/api/news`, payload, { headers });
         toast.success("Tạo bài viết thành công.");
       }
       router.push("/news/list");

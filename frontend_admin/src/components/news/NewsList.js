@@ -4,7 +4,15 @@ import Link from "next/link";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { Button, Col, Input, Row, Table } from "reactstrap";
 import { toast } from "react-toastify";
-import { deleteNews, fetchNewsList } from "./newsApi";
+import axios from "axios";
+
+function getAuthHeaders() {
+  if (typeof window === "undefined") return {};
+  const token = localStorage.getItem("accessToken") || localStorage.getItem("token") || (() => {
+    try { return JSON.parse(localStorage.getItem("user") || "{}")?.token; } catch { return null; }
+  })();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 const DEFAULT_LIMIT = 20;
 
@@ -22,9 +30,15 @@ export default function NewsList() {
   const load = async () => {
     setLoading(true);
     try {
-      const res = await fetchNewsList({ page, limit, status: status || undefined, category: category || undefined });
-      setRows(res?.data || []);
-      setPagination(res?.pagination || null);
+      const query = new URLSearchParams({
+        page: String(page),
+        limit: String(limit),
+        ...(status ? { status } : {}),
+        ...(category ? { category } : {}),
+      }).toString();
+      const res = await axios.get(`/api/news?${query}`, { headers: getAuthHeaders() });
+      setRows(res.data?.data || []);
+      setPagination(res.data?.pagination || null);
     } catch (error) {
       const messageFromApi = error?.response?.data?.message;
       const normalizedMessage = Array.isArray(messageFromApi) ? messageFromApi.join(", ") : messageFromApi;
@@ -52,7 +66,7 @@ export default function NewsList() {
   const onDelete = async (id) => {
     if (!confirm("Xóa bài viết này?")) return;
     try {
-      await deleteNews(id);
+      await axios.delete(`/api/news/${id}`, { headers: getAuthHeaders() });
       toast.success("Đã xóa bài viết.");
       load();
     } catch (error) {

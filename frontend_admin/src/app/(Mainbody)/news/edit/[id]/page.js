@@ -3,7 +3,15 @@ import React, { Fragment, useEffect, useState } from "react";
 import { Card, CardBody, CardHeader, Col, Container, Row } from "reactstrap";
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import NewsForm from "@/components/news/NewsForm";
-import { fetchNewsById } from "@/components/news/newsApi";
+import axios from "axios";
+
+function getAuthHeaders() {
+  if (typeof window === "undefined") return {};
+  const token = localStorage.getItem("accessToken") || localStorage.getItem("token") || (() => {
+    try { return JSON.parse(localStorage.getItem("user") || "{}")?.token; } catch { return null; }
+  })();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 import { toast } from "react-toastify";
 import { useParams } from "next/navigation";
 import { TINYMCE_API_KEY } from "@/config/env";
@@ -18,8 +26,8 @@ export default function EditNewsPage() {
 
   useEffect(() => {
     if (id) {
-      fetchNewsById(id)
-        .then(setNews)
+      axios.get(`/api/news/${id}`, { headers: getAuthHeaders() })
+        .then((res) => setNews(res.data?.data || res.data))
         .catch((error) => {
           const messageFromApi = error?.response?.data?.message;
           const errorMessage = Array.isArray(messageFromApi)
