@@ -16,19 +16,15 @@ import { useSearchParams } from "next/navigation";
 const BodyContent = (props) => {
   const [value, setValue] = useState(props?.initialNews ?? null);
   const searchParams = useSearchParams();
-  const id = props?.id || searchParams?.get?.("id");
+  //const id = props?.id || searchParams?.get?.("id");
 
   useEffect(() => {
-    //console.log("----------------sdfasf", props.children);
-    if (!id) return;
-    // If server already provided the post (for SEO), skip client re-fetch.
-    if (props?.initialNews) return;
 
-    // Use the existing endpoint `/api/news` and pass `id` via query string.
-    getData(`/api/news?id=${encodeURIComponent(id)}`)
-      .then((res) => setValue(res.data))
-      .catch((error) => console.error("Error fetching news data:", error));
-  }, [id, props?.initialNews]);
+    // getData(`/api/news?id=${encodeURIComponent(id)}`)
+    //   .then((res) => setValue(res.data))
+    //   .catch((error) => console.error("Error fetching news data:", error));
+
+  }, [props?.initialNews]);
 
   return (
     <section className="ratio_40">

@@ -69,16 +69,11 @@ export function mapNewsToBlogItem(newsItem) {
         : [];
 
   // Resolve image URL
-  const rawImg = newsItem?.img || newsItem?.featured_image;
+  const rawImg = newsItem?.img;
   let finalImg = FALLBACK_IMAGE;
   if (rawImg) {
-    if (rawImg.startsWith("http")) {
-      finalImg = rawImg;
-    } else {
-      finalImg = `${R2_PUBLIC_BASE_URL}/${rawImg}`;
-    }
+    finalImg = `${R2_PUBLIC_BASE_URL}/${rawImg}`;
   }
-
   return {
     id: String(newsItem?.id ?? ""),
     img: finalImg,

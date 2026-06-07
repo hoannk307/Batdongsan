@@ -10,13 +10,13 @@ import Img from "../../../utils/BackgroundImageRatio";
 
 const BlogWrapBox = ({ data, masonry }) => {
   const detailHref = data?.id
-    ? `/pages/blog-detail-pages/left-sidebar?id=${encodeURIComponent(data.id)}`
+    ? `/news/detail?id=${encodeURIComponent(data.id)}`
     : "/pages/blog-detail-pages/left-sidebar";
 
   return (
     <div className="blog-wrap wow fadeInUp">
       <div className="blog-image">
-        <div>{masonry ? <img src={data?.img} className="bg-img img-fluid" alt="" /> : <Img src={data?.img} className="bg-img img-fluid" alt="" />}</div>
+        <div>{<Img src={data?.img} className="bg-img img-fluid" alt="" />}</div>
         <div className="blog-label">
           <div>
             <h3>{data?.date}</h3>
