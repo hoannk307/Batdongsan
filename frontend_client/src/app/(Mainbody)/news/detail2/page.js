@@ -8,6 +8,7 @@ import { Fragment, useEffect, useState } from "react";
 import { SITE_URL } from "@/config/env";
 import { useSearchParams } from "next/navigation";
 import NavbarFour from "@/layout/headers/NavbarFour";
+import { getData } from "@/utils/getData";
 
 const NoSidebar = () => {
   const searchParams = useSearchParams();
@@ -17,9 +18,14 @@ const NoSidebar = () => {
   useEffect(() => {
     if (!id) return;
     const fetchData = async () => {
-      const res = await fetch(`${SITE_URL}/api/news/detail?id=${id}`, { cache: "no-store" });
-      const detail = await res.json().catch(() => null);
-      setNew(detail);
+      // const res = await fetch(`${SITE_URL}/api/news/detail?id=${id}`, { cache: "no-store" });
+      // const detail = await res.json().catch(() => null);
+      // setNew(detail);
+      getData(`/api/news/detail?id=${id}`)
+        .then((res) => {
+          setNew(res.data);
+        })
+        .catch((error) => console.error("Error fetching latest news", error));
     }
     fetchData();
   }, [id]);

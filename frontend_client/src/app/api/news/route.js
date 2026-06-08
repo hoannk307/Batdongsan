@@ -15,8 +15,9 @@ import { getBackendBaseUrl, isConnectionError } from "../../../lib/api/fetchBack
 import { mapNewsToBlogItem } from "../../../lib/api/mappers/newsMapper";
 
 function parsePositiveInt(value, { defaultValue, min = 1, max = 50 } = {}) {
+  if (value === null || value === undefined || value === "") return defaultValue;
   const n = typeof value === "string" ? Number.parseInt(value, 10) : Number(value);
-  if (!Number.isFinite(n)) return defaultValue;
+  if (Number.isNaN(n) || !Number.isFinite(n)) return defaultValue;
   return Math.min(max, Math.max(min, n));
 }
 
