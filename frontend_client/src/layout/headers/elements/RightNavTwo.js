@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import React, { useRef, useState } from "react";
 import { Home, User } from "react-feather";
