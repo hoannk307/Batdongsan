@@ -6,6 +6,7 @@ import React from "react";
 import Slider from "react-slick";
 import { Col, Container, Row } from "reactstrap";
 import { PropertyServicesDetail } from "@/constValues/constValues";
+import Link from "next/link";
 import { testimonial3 } from "@/data/slickSlider";
 import NoSsr from "@/utils/NoSsr";
 import ReviewStarr from "../../elements/ReviewStarr";
@@ -33,21 +34,23 @@ const TestimonialSection = ({ value }) => {
                       <Row className="our-client">
                         <Col md="6">
                           <div className="client-left">
-                            <img src={data.img} className="img-fluid" alt="" />
+                            <img src={data?.img} className="img-fluid" alt="" />
                           </div>
                         </Col>
                         <Col md="6">
-                          <div className="client-right">
-                            <p className="font-roboto">{data.details}</p>
-                            <ul className="client-rating">
-                              <ReviewStarr rating={data.rating} />
-                            </ul>
-                            <h3>{data.name}</h3>
-                            <h6>Our Customer</h6>
-                            <span className="quote-img">
-                              <img src="/assets/images/testimonial/quote-2.png" alt="" />
-                            </span>
-                          </div>
+                          <Link href={`/news/detail2?id=${data?.id}`}>
+                            <div className="client-right">
+                              <p className="font-roboto">{data?.summary}</p>
+                              <ul className="client-rating">
+                                <ReviewStarr rating={data?.rating} />
+                              </ul>
+                              <h3>{data?.title}</h3>
+                              <h6>Our Customer</h6>
+                              <span className="quote-img">
+                                <img src="/assets/images/testimonial/quote-2.png" alt="" />
+                              </span>
+                            </div>
+                          </Link>
                         </Col>
                       </Row>
                     </div>

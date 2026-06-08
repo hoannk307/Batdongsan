@@ -20,6 +20,8 @@ const BodyContent = () => {
   const [featuredProperties, setFeaturedProperties] = useState();
   const [clientData, setClientData] = useState();
   const [latestBlogInCorporate, setLatestBlogInCorporate] = useState();
+  const [tinTucDuAn, setTinTucDuAn] = useState();
+
 
   useEffect(() => {
     getData(`/api/batdongsan?page=1&limit=6`)
@@ -35,8 +37,13 @@ const BodyContent = () => {
 
     getData(`/api/news?type=category&id=1&page=1&limit=6`)
       .then((res) => {
-        console.log('-----------------------------------LatestNews:', res.data);
         setLatestBlogInCorporate(res.data || res);
+      })
+      .catch((error) => console.error("Error fetching latest news", error));
+
+    getData(`/api/news?type=category&id=3&page=1&limit=6`)
+      .then((res) => {
+        setTinTucDuAn(res.data || res);
       })
       .catch((error) => console.error("Error fetching latest news", error));
 
@@ -60,8 +67,8 @@ const BodyContent = () => {
       </div> */}
       <PropertySection value={value?.data} size={3} />
       {/* <PricingSection value={AppPropertyData.PricingPlan} /> */}
-      <BannerSection banner={7} />
-      <TestimonialSection value={clientData?.OurClientInCorporateLayout} />
+      <BannerSection banner={7} value={tinTucDuAn?.data} />
+      <TestimonialSection value={tinTucDuAn} />
       <BlogSection value={latestBlogInCorporate} />
     </>
   );
