@@ -22,7 +22,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 @ApiTags('news')
 @Controller('news')
 export class NewsController {
-  constructor(private readonly newsService: NewsService) {}
+  constructor(private readonly newsService: NewsService) { }
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -69,15 +69,11 @@ export class NewsController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('status') status?: string,
-    @Query('category') category?: string,
-    @Query('tag') tag?: string,
   ) {
     return this.newsService.findAll(
       page ? +page : 1,
       limit ? +limit : 20,
       status,
-      category,
-      tag,
     );
   }
 
@@ -85,6 +81,26 @@ export class NewsController {
   @ApiOperation({ summary: 'Lấy danh sách 6 tin tức mới nhất' })
   findLatest(@Query('category') category?: string) {
     return this.newsService.findLatest(6, category);
+  }
+
+  @Get('tags/:tagId')
+  @ApiOperation({ summary: 'Lấy danh sách tin tức theo Tag ID' })
+  findByTag(
+    @Param('tagId') tagId: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.newsService.findByTag(+tagId, page ? +page : 1, limit ? +limit : 20);
+  }
+
+  @Get('category/:categoryId')
+  @ApiOperation({ summary: 'Lấy danh sách tin tức theo Category ID' })
+  findByCategory(
+    @Param('categoryId') categoryId: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.newsService.findByCategory(+categoryId, page ? +page : 1, limit ? +limit : 20);
   }
 
   @Get('categories')

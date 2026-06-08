@@ -60,13 +60,37 @@ export function mapNewsToBlogItem(newsItem) {
         : 0;
 
   const rawTags = newsItem?.tags ?? newsItem?.tag ?? newsItem?.keywords ?? newsItem?.keyword;
-  const normalizedTags = normalizeTags(rawTags);
-  const tags =
-    normalizedTags.length > 0
-      ? Array.from(new Set(normalizedTags))
-      : newsItem?.category
-        ? [String(newsItem.category)]
-        : [];
+  let tags = [];
+
+  if (Array.isArray(rawTags) && rawTags.length > 0) {
+    tags = rawTags.map((t, idx) => {
+      if (typeof t === "string") return { id: idx + 1, name: t.trim(), type: "tag" };
+      if (typeof t === "object" && t !== null) {
+        return {
+          id: t.id ?? idx + 1,
+          name: t.name || t.label || t.title || t.value || "",
+          type: "tag"
+        };
+      }
+      return null;
+    }).filter(t => t && t.name);
+
+    const uniqueTags = [];
+    const seen = new Set();
+    for (const tag of tags) {
+      if (!seen.has(tag.name)) {
+        seen.add(tag.name);
+        uniqueTags.push(tag);
+      }
+    }
+    tags = uniqueTags;
+  }
+
+  if (tags.length === 0) {
+    if (newsItem?.category) {
+      tags = [{ id: newsItem.category, name: "Danh mục", type: "category" }];
+    }
+  }
 
   // Resolve image URL
   const rawImg = newsItem?.img;

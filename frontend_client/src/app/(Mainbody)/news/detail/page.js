@@ -11,7 +11,6 @@ const DetailNews = async ({ searchParams }) => {
   const id = (await searchParams)?.id;
   const res = await fetch(`${SITE_URL}/api/news/detail?id=${id}`, { cache: "no-store" });
   const news = await res.json().catch(() => null);
-  console.log("news", news)
   return (
     <Fragment>
       <NavbarThree />

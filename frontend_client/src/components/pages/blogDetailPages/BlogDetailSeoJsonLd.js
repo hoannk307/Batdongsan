@@ -29,7 +29,7 @@ const BlogDetailSeoJsonLd = ({ news, canonicalUrl, siteUrl }) => {
           name: news.author,
         }
       : undefined,
-    keywords: tags.length > 0 ? tags.join(", ") : undefined,
+    keywords: tags.length > 0 ? tags.map(t => t.name).join(", ") : undefined,
     image: imgUrl ? [imgUrl] : undefined,
     mainEntityOfPage: canonicalUrl ? { "@type": "WebPage", "@id": canonicalUrl } : undefined,
     url: canonicalUrl || undefined,

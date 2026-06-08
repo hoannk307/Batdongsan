@@ -24,30 +24,10 @@ export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const rawId = searchParams.get("id");
   const id = typeof rawId === "string" ? rawId.trim() : "";
+  const type = searchParams.get("type");
 
   const backendApiBaseUrl = getBackendBaseUrl();
 
-  // --- Chi tiết 1 bài tin ---
-  if (id) {
-    try {
-      const targetUrl = `${backendApiBaseUrl}/news/${encodeURIComponent(id)}`;
-      const res = await fetch(targetUrl, { cache: "no-store" });
-      const payload = await res.json().catch(() => null);
-
-      if (!res.ok || !payload) return NextResponse.json(null, { status: res.status || 500 });
-      if (payload?.status && payload.status !== "PUBLISHED") {
-        return NextResponse.json(null, { status: 404 });
-      }
-      return NextResponse.json(mapNewsToBlogItem(payload));
-    } catch (e) {
-      if (isConnectionError(e)) {
-        console.warn("[API/news] Backend không khả dụng khi lấy chi tiết tin.");
-      } else {
-        console.error("[API/news] Lỗi khi lấy chi tiết tin:", e);
-      }
-      return NextResponse.json(null, { status: 500 });
-    }
-  }
 
   // --- Danh sách tin ---
   const page = parsePositiveInt(searchParams.get("page"), { defaultValue: 1, min: 1, max: 9999 });
@@ -57,8 +37,23 @@ export async function GET(req) {
     page: String(page),
     limit: String(limit),
     status: "PUBLISHED",
-  }).toString();
-  const targetUrl = `${backendApiBaseUrl}/news?${query}`;
+  });
+
+  let targetUrl = "";
+
+  if (type === "tag" && id) {
+    targetUrl = `${backendApiBaseUrl}/news/tags/${encodeURIComponent(id)}?${query.toString()}`;
+  } else if (type === "category" && id) {
+    targetUrl = `${backendApiBaseUrl}/news/category/${encodeURIComponent(id)}?${query.toString()}`;
+  }
+
+  // else {
+  //   const tagParam = searchParams.get("tag");
+  //   if (tagParam) query.append("tag", tagParam);
+  //   const categoryParam = searchParams.get("category");
+  //   if (categoryParam) query.append("category", categoryParam);
+  //   targetUrl = `${backendApiBaseUrl}/news?${query.toString()}`;
+  // }
 
   try {
     const res = await fetch(targetUrl, { cache: "no-store" });

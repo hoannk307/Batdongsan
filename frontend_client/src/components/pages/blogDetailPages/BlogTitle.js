@@ -31,8 +31,10 @@ const BlogTitle = ({ news }) => {
         <div className='tags'>
           <ul>
             {tags.map((tag) => (
-              <li key={tag}>
-                <a href={`/news?tag=${encodeURIComponent(tag)}`}>{tag}</a>
+              <li key={tag.id || tag.name}>
+                <a href={tag.type === "category" ? `/news?category=${tag.id}` : `/news?tag=${encodeURIComponent(tag.name)}`}>
+                  {tag.name}
+                </a>
               </li>
             ))}
           </ul>

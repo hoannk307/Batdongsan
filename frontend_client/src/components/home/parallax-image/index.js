@@ -33,7 +33,7 @@ const BodyContent = () => {
       })
       .catch((error) => console.error("Error", error));
 
-    getData(`/api/news?page=1&limit=6`)
+    getData(`/api/news?type=category&id=1&page=1&limit=6`)
       .then((res) => {
         console.log('-----------------------------------LatestNews:', res.data);
         setLatestBlogInCorporate(res.data || res);

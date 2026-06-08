@@ -227,6 +227,80 @@ export class NewsService {
     };
   }
 
+  async findByTag(tagId: number, page = 1, limit = 20) {
+    const skip = (page - 1) * limit;
+
+    const where: any = {
+      status: 'PUBLISHED',
+      tags: {
+        some: { id: tagId },
+      },
+    };
+
+    const [news, total] = await Promise.all([
+      this.prisma.news.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { created_at: 'desc' },
+        include: {
+          users: { select: { id: true, username: true, full_name: true } },
+          tags: { select: { id: true, name: true, slug: true } },
+        },
+      }),
+      this.prisma.news.count({ where }),
+    ]);
+
+    const dataWithFiles = await this.getNewsListWithFiles(news);
+
+    return {
+      data: dataWithFiles,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async findByCategory(categoryId: number, page = 1, limit = 20) {
+    const skip = (page - 1) * limit;
+
+    const where: any = {
+      status: 'PUBLISHED',
+      category: categoryId,
+    };
+
+    const [news, total] = await Promise.all([
+      this.prisma.news.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { created_at: 'desc' },
+        include: {
+          users: { select: { id: true, username: true, full_name: true } },
+          tags: { select: { id: true, name: true, slug: true } },
+        },
+      }),
+      this.prisma.news.count({ where }),
+    ]);
+
+    const dataWithFiles = await this.getNewsListWithFiles(news);
+
+    console.log(dataWithFiles);
+
+    return {
+      data: dataWithFiles,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
   async findOne(id: number) {
     const news = await this.prisma.news.findUnique({
       where: { id },
@@ -251,7 +325,7 @@ export class NewsService {
       where: { id },
       data: { views: { increment: 1 } },
     });
-
+    console.log(news);
     return this.getNewsWithFiles(news);
   }
 

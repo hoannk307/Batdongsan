@@ -16,7 +16,7 @@ export const MainNavMenuItems = [
   {
     title: "TIN TỨC",
     type: "link",
-    path: "/news",
+    path: "/news?type=category&id=1",
   },
   {
     title: "DU LỊCH",

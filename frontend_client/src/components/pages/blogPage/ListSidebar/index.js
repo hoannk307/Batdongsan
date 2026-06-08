@@ -1,3 +1,4 @@
+"use client";
 /**
  * It takes a number of items per page and a list of items, and returns a list of pages, each
  * containing a list of items
@@ -16,19 +17,33 @@ import { getData } from "@/utils/getData";
 import BlogWrapBoxTwo from "../../../elements/propertyBoxs/BlogWrapBoxTwo";
 import { gridReducer, initialGrid } from "../../../listing/gridView/grid/gridReducer";
 
-const BodyContent = ({ side }) => {
+const BodyContent = ({ side, tagId, filterType }) => {
   const [value, setValue] = useState();
+  const [categories, setCategories] = useState([]);
   const [grid, gridDispatch] = useReducer(gridReducer, initialGrid);
 
   useEffect(() => {
-    getData(`/api/property`)
+    // Fetch categories
+    getData('/api/news/categories')
       .then((res) => {
-        const latestBlogs = res.data?.LatestBlogInCorporate || [];
-        setValue(latestBlogs);
-        gridDispatch({ type: "totalPages", payload: Math.ceil(latestBlogs.length / 4) });
+        setCategories(res?.data || []);
+      })
+      .catch((error) => console.error("Error fetching categories:", error));
+
+    // Fetch news list
+    let url = `/api/news`;
+    if (tagId && filterType) {
+      url += `?type=${filterType}&id=${tagId}`;
+    }
+
+    getData(url)
+      .then((res) => {
+        const newsList = res?.data || [];
+        setValue(newsList);
+        gridDispatch({ type: "totalPages", payload: Math.ceil(newsList.length / 4) });
       })
       .catch((error) => console.error("Error", error));
-  }, []);
+  }, [tagId, filterType]);
   return (
     <section className="ratio_landscape blog-list-section">
       <Container>
@@ -36,9 +51,9 @@ const BodyContent = ({ side }) => {
           {side && (
             <Sidebar side={side}>
               <SearchBar />
-              <Category />
-              <RecentlyAdded />
-              <PopularTags />
+              <Category categories={categories} />
+              {/* <RecentlyAdded />
+              <PopularTags /> */}
             </Sidebar>
           )}
           <Col xl={side ? "9" : "12"} lg={side ? "8" : "12"}>

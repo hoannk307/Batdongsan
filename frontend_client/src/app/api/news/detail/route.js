@@ -26,7 +26,6 @@ export async function GET(req) {
       const targetUrl = `${backendApiBaseUrl}/news/${encodeURIComponent(id)}`;
       const res = await fetch(targetUrl, { cache: "no-store" });
       const payload = await res.json().catch(() => null);
-      console.log('payload', payload);
       if (!res.ok || !payload) return NextResponse.json(null, { status: res.status || 500 });
       if (payload?.status && payload.status !== "PUBLISHED") {
         return NextResponse.json(null, { status: 404 });
