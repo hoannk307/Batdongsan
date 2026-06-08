@@ -15,14 +15,18 @@ import { useSearchParams } from "next/navigation";
 
 const BodyContent = (props) => {
   const [value, setValue] = useState(props?.initialNews ?? null);
-  const searchParams = useSearchParams();
-  //const id = props?.id || searchParams?.get?.("id");
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-
-    // getData(`/api/news?id=${encodeURIComponent(id)}`)
-    //   .then((res) => setValue(res.data))
-    //   .catch((error) => console.error("Error fetching news data:", error));
+    if (props?.initialNews) {
+      setValue(props.initialNews);
+    }
+    // Fetch categories
+    getData('/api/news/categories')
+      .then((res) => {
+        setCategories(res?.data || []);
+      })
+      .catch((error) => console.error("Error fetching categories:", error));
 
   }, [props?.initialNews]);
 
@@ -41,7 +45,7 @@ const BodyContent = (props) => {
           {props.side && (
             <Sidebar side={props.side}>
               <SearchBar />
-              <Category />
+              <Category categories={categories} />
               <PopularTags tags={value?.tags} />
             </Sidebar>
           )}

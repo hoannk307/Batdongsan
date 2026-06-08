@@ -9,7 +9,7 @@ import { MapPin } from "react-feather";
 import Img from "../../../utils/BackgroundImageRatio";
 
 const BlogWrapBoxTwo = ({ data }) => {
-  const detailHref = data?.id ? `/pages/blog-detail-pages/left-sidebar?id=${encodeURIComponent(data.id)}` : "/pages/blog-detail-pages/left-sidebar";
+  const detailHref = `/news/detail?id=${encodeURIComponent(data.id)}`;
 
   return (
     <div className="blog-wrap wow fadeInUp">

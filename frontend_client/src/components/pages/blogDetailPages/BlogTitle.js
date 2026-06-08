@@ -15,7 +15,6 @@ const BlogTitle = ({ news }) => {
     <div className='blog-title'>
       <ul className='post-detail'>
         <li>{dateText || "—"}</li>
-
         <li>Posted By : {author}</li>
         <li>
           <i className='fa fa-heart me-2'></i>
@@ -25,7 +24,7 @@ const BlogTitle = ({ news }) => {
           <i className='fa fa-comments me-2'></i>{typeof news?.comments === "number" ? news.comments : 0} Comment
         </li>
       </ul>
-      <h1>{news?.title || "Untitled"}</h1>
+      <h2>{news?.title || "Untitled"}</h2>
 
       {tags.length > 0 && (
         <div className='tags'>
@@ -33,7 +32,7 @@ const BlogTitle = ({ news }) => {
             {tags.map((tag) => (
               <li key={tag.id || tag.name}>
                 <a href={tag.type === "category" ? `/news?category=${tag.id}` : `/news?tag=${encodeURIComponent(tag.name)}`}>
-                  {tag.name}
+                  {tag.name} ,
                 </a>
               </li>
             ))}

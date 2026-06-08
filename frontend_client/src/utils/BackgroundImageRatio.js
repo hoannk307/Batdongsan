@@ -20,7 +20,7 @@ const Img = (props) => {
       parentElement.setAttribute(
         "style",
         `
-        background-image: url(${src});
+        background-image: url("${src}");
         background-size:cover; 
         background-position: center;
         background-repeat: no-repeat;

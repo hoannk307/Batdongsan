@@ -6,8 +6,25 @@ const DetailsProperty = ({ news }) => {
 
   return (
     <div className='details-property'>
+      <style>{`
+        .news-content {
+          word-break: break-word;
+          overflow-wrap: break-word;
+          overflow-x: auto;
+        }
+        .news-content img,
+        .news-content video,
+        .news-content iframe {
+          max-width: 100%;
+          height: auto;
+        }
+        .news-content figure,
+        .news-content table {
+          max-width: 100%;
+        }
+      `}</style>
       <Row>
-        <div dangerouslySetInnerHTML={{ __html: rawText }} />
+        <div className="news-content" dangerouslySetInnerHTML={{ __html: rawText }} />
       </Row>
     </div>
   );

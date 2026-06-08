@@ -9,8 +9,6 @@ import React, { useEffect, useReducer, useState } from "react";
 import { Col, Container, Row } from "reactstrap";
 import Pagination from "@/layout/Pagination";
 import Category from "@/layout/sidebarLayout/Category";
-import PopularTags from "@/layout/sidebarLayout/PopularTags";
-import RecentlyAdded from "@/layout/sidebarLayout/RecentlyAdded";
 import SearchBar from "@/layout/sidebarLayout/SearchBar";
 import Sidebar from "@/layout/sidebarLayout/Sidebar";
 import { getData } from "@/utils/getData";

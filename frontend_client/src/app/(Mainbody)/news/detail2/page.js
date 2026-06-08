@@ -1,15 +1,27 @@
+"use client";
 import BodyContent from "@/components/pages/blogDetailPages";
 import Breadcrumb from "@/layout/Breadcrumb/Breadcrumb";
 import FooterThree from "@/layout/footers/FooterThree";
 import NavbarThree from "@/layout/headers/NavbarThree";
 import Img from "@/utils/BackgroundImageRatio";
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { SITE_URL } from "@/config/env";
+import { useSearchParams } from "next/navigation";
 
-const NoSidebar = async ({ searchParams }) => {
-  const id = (await searchParams)?.id;
-  const res = await fetch(`${SITE_URL}/api/news/detail?id=${id}`, { cache: "no-store" });
-  const news = await res.json().catch(() => null);
+const NoSidebar = () => {
+  const searchParams = useSearchParams();
+  const id = searchParams?.get("id");
+
+  const [news, setNew] = useState(null);
+  useEffect(() => {
+    if (!id) return;
+    const fetchData = async () => {
+      const res = await fetch(`${SITE_URL}/api/news/detail?id=${id}`, { cache: "no-store" });
+      const detail = await res.json().catch(() => null);
+      setNew(detail);
+    }
+    fetchData();
+  }, [id]);
 
   return (
     <Fragment>
@@ -17,7 +29,7 @@ const NoSidebar = async ({ searchParams }) => {
       <Breadcrumb />
       <BodyContent side={false} id={id} initialNews={news}>
         <div className="blog-detail-image">
-          <Img src={news?.img} className="bg-img img-fluid" alt="" />
+          {news?.img && <Img src={news.img} className="bg-img img-fluid" alt="" />}
         </div>
       </BodyContent>
       <FooterThree />
