@@ -7,6 +7,7 @@ import Img from "@/utils/BackgroundImageRatio";
 import { Fragment, useEffect, useState } from "react";
 import { SITE_URL } from "@/config/env";
 import { useSearchParams } from "next/navigation";
+import NavbarFour from "@/layout/headers/NavbarFour";
 
 const NoSidebar = () => {
   const searchParams = useSearchParams();
@@ -25,7 +26,7 @@ const NoSidebar = () => {
 
   return (
     <Fragment>
-      <NavbarThree />
+      <NavbarFour />
       <Breadcrumb />
       <BodyContent side={false} id={id} initialNews={news}>
         <div className="blog-detail-image">

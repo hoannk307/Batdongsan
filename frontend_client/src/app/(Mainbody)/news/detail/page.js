@@ -5,6 +5,7 @@ import FooterThree from "@/layout/footers/FooterThree";
 import NavbarThree from "@/layout/headers/NavbarThree";
 import Img from "@/utils/BackgroundImageRatio";
 import { SITE_URL } from "@/config/env";
+import NavbarFour from "@/layout/headers/NavbarFour";
 
 
 const DetailNews = async ({ searchParams }) => {
@@ -13,7 +14,7 @@ const DetailNews = async ({ searchParams }) => {
   const news = await res.json().catch(() => null);
   return (
     <Fragment>
-      <NavbarThree />
+      <NavbarFour />
       <Breadcrumb />
       <BodyContent side={"left"} id={id} initialNews={news}>
         <div className='blog-detail-image'>
