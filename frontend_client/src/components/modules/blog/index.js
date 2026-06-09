@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from "react";
-import { getData } from "@/utils/getData";
+import { getData } from "@/utils/apiRequests";
 import BlogSection from "../../home/corporate/Blog";
 import HorizontalBlogSection from "./HorizontalBlog";
 

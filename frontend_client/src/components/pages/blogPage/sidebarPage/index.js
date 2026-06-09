@@ -11,7 +11,7 @@ import SearchBar from "@/layout/sidebarLayout/SearchBar";
 import Category from "@/layout/sidebarLayout/Category";
 import RecentlyAdded from "@/layout/sidebarLayout/RecentlyAdded";
 import PopularTags from "@/layout/sidebarLayout/PopularTags";
-import { getData } from "@/utils/getData";
+import { getData } from "@/utils/apiRequests";
 import Pagination from "@/layout/Pagination";
 import BlogWrapBox from "../../../elements/propertyBoxs/BlogWrapBox";
 import { gridReducer, initialGrid } from "../../../listing/gridView/grid/gridReducer";

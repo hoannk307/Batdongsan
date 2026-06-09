@@ -13,7 +13,7 @@ import Mortgage from "../../../layout/sidebarLayout/Mortgage";
 import RecentlyAdded from "../../../layout/sidebarLayout/RecentlyAdded";
 import Sidebar from "../../../layout/sidebarLayout/Sidebar";
 import NoSsr from "../../../utils/NoSsr";
-import { getData } from "../../../utils/getData";
+import { getData } from "../../../utils/apiRequests";
 import RelatedProperty from "./RelatedProperty";
 import SinglePropertySection from "./SingleProperty";
 import SliderBreadcrumbSection from "./SliderBreadcrumb";

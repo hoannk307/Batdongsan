@@ -6,31 +6,31 @@
 import Link from "next/link";
 import React from "react";
 import { Col, Container, Row } from "reactstrap";
-import { Realestate, SubmitProperty } from "@/constValues/constValues";
 
-const BannerSection = ({ banner }) => {
+const BannerSection = ({ banner, value }) => {
   return (
-    <section className={`banner-section layout${banner}-bg parallax-image`}>
+
+    <section className={`banner-section  parallax-image`} style={{ backgroundImage: `url(${value?.img})` }}>
       <Container>
         <Row>
           <Col>
             <div className="banner-3">
-              <span className={`label label-light label-flat`}># {Realestate}</span>
+              <span className={`label label-light label-flat`}>Quảng cáo</span>
               <h2>
-                Are you worried <br /> sick about moving out?
+                {value?.title}
               </h2>
               <p>
-                We know how it feels! Elegant retreat in a quiet Coral Gables setting. This home provides wonderful entertaining spaces with a chef kitchen opening Elegant retreat in a quiet Coral
-                Gables setting.
+                {value?.summary}
               </p>
-              <Link href="/agent/submit-property" className="btn btn-solid btn-flat">
-                {SubmitProperty}
+              <Link href={`/news/detail2?id=${value?.id}`} className="btn btn-solid btn-flat">
+                Xem thêm
               </Link>
             </div>
           </Col>
         </Row>
       </Container>
     </section>
+
   );
 };
 

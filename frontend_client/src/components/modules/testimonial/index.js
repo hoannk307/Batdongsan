@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from "react";
-import { getData } from "@/utils/getData";
+import { getData } from "@/utils/apiRequests";
 import TestimonialSectionOne from "@/components/home/enterprise/Testimonial";
 import TestimonialSectionTwo from "@/components/home/slider-filter-search/Testimonial";
 import TestimonialSectionThree from "@/components/home/corporate/Testimonial";

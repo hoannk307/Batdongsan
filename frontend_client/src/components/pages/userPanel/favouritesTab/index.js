@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { Container } from "reactstrap";
 import Pagination from "@/layout/Pagination";
 import Header from "@/layout/sidebarLayout/Header";
-import { getData } from "@/utils/getData";
+import { getData } from "@/utils/apiRequests";
 import GridLayout from "../../../listing/elements/GridLayout";
 import { gridReducer, initialGrid } from "@/components/listing/gridView/grid/gridReducer";
 

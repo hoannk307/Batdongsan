@@ -6,7 +6,7 @@
 "use client";
 import React, { Fragment, useEffect, useState } from "react";
 import SliderSection from "@/components/property/tabPanelPages/Slider";
-import { getData } from "@/utils/getData";
+import { getData } from "@/utils/apiRequests";
 import NavbarFive from "@/layout/headers/NavbarFive";
 import FooterThree from "@/layout/footers/FooterThree";
 import BodyContent from "@/components/property/stickyTabOrClassic";

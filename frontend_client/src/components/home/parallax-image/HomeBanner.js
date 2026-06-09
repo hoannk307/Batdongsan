@@ -13,9 +13,9 @@ import {
 } from "reactstrap";
 
 const HomeBannerSection = () => {
-  const [toggle, setToggle] = useState(false);
-  const [dropDownInput, setDropDownInput] = useState("Apartment");
-  const dispatch = useDispatch();
+  // const [toggle, setToggle] = useState(false);
+  // const [dropDownInput, setDropDownInput] = useState("Apartment");
+  // const dispatch = useDispatch();
 
   return (
     <section className="parallax-home video-layout">
@@ -29,17 +29,15 @@ const HomeBannerSection = () => {
       <Container>
         <Row className="justify-content-end">
           <Col lg="7" md="9" className="ms-auto">
-            <div className="parallax-content text-end">
-              <div className="box text-affect" style={{ width: '600px' }}>
+            <div className="parallax-content " style={{ width: '100%' }}>
+              <div className="box text-affect" style={{ width: '100%' }}>
                 <div className="title">
-                  <span className="block"></span>
                   <p style={{ fontSize: '30px', fontWeight: 'bold', color: '#FFF' }}>
                     NHA TRANG
                   </p>
                 </div>
                 <div className="role">
-                  <div className="block"></div>
-                  <p className="font-roboto" style={{ fontSize: '24px', color: '#FFF' }}>Điểm đến đầu tư, nơi an cư lý tưởng</p>
+                  <p className="font-roboto" style={{ fontSize: '22px', color: '#FFF' }}>Điểm đến đầu tư, nơi an cư lý tưởng</p>
                 </div>
               </div>
               <form className="video-search">
@@ -54,68 +52,7 @@ const HomeBannerSection = () => {
                     aria-describedby="basic-addon1"
                   />
                 </div>
-                <Dropdown isOpen={toggle} toggle={() => setToggle(!toggle)}>
-                  <DropdownToggle className="font-roboto">
-                    <Fragment>
-                      {dropDownInput}
-                      <i className="fas fa-angle-down"></i>
-                    </Fragment>
-                  </DropdownToggle>
-                  <DropdownMenu className=" text-start">
-                    <DropdownItem
-                      onClick={() => {
-                        setDropDownInput("Any property type");
-                        dispatch({
-                          type: "propertyType",
-                          payload: "Property Type",
-                        });
-                      }}
-                    >
-                      <Fragment>Any property type</Fragment>
-                    </DropdownItem>
-                    <DropdownItem
-                      onClick={() => {
-                        setDropDownInput("Office");
-                        dispatch({
-                          type: "propertyType",
-                          payload: "Offices",
-                        });
-                      }}
-                    >
-                      <Fragment>Office</Fragment>
-                    </DropdownItem>
-                    <DropdownItem
-                      onClick={() => {
-                        setDropDownInput("Apartment");
-                        dispatch({
-                          type: "propertyType",
-                          payload: "Apartment",
-                        });
-                      }}
-                    >
-                      <Fragment>Apartment</Fragment>
-                    </DropdownItem>
-                    <DropdownItem
-                      onClick={() => {
-                        setDropDownInput("House");
-                        dispatch({
-                          type: "propertyType",
-                          payload: "Town House",
-                        });
-                      }}
-                    >
-                      <Fragment>House</Fragment>
-                    </DropdownItem>
-                    <DropdownItem
-                      onClick={() => {
-                        setDropDownInput("Villa");
-                        dispatch({ type: "propertyType", payload: "Villa" });
-                      }}
-                    >
-                      <Fragment>Villa</Fragment>
-                    </DropdownItem>
-                  </DropdownMenu>
-                </Dropdown>
+
 
                 <div>
                   <Link

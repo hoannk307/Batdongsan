@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { AppPropertyData } from "@/data/appPropertyData";
-import { getData } from "@/utils/getData";
+import { getData } from "@/utils/apiRequests";
 import BlogSection from "../../../home/corporate/Blog";
 import PropertyServicesSection from "../../../home/enterprise/Propertyservices";
 import TestimonialSection from "../../../home/enterprise/Testimonial";

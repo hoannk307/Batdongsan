@@ -8,7 +8,7 @@
  */
 import React, { Fragment, useEffect, useState } from "react";
 import { AppPropertyData } from "@/data/appPropertyData";
-import { getData } from "@/utils/getData";
+import { getData } from "@/utils/apiRequests";
 import BrandSection from "../classic/Brand";
 import FeaturedPropertySection from "../classic/FeaturedProperty";
 import LatestPropertySection from "../classic/LatestProperty";

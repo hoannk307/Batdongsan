@@ -8,7 +8,7 @@ import React, { useEffect, useReducer, useState } from "react";
 import { Col, Container, Row } from "reactstrap";
 import Header from "../../../../layout/sidebarLayout/Header";
 import Pagination from "../../../../layout/Pagination";
-import { getData } from "../../../../utils/getData";
+import { getData } from "../../../../utils/apiRequests";
 import GridLayout from "../../elements/GridLayout";
 import { gridReducer, initialGrid } from "../grid/gridReducer";
 

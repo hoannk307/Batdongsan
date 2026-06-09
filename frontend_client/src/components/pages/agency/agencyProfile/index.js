@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Col, Container, Row } from "reactstrap";
 import Sidebar from "@/layout/sidebarLayout/Sidebar";
-import { getData } from "@/utils/getData";
+import { getData } from "@/utils/apiRequests";
 import Exploration from "@/layout/sidebarLayout/Exploration";
 import RecentlyAdded from "@/layout/sidebarLayout/RecentlyAdded";
 import Filter from "@/layout/sidebarLayout/Filter";

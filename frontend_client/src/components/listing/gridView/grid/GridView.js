@@ -12,7 +12,7 @@ import Filter from "../../../../layout/sidebarLayout/Filter";
 import Header from "../../../../layout/sidebarLayout/Header";
 import RecentlyAdded from "../../../../layout/sidebarLayout/RecentlyAdded";
 import Sidebar from "../../../../layout/sidebarLayout/Sidebar";
-import { getData } from "../../../../utils/getData";
+import { getData } from "../../../../utils/apiRequests";
 import FilterTag from "../../elements/FilterTag";
 import GridLayout from "../../elements/GridLayout";
 import { gridReducer, initialGrid } from "./gridReducer";

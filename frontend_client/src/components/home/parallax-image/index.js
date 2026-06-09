@@ -4,7 +4,7 @@
  */
 import React, { useEffect, useState } from "react";
 import { AppPropertyData } from "@/data/appPropertyData";
-import { getData } from "@/utils/getData";
+import { getData } from "@/utils/apiRequests";
 import AboutSection from "../corporate/About";
 import BannerSection from "../corporate/Banner";
 import BlogSection from "../corporate/Blog";
@@ -16,17 +16,21 @@ import TestimonialSection from "../corporate/Testimonial";
 import HomeBannerSection from "./HomeBanner";
 
 const BodyContent = () => {
-  const [value, setValue] = useState();
+  const [value1, setValue1] = useState();
+  const [value2, setValue2] = useState();
   const [featuredProperties, setFeaturedProperties] = useState();
   const [clientData, setClientData] = useState();
   const [latestBlogInCorporate, setLatestBlogInCorporate] = useState();
   const [tinTucDuAn, setTinTucDuAn] = useState();
+  const [bdsQuangCao, setBdsQuangCao] = useState();
 
 
   useEffect(() => {
-    getData(`/api/batdongsan?page=1&limit=6`)
+    getData(`/api/batdongsan?page=1&limit=14`)
       .then((res) => {
-        setValue(res.data); // shape: { data: PropertyCard[], pagination: {} }
+        const list = res.data.data || [];
+        setValue1(list.slice(0, 6)); // shape: { data: PropertyCard[], pagination: {} }
+        setValue2(list.slice(6, 14));
       })
       .catch((error) => console.error("Error", error));
     getData(`/api/client-agent`)
@@ -47,6 +51,12 @@ const BodyContent = () => {
       })
       .catch((error) => console.error("Error fetching latest news", error));
 
+    getData(`/api/news?type=category&id=0&page=1&limit=6`)
+      .then((res) => {
+        setBdsQuangCao(res.data[0] || res);
+      })
+      .catch((error) => console.error("Error fetching latest news", error));
+
     // Lấy BĐS nổi bật
     getData(`/api/batdongsan/feature`)
       .then((res) => {
@@ -59,15 +69,15 @@ const BodyContent = () => {
     <>
       <HomeBannerSection />
       <div className="section-pb">
-        <PropertySection value={value?.data} />
+        <PropertySection value={value1} />
       </div>
       <FeaturePropertySection value={featuredProperties} />
       {/* <div className="service-section-pt-0">
         <ServiceSection value={AppPropertyData.ProvidedServices} />
       </div> */}
-      <PropertySection value={value?.data} size={3} />
+      <PropertySection value={value2} size={3} />
       {/* <PricingSection value={AppPropertyData.PricingPlan} /> */}
-      <BannerSection banner={7} value={tinTucDuAn?.data} />
+      <BannerSection banner={7} value={bdsQuangCao} />
       <TestimonialSection value={tinTucDuAn} />
       <BlogSection value={latestBlogInCorporate} />
     </>

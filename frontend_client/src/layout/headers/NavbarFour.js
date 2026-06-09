@@ -18,7 +18,9 @@ const NavbarFour = () => {
                 </Link>
               </div>
               <MainNav />
-              <RightNavTwo />
+              <div className="d-none d-md-block">
+                <RightNavTwo />
+              </div>
             </div>
           </div>
         </Row>

@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { Heart } from "react-feather";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { getData } from "@/utils/getData";
+import { getData } from "@/utils/apiRequests";
 import useOutsideDropdown from "@/utils/useOutsideDropdown";
 import { unlike } from "@/redux-toolkit/reducers/addToWishListReducer";
 

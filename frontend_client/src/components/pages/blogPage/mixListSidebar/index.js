@@ -9,7 +9,7 @@ import RecentlyAdded from "@/layout/sidebarLayout/RecentlyAdded";
 import SearchBar from "@/layout/sidebarLayout/SearchBar";
 import Sidebar from "@/layout/sidebarLayout/Sidebar";
 import Img from "@/utils/BackgroundImageRatio";
-import { getData } from "@/utils/getData";
+import { getData } from "@/utils/apiRequests";
 import BlogWrapBoxTwo from "../../../elements/propertyBoxs/BlogWrapBoxTwo";
 import { gridReducer, initialGrid } from "../../../listing/gridView/grid/gridReducer";
 

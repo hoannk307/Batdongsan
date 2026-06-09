@@ -1,6 +1,6 @@
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import { getData } from "../../utils/getData";
+import { getData } from "../../utils/apiRequests";
 
 const SearchSuggestionBox = ({ searchDropDown, className, searchInput }) => {
   const classIS = `nav-submenu suggestion-cart ${searchDropDown ? "open" : ""} ${className ? className : ""}`;

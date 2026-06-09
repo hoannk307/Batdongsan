@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from "react";
-import { getData } from "@/utils/getData";
+import { getData } from "@/utils/apiRequests";
 import LatestPropertySection from "@/components/home/enterprise/LatestProperty";
 import LatestPropertySectionOne from "@/components/home/classic/LatestProperty";
 import PropertySection from "@/components/home/slider-filter-search/Property";

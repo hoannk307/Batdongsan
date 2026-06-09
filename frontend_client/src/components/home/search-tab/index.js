@@ -4,7 +4,7 @@
  */
 import React, { useEffect, useState } from "react";
 import { AppPropertyData } from "@/data/appPropertyData";
-import { getData } from "@/utils/getData";
+import { getData } from "@/utils/apiRequests";
 import FeaturedPropertySection from "../classic/FeaturedProperty";
 import LatestPropertySection from "../classic/LatestProperty";
 import PropertyServicesSection from "../classic/PropertyServices";

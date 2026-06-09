@@ -8,7 +8,7 @@ import { Fragment, useEffect, useState } from "react";
 import { SITE_URL } from "@/config/env";
 import { useSearchParams } from "next/navigation";
 import NavbarFour from "@/layout/headers/NavbarFour";
-import { getData } from "@/utils/getData";
+import { getData } from "@/utils/apiRequests";
 
 const NoSidebar = () => {
   const searchParams = useSearchParams();

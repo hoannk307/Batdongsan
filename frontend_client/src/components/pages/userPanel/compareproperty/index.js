@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { Container } from "reactstrap";
-import { getData } from "@/utils/getData";
+import { getData } from "@/utils/apiRequests";
 import { removeCompareProducts } from "@/redux-toolkit/reducers/addToCompareReducer";
 import { like } from "@/redux-toolkit/reducers/addToWishListReducer";
 

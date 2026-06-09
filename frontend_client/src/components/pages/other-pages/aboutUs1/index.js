@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { AppPropertyData } from "@/data/appPropertyData";
-import { getData } from "@/utils/getData";
+import { getData } from "@/utils/apiRequests";
 import TestimonialSection from "../../../home/classic/Testimonial";
 import BlogSection from "../../../home/corporate/Blog";
 import BrandSection from "../../../home/enterprise/Brand";

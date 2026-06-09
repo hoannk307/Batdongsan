@@ -3,7 +3,7 @@
  * @returns The return value of the function is the value of the last expression in the function body.
  */
 import React, { Fragment, useEffect, useState } from "react";
-import { getData } from "@/utils/getData";
+import { getData } from "@/utils/apiRequests";
 import PropertySection from "../slider-filter-search/Property";
 import FeatureSection from "../slider-filter-search/Feature";
 import BannerSection from "../slider-filter-search/Banner";
