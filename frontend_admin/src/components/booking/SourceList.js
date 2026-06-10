@@ -3,15 +3,9 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { Button, Col, Input, Row, Table, Modal, ModalHeader, ModalBody, ModalFooter, FormGroup, Label } from "reactstrap";
 import { toast } from "react-toastify";
-import axios from "axios";
+import { getData, postData, putData, deleteData } from "../../utils/apiRequests";
 
-function getAuthHeaders() {
-  if (typeof window === "undefined") return {};
-  const token = localStorage.getItem("accessToken") || localStorage.getItem("token") || (() => {
-    try { return JSON.parse(localStorage.getItem("user") || "{}") ?.token; } catch { return null; }
-  })();
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
+
 
 export default function SourceList() {
   const [loading, setLoading] = useState(false);
@@ -23,8 +17,10 @@ export default function SourceList() {
   const load = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("/api/booking/sources", { headers: getAuthHeaders() });
-      setRows(Array.isArray(res.data) ? res.data : []);
+      const res = await getData("/api/booking/sources");
+      if (res && res.data) {
+        setRows(Array.isArray(res.data) ? res.data : []);
+      }
     } catch (error) {
       toast.error("Không thể tải danh sách nguồn khách.");
     } finally {
@@ -50,10 +46,10 @@ export default function SourceList() {
     if (!form.name.trim()) { toast.warning("Vui lòng nhập tên nguồn khách."); return; }
     try {
       if (editItem) {
-        await axios.put(`/api/booking/sources/${editItem.id}`, form, { headers: getAuthHeaders() });
+        await putData(`/api/booking/sources/${editItem.id}`, form);
         toast.success("Cập nhật thành công.");
       } else {
-        await axios.post("/api/booking/sources", form, { headers: getAuthHeaders() });
+        await postData("/api/booking/sources", form);
         toast.success("Thêm mới thành công.");
       }
       setModal(false);
@@ -67,7 +63,7 @@ export default function SourceList() {
   const onDelete = async (id) => {
     if (!confirm("Xóa nguồn khách này?")) return;
     try {
-      await axios.delete(`/api/booking/sources/${id}`, { headers: getAuthHeaders() });
+      await deleteData(`/api/booking/sources/${id}`);
       toast.success("Đã xóa.");
       load();
     } catch (error) {

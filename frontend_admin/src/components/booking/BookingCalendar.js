@@ -3,16 +3,10 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Button, Col, Input, Row } from "reactstrap";
 import { toast } from "react-toastify";
-import axios from "axios";
+import { getData, postData, deleteData } from "../../utils/apiRequests";
 import BookingForm from "./BookingForm";
 
-function getAuthHeaders() {
-  if (typeof window === "undefined") return {};
-  const token = localStorage.getItem("accessToken") || localStorage.getItem("token") || (() => {
-    try { return JSON.parse(localStorage.getItem("user") || "{}") ?.token; } catch { return null; }
-  })();
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
+
 
 function formatDate(d) {
   return d.toISOString().split("T")[0];
@@ -47,11 +41,13 @@ export default function BookingCalendar() {
 
   // Load rooms
   useEffect(() => {
-    axios.get("/api/booking/rooms", { headers: getAuthHeaders() })
+    getData("/api/booking/rooms")
       .then((res) => {
-        const data = Array.isArray(res.data) ? res.data : [];
-        setRooms(data);
-        if (data.length > 0 && !selectedRoom) setSelectedRoom(String(data[0].id));
+        if (res && res.data) {
+          const data = Array.isArray(res.data) ? res.data : [];
+          setRooms(data);
+          if (data.length > 0 && !selectedRoom) setSelectedRoom(String(data[0].id));
+        }
       })
       .catch(() => toast.error("Không thể tải danh sách phòng."));
   }, []);
@@ -61,11 +57,14 @@ export default function BookingCalendar() {
     if (!selectedRoom) return;
     setLoading(true);
     try {
-      const res = await axios.get(
-        `/api/booking/bookings/calendar?room_id=${selectedRoom}&month=${month}&year=${year}`,
-        { headers: getAuthHeaders() }
+      const res = await getData(
+        `/api/booking/bookings/calendar?room_id=${selectedRoom}&month=${month}&year=${year}`
       );
-      setCalendarData(res.data || { bookings: [], lockedDays: [] });
+      if (res && res.data) {
+        setCalendarData(res.data || { bookings: [], lockedDays: [] });
+      } else {
+        setCalendarData({ bookings: [], lockedDays: [] });
+      }
     } catch {
       toast.error("Không thể tải lịch.");
     } finally {
@@ -121,10 +120,10 @@ export default function BookingCalendar() {
   const onLockDays = async () => {
     if (selectedDates.length === 0) { toast.warning("Chọn ngày để khóa."); return; }
     try {
-      await axios.post("/api/booking/lock-days", {
+      await postData("/api/booking/lock-days", {
         room_id: Number(selectedRoom),
         dates: selectedDates,
-      }, { headers: getAuthHeaders() });
+      });
       toast.success("Đã khóa phòng.");
       setSelectedDates([]);
       loadCalendar();
@@ -138,9 +137,8 @@ export default function BookingCalendar() {
     const lockedSelected = selectedDates.filter((d) => dateStatusMap[d]?.type === "locked");
     if (lockedSelected.length === 0) { toast.warning("Chọn ngày đã khóa để mở."); return; }
     try {
-      await axios.delete("/api/booking/lock-days", {
-        data: { room_id: Number(selectedRoom), dates: lockedSelected },
-        headers: getAuthHeaders(),
+      await deleteData("/api/booking/lock-days", {
+        data: { room_id: Number(selectedRoom), dates: lockedSelected }
       });
       toast.success("Đã mở khóa.");
       setSelectedDates([]);

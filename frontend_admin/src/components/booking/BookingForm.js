@@ -3,15 +3,9 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button, FormGroup, Label, Input, Row, Col, Table } from "reactstrap";
 import { toast } from "react-toastify";
-import axios from "axios";
+import { getData, postData, putData } from "../../utils/apiRequests";
 
-function getAuthHeaders() {
-  if (typeof window === "undefined") return {};
-  const token = localStorage.getItem("accessToken") || localStorage.getItem("token") || (() => {
-    try { return JSON.parse(localStorage.getItem("user") || "{}") ?.token; } catch { return null; }
-  })();
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
+
 
 function formatDate(d) {
   if (!d) return "";
@@ -48,8 +42,10 @@ export default function BookingForm({ isOpen, toggle, roomId, selectedDates, onS
   // Load sources
   useEffect(() => {
     if (isOpen) {
-      axios.get("/api/booking/sources", { headers: getAuthHeaders() })
-        .then((res) => setSources(Array.isArray(res.data) ? res.data : []))
+      getData("/api/booking/sources")
+        .then((res) => {
+          if (res && res.data) setSources(Array.isArray(res.data) ? res.data : []);
+        })
         .catch(() => {});
     }
   }, [isOpen]);
@@ -164,10 +160,10 @@ export default function BookingForm({ isOpen, toggle, roomId, selectedDates, onS
       };
 
       if (editBooking) {
-        await axios.put(`/api/booking/bookings/${editBooking.id}`, payload, { headers: getAuthHeaders() });
+        await putData(`/api/booking/bookings/${editBooking.id}`, payload);
         toast.success("Cập nhật booking thành công.");
       } else {
-        await axios.post("/api/booking/bookings", payload, { headers: getAuthHeaders() });
+        await postData("/api/booking/bookings", payload);
         toast.success("Tạo booking thành công.");
       }
       toggle();

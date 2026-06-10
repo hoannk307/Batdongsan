@@ -3,15 +3,9 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Col, Input, Row } from "reactstrap";
 import { toast } from "react-toastify";
-import axios from "axios";
+import { getData } from "../../utils/apiRequests";
 
-function getAuthHeaders() {
-  if (typeof window === "undefined") return {};
-  const token = localStorage.getItem("accessToken") || localStorage.getItem("token") || (() => {
-    try { return JSON.parse(localStorage.getItem("user") || "{}") ?.token; } catch { return null; }
-  })();
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
+
 
 function formatDate(d) {
   return new Date(d).toISOString().split("T")[0];
@@ -47,11 +41,14 @@ export default function BookingDashboard() {
   const loadTimeline = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get(
-        `/api/booking/bookings/timeline?month=${month}&year=${year}`,
-        { headers: getAuthHeaders() }
+      const res = await getData(
+        `/api/booking/bookings/timeline?month=${month}&year=${year}`
       );
-      setData(res.data || { rooms: [], bookings: [], lockedDays: [] });
+      if (res && res.data) {
+        setData(res.data || { rooms: [], bookings: [], lockedDays: [] });
+      } else {
+        setData({ rooms: [], bookings: [], lockedDays: [] });
+      }
     } catch {
       toast.error("Không thể tải timeline.");
     } finally {

@@ -3,15 +3,9 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { Button, Col, Input, Row, Table, Modal, ModalHeader, ModalBody, ModalFooter, FormGroup, Label } from "reactstrap";
 import { toast } from "react-toastify";
-import axios from "axios";
+import { getData, postData, putData, deleteData } from "../../utils/apiRequests";
 
-function getAuthHeaders() {
-  if (typeof window === "undefined") return {};
-  const token = localStorage.getItem("accessToken") || localStorage.getItem("token") || (() => {
-    try { return JSON.parse(localStorage.getItem("user") || "{}") ?.token; } catch { return null; }
-  })();
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
+
 
 export default function RoomList() {
   const [loading, setLoading] = useState(false);
@@ -23,8 +17,10 @@ export default function RoomList() {
   const load = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("/api/booking/rooms", { headers: getAuthHeaders() });
-      setRows(Array.isArray(res.data) ? res.data : []);
+      const res = await getData("/api/booking/rooms");
+      if (res && res.data) {
+        setRows(Array.isArray(res.data) ? res.data : []);
+      }
     } catch (error) {
       toast.error("Không thể tải danh sách phòng.");
     } finally {
@@ -50,10 +46,10 @@ export default function RoomList() {
     if (!form.name.trim()) { toast.warning("Vui lòng nhập tên phòng."); return; }
     try {
       if (editItem) {
-        await axios.put(`/api/booking/rooms/${editItem.id}`, form, { headers: getAuthHeaders() });
+        await putData(`/api/booking/rooms/${editItem.id}`, form);
         toast.success("Cập nhật thành công.");
       } else {
-        await axios.post("/api/booking/rooms", form, { headers: getAuthHeaders() });
+        await postData("/api/booking/rooms", form);
         toast.success("Thêm mới thành công.");
       }
       setModal(false);
@@ -67,7 +63,7 @@ export default function RoomList() {
   const onDelete = async (id) => {
     if (!confirm("Xóa phòng này? Tất cả bookings liên quan sẽ bị xóa.")) return;
     try {
-      await axios.delete(`/api/booking/rooms/${id}`, { headers: getAuthHeaders() });
+      await deleteData(`/api/booking/rooms/${id}`);
       toast.success("Đã xóa.");
       load();
     } catch (error) {
