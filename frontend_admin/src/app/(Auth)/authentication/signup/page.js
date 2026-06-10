@@ -3,7 +3,7 @@ import { Field, Form, Formik } from "formik";
 import * as Yup from "yup";
 import Link from "next/link";
 import React, { useState } from "react";
-import { Lock, Mail, User } from "react-feather";
+import { Lock, Mail, Phone, User } from "react-feather";
 import { Card, CardBody, Col, Container, Row } from "reactstrap";
 import { toast } from 'react-toastify';
 import Img from "@/components/Common/Image";
@@ -47,18 +47,24 @@ const SignUp = () => {
             <Card className='card'>
               <CardBody className='card-body'>
                 <div className='title-3 text-start'>
-                  <h2>Sign up</h2>
+                  <h2>Đăng ký tài khoản</h2>
                 </div>
                 <Formik
                   initialValues={{
                     name: "",
+                    phone: "",
                     email: "",
                     password: "",
+                    confirmPassword: "",
                   }}
                   validationSchema={Yup.object().shape({
                     name: Yup.string().required("Name is Required..!"),
+                    phone: Yup.string().required("Phone is Required..!"),
                     email: Yup.string().required("Enter valid Email..!"),
                     password: Yup.string().required("Password is required..!"),
+                    confirmPassword: Yup.string()
+                      .oneOf([Yup.ref('password'), null], 'Mật khẩu nhập lại không khớp!')
+                      .required("Confirm password is required..!"),
                   })}
                   onSubmit={signup}
                 >
@@ -69,9 +75,18 @@ const SignUp = () => {
                           <div className='input-group-prepend'>
                             <User size={20} />
                           </div>
-                          <Field type='text' name='name' className={`form-control ${errors.name && touched.name ? "is-invalid" : ""}`} placeholder='Enter your name' />
+                          <Field type='text' name='name' className={`form-control ${errors.name && touched.name ? "is-invalid" : ""}`} placeholder='Tên đăng nhập' />
                         </div>
                         {errors.name && touched.name && <div className='text-danger ms-4'>{errors.name}</div>}
+                      </div>
+                      <div className='form-group'>
+                        <div className='input-group'>
+                          <div className='input-group-prepend'>
+                            <Phone size={20} />
+                          </div>
+                          <Field type='number' name='phone' className={`form-control ${errors.phone && touched.phone ? "is-invalid" : ""}`} placeholder='Nhập số điện thoại' />
+                        </div>
+                        {errors.phone && touched.phone && <div className='text-danger ms-4'>{errors.phone}</div>}
                       </div>
                       <div className='form-group'>
                         <div className='input-group'>
@@ -99,7 +114,26 @@ const SignUp = () => {
                           </div>
                         </div>
                         {errors.password && touched.password && <div className='text-danger ms-4'>{errors.password}</div>}
-                        <div className='important-note'>password should be a minimum of 8 characters and should contains letters and numbers</div>
+                        <div className='important-note'>Mật khẩu phải có ít nhất 8 ký tự và chứa chữ và số</div>
+                      </div>
+                      <div className='form-group'>
+                        <div className='input-group'>
+                          <div className='input-group-prepend'>
+                            <Lock size={20} />
+                          </div>
+                          <Field type={`${showpassword ? "text" : "password"}`} name='confirmPassword' id='pwd-input2' className={`form-control ${errors.confirmPassword && touched.confirmPassword ? "is-invalid" : ""}`} placeholder='Nhập lại password' />
+                          <div className='input-group-apend'>
+                            <i
+                              id='pwd-icon'
+                              className={`far fa-eye${!showpassword ? "-slash" : ""}`}
+                              onClick={() => {
+                                setShowpassword(!showpassword);
+                              }}
+                            />
+                          </div>
+                        </div>
+                        {errors.confirmPassword && touched.confirmPassword && <div className='text-danger ms-4'>{errors.confirmPassword}</div>}
+                        <div className='important-note'>Nhập lại mật khẩu</div>
                       </div>
                       <div>
                         <button type='submit' className='btn btn-gradient btn-pill me-sm-3 me-2'>
@@ -124,24 +158,14 @@ const SignUp = () => {
                         <span>Facebook</span>
                       </Link>
                     </Col>
-                    <Col sm='6'>
-                      <Link href='https://twitter.com/' className='btn btn-social btn-flat twitter p-0'>
-                        <i className='fab fa-twitter' />
-                        <span>Twitter</span>
-                      </Link>
-                    </Col>
+
                     <Col sm='6'>
                       <Link href='https://accounts.google.com/' className='btn btn-social btn-flat google p-0'>
                         <i className='fab fa-google' />
                         <span>Google</span>
                       </Link>
                     </Col>
-                    <Col sm='6'>
-                      <Link href='https://www.linkedin.com/' className='btn btn-social btn-flat linkedin p-0'>
-                        <i className='fab fa-linkedin-in' />
-                        <span>Linkedin</span>
-                      </Link>
-                    </Col>
+
                   </Row>
                 </div>
               </CardBody>

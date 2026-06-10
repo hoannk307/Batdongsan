@@ -19,9 +19,9 @@ const BlogSection = ({ value }) => {
         <Row>
           <Col>
             <div className="title-3">
-              <svg className="title-svg">
+              {/* <svg className="title-svg">
                 <use xlinkHref="/assets/svg/icons.svg#title-line"></use>
-              </svg>
+              </svg> */}
               <h2>
                 Tin tức
               </h2>

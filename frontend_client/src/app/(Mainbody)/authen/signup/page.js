@@ -1,6 +1,6 @@
 "use client";
 import React, { Fragment } from "react";
-import { User, Lock, Mail } from "react-feather";
+import { User, Lock, Mail, Phone } from "react-feather";
 import { Col, Container, Row } from "reactstrap";
 import Link from "next/link";
 import Breadcrumb from "@/layout/Breadcrumb/Breadcrumb";
@@ -18,7 +18,7 @@ const SignUp = () => {
             <Col xl="5" lg="6" md="8" sm="10">
               <div className="theme-card">
                 <div className="title-3 text-start">
-                  <h2>Sign up</h2>
+                  <h2>Đăng ký</h2>
                 </div>
                 <form>
                   <div className="form-group">
@@ -28,7 +28,17 @@ const SignUp = () => {
                           <User />
                         </div>
                       </div>
-                      <input type="text" className="form-control" placeholder="Enter your name" required />
+                      <input type="text" className="form-control" placeholder="Tên đăng nhập" required />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <div className="input-group">
+                      <div className="input-group-prepend">
+                        <div className="input-group-text">
+                          <Phone />
+                        </div>
+                      </div>
+                      <input type="tel" className="form-control" placeholder="Số điện thoại" required />
                     </div>
                   </div>
                   <div className="form-group">
@@ -38,7 +48,7 @@ const SignUp = () => {
                           <Mail />
                         </div>
                       </div>
-                      <input type="email" className="form-control" placeholder="Enter email address" required />
+                      <input type="email" className="form-control" placeholder="Nhập email" required />
                     </div>
                   </div>
                   <div className="form-group">
@@ -55,7 +65,23 @@ const SignUp = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="important-note">password should be a minimum of 8 characters and should contains letters and numbers</div>
+                    <div className="important-note">Tối thiểu 8 ký tự và gồm chữ, số</div>
+                  </div>
+                  <div className="form-group">
+                    <div className="input-group">
+                      <div className="input-group-prepend">
+                        <div className="input-group-text">
+                          <Lock />
+                        </div>
+                      </div>
+                      <input type="password" id="pwd-input2" className="form-control" placeholder="Nhập lại Password" maxLength="8" required />
+                      <div className="input-group-apend">
+                        <div className="input-group-text">
+                          <i id="pwd-icon" className="far fa-eye-slash"></i>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="important-note">Nhập lại password</div>
                   </div>
                   <div>
                     <button type="submit" className="btn btn-gradient btn-pill me-sm-3 me-2">
@@ -78,23 +104,12 @@ const SignUp = () => {
                         </a>
                       </Col>
                       <Col sm="6">
-                        <a href="https://twitter.com/" className="btn btn-social btn-flat twitter p-0">
-                          <i className="fab fa-twitter"></i>
-                          <span>Twitter</span>
-                        </a>
-                      </Col>
-                      <Col sm="6">
                         <a href="https://account.google.com" className="btn btn-social btn-flat google p-0">
                           <i className="fab fa-google"></i>
                           <span>Google</span>
                         </a>
                       </Col>
-                      <Col sm="6">
-                        <a href="https://www.linkedin.com/" className="btn btn-social btn-flat linkedin p-0">
-                          <i className="fab fa-linkedin-in"></i>
-                          <span>Linkedin</span>
-                        </a>
-                      </Col>
+
                     </div>
                   </div>
                 </form>

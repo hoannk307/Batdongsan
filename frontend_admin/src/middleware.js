@@ -4,7 +4,7 @@ export function middleware(request) {
   const path = request.nextUrl.pathname;
   const accessToken = request.cookies.get("accessToken")?.value;
 
-  const isPublicPage = path.startsWith("/authentication/login");
+  const isPublicPage = path.startsWith("/authentication/");
 
   if (!accessToken && !isPublicPage) {
     const returnTo = request.nextUrl.pathname + request.nextUrl.search;

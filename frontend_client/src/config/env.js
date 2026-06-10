@@ -14,7 +14,7 @@
 
 /** Base URL của backend NestJS API (dùng cho client-side, browser gọi) */
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+  process.env.NEXT_PUBLIC_API_URL || "https://api.nhatranglands.vn/api";
 
 /**
  * URL nội bộ của backend (dùng cho server-side API routes bên trong Docker).
@@ -28,7 +28,7 @@ export const INTERNAL_API_URL =
 
 /** URL công khai của frontend_client (dùng cho SEO, OG tags) */
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3002";
+  process.env.NEXT_PUBLIC_SITE_URL || "https://nhatranglands.vn";
 
 /** Base URL công khai của Cloudflare R2 (dùng để ghép với path ảnh từ file_attach) */
 export const R2_PUBLIC_BASE_URL =

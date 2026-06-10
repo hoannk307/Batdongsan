@@ -13,9 +13,9 @@ const PropertySection = ({ value, size }) => {
         <Row className='ratio_63 zoom-gallery property-box-flat'>
           <Col>
             <div className='title-3'>
-              <svg className='title-svg'>
+              {/* <svg className='title-svg'>
                 <use xlinkHref='/assets/svg/icons.svg#title-line'></use>
-              </svg>
+              </svg> */}
               <h2 >TIN BẤT ĐỘNG SẢN</h2>
               {/* <p className='font-roboto'>{propertyDescription}</p> */}
             </div>

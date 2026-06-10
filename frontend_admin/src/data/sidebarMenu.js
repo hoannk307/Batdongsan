@@ -1,4 +1,4 @@
-import { Airplay, BarChart, CreditCard, FileText, Grid, Layout, Lock, MapPin, UserPlus, Users } from "react-feather";
+import { Airplay, BarChart, Calendar, CreditCard, FileText, Grid, Layout, Lock, MapPin, UserPlus, Users } from "react-feather";
 
 export const SidebarMenuItem = [
     {
@@ -84,6 +84,34 @@ export const SidebarMenuItem = [
             }
         ]
     },
+    {
+        title: 'Booking',
+        icon: <Calendar />,
+        type: 'sub',
+        children: [
+            {
+                path: "/booking/dashboard",
+                title: 'Dashboard',
+                type: 'link'
+            },
+            {
+                path: "/booking/calendar",
+                title: 'Lịch',
+                type: 'link'
+            },
+            {
+                path: "/booking/sources",
+                title: 'Nguồn khách hàng',
+                type: 'link'
+            },
+            {
+                path: "/booking/rooms",
+                title: 'Quản lý phòng',
+                type: 'link'
+            }
+        ]
+    },
+
     {
         title: 'Agents',
         icon: <UserPlus />,

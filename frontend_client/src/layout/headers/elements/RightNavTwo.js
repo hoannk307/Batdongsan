@@ -12,7 +12,7 @@ const RightNavTwo = () => {
 
   return (
     <ul className="header-right">
-      <li>
+      {/* <li>
         <Link href="/user-profile">
           <User />
         </Link>
@@ -35,7 +35,7 @@ const RightNavTwo = () => {
         >
           Đăng nhập
         </Link>
-      </li>
+      </li> */}
       <li>
         <Link
           href={`${ADMIN_URL}/myproperties/add-property`}
