@@ -28,7 +28,7 @@ export class BookingService {
     const overlapping = await this.prisma.bk_bookings.findFirst({
       where: {
         room_id: dto.room_id,
-        status: 'CONFIRMED',
+        status: { in: ['COMPLETED', 'DEPOSITED', 'UNPAID'] },
         check_in: { lt: checkOut },
         check_out: { gt: checkIn },
       },
@@ -150,7 +150,7 @@ export class BookingService {
       this.prisma.bk_bookings.findMany({
         where: {
           room_id: roomId,
-          status: 'CONFIRMED',
+          status: { in: ['COMPLETED', 'DEPOSITED', 'UNPAID'] },
           check_in: { lte: endOfMonth },
           check_out: { gte: startOfMonth },
         },
@@ -191,7 +191,7 @@ export class BookingService {
       this.prisma.bk_bookings.findMany({
         where: {
           room_id: { in: roomIds },
-          status: 'CONFIRMED',
+          status: { in: ['COMPLETED', 'DEPOSITED', 'UNPAID'] },
           check_in: { lte: endOfMonth },
           check_out: { gte: startOfMonth },
         },
@@ -246,7 +246,7 @@ export class BookingService {
         where: {
           room_id: existing.room_id,
           id: { not: id },
-          status: 'CONFIRMED',
+          status: { in: ['COMPLETED', 'DEPOSITED', 'UNPAID'] },
           check_in: { lt: newCheckOut },
           check_out: { gt: newCheckIn },
         },
@@ -424,3 +424,5 @@ export class BookingService {
     return this.prisma.bk_surcharges.delete({ where: { id: surchargeId } });
   }
 }
+
+// Trigger reload

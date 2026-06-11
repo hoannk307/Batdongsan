@@ -40,7 +40,7 @@ export class UpdateBookingDto {
   comment?: string;
 
   @IsOptional()
-  @IsEnum(['CONFIRMED', 'CANCELLED'])
+  @IsEnum(['COMPLETED', 'DEPOSITED', 'UNPAID'])
   status?: string;
 
   @IsOptional()

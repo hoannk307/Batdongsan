@@ -34,6 +34,7 @@ export default function BookingForm({ isOpen, toggle, roomId, selectedDates, onS
     check_out: "",
     comment: "",
     total_amount: 0,
+    status: "DEPOSITED",
   });
   const [surcharges, setSurcharges] = useState([]);
   const [payments, setPayments] = useState([]);
@@ -63,6 +64,7 @@ export default function BookingForm({ isOpen, toggle, roomId, selectedDates, onS
           check_out: formatDate(editBooking.check_out),
           comment: editBooking.comment || "",
           total_amount: Number(editBooking.total_amount) || 0,
+          status: editBooking.status || "DEPOSITED",
         });
         setSurcharges((editBooking.surcharges || []).map((s, i) => ({ ...s, _key: i, price: Number(s.price) })));
         setPayments((editBooking.payments || []).map((p, i) => ({ ...p, _key: i, amount: Number(p.amount), payment_date: formatDate(p.payment_date) })));
@@ -84,6 +86,7 @@ export default function BookingForm({ isOpen, toggle, roomId, selectedDates, onS
           check_out: checkOut,
           comment: "",
           total_amount: 0,
+          status: "DEPOSITED",
         });
         setSurcharges([]);
         setPayments([]);
@@ -147,6 +150,7 @@ export default function BookingForm({ isOpen, toggle, roomId, selectedDates, onS
         estimated_revenue: estimatedRevenue,
         total_amount: Number(form.total_amount) || estimatedRevenue,
         comment: form.comment || null,
+        status: form.status,
         surcharges: surcharges.filter((s) => s.name.trim()).map((s) => ({
           name: s.name,
           price: Number(s.price) || 0,
@@ -271,18 +275,28 @@ export default function BookingForm({ isOpen, toggle, roomId, selectedDates, onS
 
         {/* Revenue */}
         <Row className="mb-3">
-          <Col md={6}>
+          <Col md={4}>
             <FormGroup>
               <Label className="fw-bold">Doanh thu ước tính</Label>
               <Input readOnly value={formatMoney(estimatedRevenue) + " VNĐ"} className="bg-light" />
               <small className="text-muted">({formatMoney(form.price_per_night)} × {numNights} đêm) + {formatMoney(totalSurcharges)} phụ phí</small>
             </FormGroup>
           </Col>
-          <Col md={6}>
+          <Col md={4}>
             <FormGroup>
-              <Label className="fw-bold">Tổng tiền cần thanh toán</Label>
+              <Label className="fw-bold">Tổng thanh toán</Label>
               <Input type="number" value={form.total_amount} onChange={(e) => setForm({ ...form, total_amount: Number(e.target.value) || 0 })} />
               <small className="text-muted">Có thể sửa đổi</small>
+            </FormGroup>
+          </Col>
+          <Col md={4}>
+            <FormGroup>
+              <Label className="fw-bold">Trạng thái</Label>
+              <Input type="select" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+                <option value="COMPLETED">Tất toán</option>
+                <option value="DEPOSITED">Đã cọc</option>
+                <option value="UNPAID">Chưa cọc</option>
+              </Input>
             </FormGroup>
           </Col>
         </Row>

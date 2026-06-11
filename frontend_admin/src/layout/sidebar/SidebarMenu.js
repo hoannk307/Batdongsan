@@ -4,10 +4,17 @@ import { ChevronsRight } from 'react-feather';
 import { SidebarMenuItem } from '../../data/sidebarMenu';
 import { useRouter } from 'next/navigation';
 
-const SidebarMenu = () => {
+const SidebarMenu = ({ setToggle }) => {
     const router = useRouter();
     const [activeMenu, setActiveMenu] = useState();
     const [chiledMenu, setChiledMenu] = useState();
+
+    const handleLinkClick = (title) => {
+        setActiveMenu(prev => prev !== title ? title : '');
+        if (window.innerWidth <= 991 && setToggle) {
+            setToggle(false);
+        }
+    };
 
     useEffect(() => {
         if (router.asPath) {
@@ -31,13 +38,13 @@ const SidebarMenu = () => {
                 SidebarMenuItem && SidebarMenuItem.map((item, i) => {
                     return (
                         <li key={i} className="sidebar-item">
-                            {item.type === 'link' && <Link href={`${item.path}`} className={`sidebar-link only-link ${activeMenu === item.title ? 'active' : ''}`} onClick={() => { setActiveMenu(prev => prev !== item.title && item.title) }}>
+                            {item.type === 'link' && <Link href={`${item.path}`} className={`sidebar-link only-link ${activeMenu === item.title ? 'active' : ''}`} onClick={() => handleLinkClick(item.title)}>
                                 {item.icon}
                                 <span>{item.title}</span>
                             </Link>}
                             {
                                 item.type === 'sub' &&
-                                <a href="#" className={`sidebar-link ${activeMenu === item.title ? 'active' : ''}`} onClick={() => { setActiveMenu(prev => prev !== item.title && item.title) }}>
+                                <a href="#" className={`sidebar-link ${activeMenu === item.title ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setActiveMenu(prev => prev !== item.title ? item.title : ''); }}>
                                     {item.icon}
                                     <span>{item.title}</span>
                                     <div className="according-menu"><i className="fa fa-angle-right" /></div>
@@ -49,7 +56,7 @@ const SidebarMenu = () => {
                                     {item.children.map((child, i) => {
                                         return (
                                             <li key={i}>
-                                                <Link href={`${child.path}`} className={`${child.title === chiledMenu ? 'active' : ''}`} onClick={() => { setChiledMenu(child.title) }}>
+                                                <Link href={`${child.path}`} className={`${child.title === chiledMenu ? 'active' : ''}`} onClick={() => { setChiledMenu(child.title); if (window.innerWidth <= 991 && setToggle) setToggle(false); }}>
                                                     <ChevronsRight />
                                                     {child.title}
                                                     {

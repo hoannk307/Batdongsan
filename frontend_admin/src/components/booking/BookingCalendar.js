@@ -256,6 +256,11 @@ export default function BookingCalendar() {
               <i className="fa fa-plus me-1" /> Tạo Booking
             </Button>
           )}
+          {hasBookedSelected && selectedBookings.length === 1 && (
+            <Button className="btn btn-pill btn-info text-white" onClick={() => { setEditBooking(selectedBookings[0]); setBookingFormOpen(true); }} disabled={loading}>
+              <i className="fa fa-eye me-1" /> Xem chi tiết
+            </Button>
+          )}
           {hasBookedSelected && (
             <Button className="btn btn-pill btn-danger" onClick={onDeleteBooking} disabled={loading}>
               <i className="fa fa-trash me-1" /> Xóa Booking ({selectedBookings.length})
@@ -299,29 +304,31 @@ export default function BookingCalendar() {
       </Row>
 
       {/* Calendar Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 6 }}>
-        {WEEKDAYS.map((wd) => (
-          <div key={wd} style={{ textAlign: "center", fontWeight: 700, fontSize: 13, padding: "8px 0", color: "#6c757d" }}>
-            {wd}
-          </div>
-        ))}
-        {calendarCells.map((cell, idx) => {
-          if (!cell) return <div key={`empty-${idx}`} />;
-          const status = dateStatusMap[cell.dateStr];
-          return (
-            <div key={cell.dateStr} style={getCellStyle(cell.dateStr)} onClick={() => toggleDate(cell.dateStr)}>
-              <span>{cell.day}</span>
-              {status?.type === "booked" && (
-                <span style={{ fontSize: 9, marginTop: 2, maxWidth: "90%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {status.booking.sources?.name || status.booking.customer_name}
-                </span>
-              )}
-              {status?.type === "locked" && (
-                <span style={{ fontSize: 9, marginTop: 2 }}>🔒</span>
-              )}
+      <div className="table-responsive" style={{ overflowX: "auto", paddingBottom: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(40px, 1fr))", gap: 6, minWidth: 400 }}>
+          {WEEKDAYS.map((wd) => (
+            <div key={wd} style={{ textAlign: "center", fontWeight: 700, fontSize: 13, padding: "8px 0", color: "#6c757d" }}>
+              {wd}
             </div>
-          );
-        })}
+          ))}
+          {calendarCells.map((cell, idx) => {
+            if (!cell) return <div key={`empty-${idx}`} />;
+            const status = dateStatusMap[cell.dateStr];
+            return (
+              <div key={cell.dateStr} style={getCellStyle(cell.dateStr)} onClick={() => toggleDate(cell.dateStr)}>
+                <span>{cell.day}</span>
+                {status?.type === "booked" && (
+                  <span style={{ fontSize: 9, marginTop: 2, maxWidth: "90%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {status.booking.sources?.name || status.booking.customer_name}
+                  </span>
+                )}
+                {status?.type === "locked" && (
+                  <span style={{ fontSize: 9, marginTop: 2 }}>🔒</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Booking Form Modal */}

@@ -31,7 +31,7 @@ const Sidebar = ({ toggle, setToggle }) => {
           </Media>
         </div>
         <div id="mainsidebar">
-          <SidebarMenu />
+          <SidebarMenu setToggle={setToggle} />
         </div >
       </div >
     </div >

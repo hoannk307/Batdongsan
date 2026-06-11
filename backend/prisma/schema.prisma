@@ -22,13 +22,13 @@ model favorites {
 model file_attach {
   id            Int       @id(map: "property_images_pkey") @default(autoincrement())
   object_id     Int
+  path          String?   @db.VarChar(500)
   nghiepvu_code String?   @db.Char(100)
   name          String?
   create_user   Int?
   create_date   DateTime? @db.Date
   type          String?   @db.Char(20)
   extend        String?   @db.Char(20)
-  path          String?   @db.VarChar(500)
 
   @@index([object_id], map: "property_images_property_id_idx")
 }
@@ -115,17 +115,105 @@ model users {
   avatar      String?       @db.VarChar(255)
   created_at  DateTime      @default(now())
   updated_at  DateTime
-  favorites   favorites[]
-  news        news[]
+  bk_bookings bk_bookings[]
   bk_rooms    bk_rooms[]
   bk_sources  bk_sources[]
-  bk_bookings bk_bookings[]
+  favorites   favorites[]
+  news        news[]
 }
 
 model news_catelog {
   id          Int     @id
   name        String  @db.VarChar(255)
   description String? @db.VarChar(500)
+}
+
+model bk_rooms {
+  id          Int              @id @default(autoincrement())
+  user_id     Int
+  name        String           @db.VarChar(255)
+  comment     String?
+  created_at  DateTime         @default(now())
+  updated_at  DateTime         @updatedAt
+  bookings    bk_bookings[]
+  locked_days bk_locked_days[]
+  users       users            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+}
+
+model bk_sources {
+  id         Int           @id @default(autoincrement())
+  user_id    Int
+  name       String        @db.VarChar(255)
+  comment    String?
+  created_at DateTime      @default(now())
+  bookings   bk_bookings[]
+  users      users         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+}
+
+model bk_bookings {
+  id                Int             @id @default(autoincrement())
+  room_id           Int
+  source_id         Int?
+  user_id           Int
+  customer_name     String          @db.VarChar(255)
+  customer_phone    String?         @db.VarChar(50)
+  check_in          DateTime        @db.Date
+  check_out         DateTime        @db.Date
+  price_per_night   Decimal         @db.Decimal(15, 2)
+  estimated_revenue Decimal         @db.Decimal(15, 2)
+  total_amount      Decimal         @db.Decimal(15, 2)
+  comment           String?
+  status            BkBookingStatus @default(DEPOSITED)
+  created_at        DateTime        @default(now())
+  updated_at        DateTime        @updatedAt
+  rooms             bk_rooms        @relation(fields: [room_id], references: [id], onDelete: Cascade)
+  sources           bk_sources?     @relation(fields: [source_id], references: [id])
+  users             users           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  payments          bk_payments[]
+  surcharges        bk_surcharges[]
+
+  @@index([room_id])
+  @@index([user_id])
+  @@index([check_in, check_out])
+}
+
+model bk_surcharges {
+  id         Int         @id @default(autoincrement())
+  booking_id Int
+  name       String      @db.VarChar(255)
+  price      Decimal     @db.Decimal(15, 2)
+  comment    String?
+  created_at DateTime    @default(now())
+  bookings   bk_bookings @relation(fields: [booking_id], references: [id], onDelete: Cascade)
+
+  @@index([booking_id])
+}
+
+model bk_payments {
+  id           Int         @id @default(autoincrement())
+  booking_id   Int
+  payment_date DateTime    @db.Date
+  amount       Decimal     @db.Decimal(15, 2)
+  comment      String?
+  created_at   DateTime    @default(now())
+  bookings     bk_bookings @relation(fields: [booking_id], references: [id], onDelete: Cascade)
+
+  @@index([booking_id])
+}
+
+model bk_locked_days {
+  id          Int      @id @default(autoincrement())
+  room_id     Int
+  locked_date DateTime @db.Date
+  created_at  DateTime @default(now())
+  rooms       bk_rooms @relation(fields: [room_id], references: [id], onDelete: Cascade)
+
+  @@unique([room_id, locked_date])
+  @@index([room_id, locked_date])
 }
 
 enum LocationType {
@@ -148,103 +236,8 @@ enum UserRole {
   ADMIN
 }
 
-// ===== BOOKING MODELS =====
-
 enum BkBookingStatus {
-  CONFIRMED
-  CANCELLED
-}
-
-model bk_rooms {
-  id          Int              @id @default(autoincrement())
-  user_id     Int
-  name        String           @db.VarChar(255)
-  comment     String?
-  created_at  DateTime         @default(now())
-  updated_at  DateTime         @updatedAt
-
-  users       users            @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  bookings    bk_bookings[]
-  locked_days bk_locked_days[]
-
-  @@index([user_id])
-}
-
-model bk_sources {
-  id          Int              @id @default(autoincrement())
-  user_id     Int
-  name        String           @db.VarChar(255)
-  comment     String?
-  created_at  DateTime         @default(now())
-
-  users       users            @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  bookings    bk_bookings[]
-
-  @@index([user_id])
-}
-
-model bk_bookings {
-  id                Int              @id @default(autoincrement())
-  room_id           Int
-  source_id         Int?
-  user_id           Int
-  customer_name     String           @db.VarChar(255)
-  customer_phone    String?          @db.VarChar(50)
-  check_in          DateTime         @db.Date
-  check_out         DateTime         @db.Date
-  price_per_night   Decimal          @db.Decimal(15, 2)
-  estimated_revenue Decimal          @db.Decimal(15, 2)
-  total_amount      Decimal          @db.Decimal(15, 2)
-  comment           String?
-  status            BkBookingStatus  @default(CONFIRMED)
-  created_at        DateTime         @default(now())
-  updated_at        DateTime         @updatedAt
-
-  rooms      bk_rooms       @relation(fields: [room_id], references: [id], onDelete: Cascade)
-  sources    bk_sources?    @relation(fields: [source_id], references: [id], onDelete: SetNull)
-  users      users          @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  surcharges bk_surcharges[]
-  payments   bk_payments[]
-
-  @@index([room_id])
-  @@index([user_id])
-  @@index([check_in, check_out])
-}
-
-model bk_surcharges {
-  id          Int          @id @default(autoincrement())
-  booking_id  Int
-  name        String       @db.VarChar(255)
-  price       Decimal      @db.Decimal(15, 2)
-  comment     String?
-  created_at  DateTime     @default(now())
-
-  bookings    bk_bookings  @relation(fields: [booking_id], references: [id], onDelete: Cascade)
-
-  @@index([booking_id])
-}
-
-model bk_payments {
-  id            Int          @id @default(autoincrement())
-  booking_id    Int
-  payment_date  DateTime     @db.Date
-  amount        Decimal      @db.Decimal(15, 2)
-  comment       String?
-  created_at    DateTime     @default(now())
-
-  bookings      bk_bookings  @relation(fields: [booking_id], references: [id], onDelete: Cascade)
-
-  @@index([booking_id])
-}
-
-model bk_locked_days {
-  id          Int        @id @default(autoincrement())
-  room_id     Int
-  locked_date DateTime   @db.Date
-  created_at  DateTime   @default(now())
-
-  rooms       bk_rooms   @relation(fields: [room_id], references: [id], onDelete: Cascade)
-
-  @@unique([room_id, locked_date])
-  @@index([room_id, locked_date])
+  COMPLETED
+  DEPOSITED
+  UNPAID
 }
