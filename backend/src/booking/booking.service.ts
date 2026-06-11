@@ -52,6 +52,7 @@ export class BookingService {
           estimated_revenue: dto.estimated_revenue,
           total_amount: dto.total_amount,
           comment: dto.comment || null,
+          status: dto.status as any,
         },
       });
 

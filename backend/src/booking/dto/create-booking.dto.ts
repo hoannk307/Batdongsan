@@ -60,6 +60,10 @@ export class CreateBookingDto {
   comment?: string;
 
   @IsOptional()
+  @IsEnum(['COMPLETED', 'DEPOSITED', 'UNPAID'])
+  status?: string;
+
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => SurchargeItemDto)
