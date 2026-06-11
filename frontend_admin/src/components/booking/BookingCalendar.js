@@ -250,7 +250,7 @@ export default function BookingCalendar() {
             {[year - 1, year, year + 1, year + 2].map((y) => <option key={y} value={y}>{y}</option>)}
           </Input>
         </Col>
-        <Col md={5} className="d-flex gap-2 flex-wrap">
+        <Col md={5} className="d-flex gap-2 flex-wrap mt-3">
           {hasFreeSelected && (
             <Button className="btn btn-gradient btn-pill" onClick={onCreateBooking} disabled={loading}>
               <i className="fa fa-plus me-1" /> Tạo Booking
