@@ -37,17 +37,6 @@ export class BookingService {
       throw new BadRequestException('Ngày đã có booking khác trùng lịch');
     }
 
-    // Check locked days
-    const lockedDays = await this.prisma.bk_locked_days.findMany({
-      where: {
-        room_id: dto.room_id,
-        locked_date: { gte: checkIn, lt: checkOut },
-      },
-    });
-    if (lockedDays.length > 0) {
-      throw new BadRequestException('Một số ngày trong khoảng đã bị khóa');
-    }
-
     // Transaction: create booking + surcharges + payments
     return this.prisma.$transaction(async (tx) => {
       const booking = await tx.bk_bookings.create({
@@ -85,6 +74,21 @@ export class BookingService {
             amount: p.amount,
             comment: p.comment || null,
           })),
+        });
+      }
+
+      // Auto-lock ngày từ check_in đến check_out
+      const lockRecords = [];
+      for (let d = new Date(checkIn); d < checkOut; d.setDate(d.getDate() + 1)) {
+        lockRecords.push({
+          room_id: dto.room_id,
+          locked_date: new Date(d),
+        });
+      }
+      if (lockRecords.length > 0) {
+        await tx.bk_locked_days.createMany({
+          data: lockRecords,
+          skipDuplicates: true,
         });
       }
 
@@ -310,8 +314,28 @@ export class BookingService {
   }
 
   async remove(id: number, userId: number) {
-    await this.findOne(id, userId);
-    return this.prisma.bk_bookings.delete({ where: { id } });
+    const booking = await this.findOne(id, userId);
+
+    // Xóa trong transaction: locked_days (theo date range) + surcharges + payments + booking
+    return this.prisma.$transaction(async (tx) => {
+      const checkIn = new Date(booking.check_in);
+      const checkOut = new Date(booking.check_out);
+
+      // Xóa locked days thuộc booking date range
+      await tx.bk_locked_days.deleteMany({
+        where: {
+          room_id: booking.room_id,
+          locked_date: { gte: checkIn, lt: checkOut },
+        },
+      });
+
+      // Xóa surcharges + payments (cascade cũng xử lý, nhưng explicit cho rõ ràng)
+      await tx.bk_surcharges.deleteMany({ where: { booking_id: id } });
+      await tx.bk_payments.deleteMany({ where: { booking_id: id } });
+
+      // Xóa booking
+      return tx.bk_bookings.delete({ where: { id } });
+    });
   }
 
   // ===== Lock Days =====

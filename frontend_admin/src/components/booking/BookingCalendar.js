@@ -105,17 +105,37 @@ export default function BookingCalendar() {
   }, [month, year, daysInMonth, firstDay]);
 
   const toggleDate = (dateStr) => {
-    const status = dateStatusMap[dateStr];
-    if (status?.type === "booked") {
-      // Click on booked date → open edit booking
-      setEditBooking(status.booking);
-      setBookingFormOpen(true);
-      return;
-    }
     setSelectedDates((prev) =>
       prev.includes(dateStr) ? prev.filter((d) => d !== dateStr) : [...prev, dateStr]
     );
   };
+
+  // Detect what type of dates are selected
+  const selectedBookedDates = useMemo(() => {
+    return selectedDates.filter((d) => dateStatusMap[d]?.type === "booked");
+  }, [selectedDates, dateStatusMap]);
+
+  const selectedLockedDates = useMemo(() => {
+    return selectedDates.filter((d) => dateStatusMap[d]?.type === "locked");
+  }, [selectedDates, dateStatusMap]);
+
+  const selectedFreeDates = useMemo(() => {
+    return selectedDates.filter((d) => !dateStatusMap[d]);
+  }, [selectedDates, dateStatusMap]);
+
+  // Get unique bookings from selected booked dates
+  const selectedBookings = useMemo(() => {
+    const bookingMap = new Map();
+    selectedBookedDates.forEach((d) => {
+      const b = dateStatusMap[d]?.booking;
+      if (b && !bookingMap.has(b.id)) bookingMap.set(b.id, b);
+    });
+    return Array.from(bookingMap.values());
+  }, [selectedBookedDates, dateStatusMap]);
+
+  const hasBookedSelected = selectedBookedDates.length > 0;
+  const hasLockedSelected = selectedLockedDates.length > 0;
+  const hasFreeSelected = selectedFreeDates.length > 0;
 
   const onLockDays = async () => {
     if (selectedDates.length === 0) { toast.warning("Chọn ngày để khóa."); return; }
@@ -134,11 +154,11 @@ export default function BookingCalendar() {
   };
 
   const onUnlockDays = async () => {
-    const lockedSelected = selectedDates.filter((d) => dateStatusMap[d]?.type === "locked");
-    if (lockedSelected.length === 0) { toast.warning("Chọn ngày đã khóa để mở."); return; }
+    if (selectedLockedDates.length === 0) { toast.warning("Chọn ngày đã khóa để mở."); return; }
+    if (!confirm(`Mở khóa ${selectedLockedDates.length} ngày?`)) return;
     try {
       await deleteData("/api/booking/lock-days", {
-        data: { room_id: Number(selectedRoom), dates: lockedSelected }
+        data: { room_id: Number(selectedRoom), dates: selectedLockedDates }
       });
       toast.success("Đã mở khóa.");
       setSelectedDates([]);
@@ -148,11 +168,25 @@ export default function BookingCalendar() {
     }
   };
 
+  const onDeleteBooking = async () => {
+    if (selectedBookings.length === 0) return;
+    const names = selectedBookings.map((b) => `#${b.id} - ${b.customer_name}`).join(", ");
+    if (!confirm(`Xóa ${selectedBookings.length} booking: ${names}?\nTất cả dữ liệu liên quan (phụ phí, thanh toán, ngày khóa) sẽ bị xóa.`)) return;
+    try {
+      for (const b of selectedBookings) {
+        await deleteData(`/api/booking/bookings/${b.id}`);
+      }
+      toast.success(`Đã xóa ${selectedBookings.length} booking.`);
+      setSelectedDates([]);
+      loadCalendar();
+    } catch (error) {
+      const msg = error?.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join(", ") : msg || "Lỗi xóa booking.");
+    }
+  };
+
   const onCreateBooking = () => {
-    if (selectedDates.length === 0) { toast.warning("Chọn ngày để tạo booking."); return; }
-    // Check no booked/locked dates selected
-    const conflict = selectedDates.find((d) => dateStatusMap[d]);
-    if (conflict) { toast.warning("Không thể tạo booking cho ngày đã có booking hoặc bị khóa."); return; }
+    if (selectedFreeDates.length === 0) { toast.warning("Chọn ngày trống để tạo booking."); return; }
     setEditBooking(null);
     setBookingFormOpen(true);
   };
@@ -175,8 +209,14 @@ export default function BookingCalendar() {
       transition: "all 0.2s",
       position: "relative",
     };
+    if (status?.type === "booked" && isSelected) {
+      return { ...base, backgroundColor: "#e63946", color: "#fff", border: "2px solid #c1121f", boxShadow: "0 0 0 2px #f72585" };
+    }
     if (status?.type === "booked") {
       return { ...base, backgroundColor: "#4361ee", color: "#fff", border: "2px solid #3a56d4" };
+    }
+    if (status?.type === "locked" && isSelected) {
+      return { ...base, backgroundColor: "#6c757d", color: "#fff", border: "2px solid #495057", boxShadow: "0 0 0 2px #f72585" };
     }
     if (status?.type === "locked") {
       return { ...base, backgroundColor: "#adb5bd", color: "#fff", border: "2px solid #6c757d" };
@@ -211,15 +251,26 @@ export default function BookingCalendar() {
           </Input>
         </Col>
         <Col md={5} className="d-flex gap-2 flex-wrap">
-          <Button className="btn btn-gradient btn-pill" onClick={onCreateBooking} disabled={loading}>
-            <i className="fa fa-plus me-1" /> Tạo Booking
-          </Button>
-          <Button className="btn btn-pill" style={{ background: "#6c757d", color: "#fff" }} onClick={onLockDays} disabled={loading}>
-            <i className="fa fa-lock me-1" /> Khóa phòng
-          </Button>
-          <Button className="btn btn-pill btn-outline-secondary" onClick={onUnlockDays} disabled={loading}>
-            <i className="fa fa-unlock me-1" /> Mở khóa
-          </Button>
+          {hasFreeSelected && (
+            <Button className="btn btn-gradient btn-pill" onClick={onCreateBooking} disabled={loading}>
+              <i className="fa fa-plus me-1" /> Tạo Booking
+            </Button>
+          )}
+          {hasBookedSelected && (
+            <Button className="btn btn-pill btn-danger" onClick={onDeleteBooking} disabled={loading}>
+              <i className="fa fa-trash me-1" /> Xóa Booking ({selectedBookings.length})
+            </Button>
+          )}
+          {hasFreeSelected && (
+            <Button className="btn btn-pill" style={{ background: "#6c757d", color: "#fff" }} onClick={onLockDays} disabled={loading}>
+              <i className="fa fa-lock me-1" /> Khóa phòng
+            </Button>
+          )}
+          {hasLockedSelected && (
+            <Button className="btn btn-pill" style={{ background: "#28a745", color: "#fff" }} onClick={onUnlockDays} disabled={loading}>
+              <i className="fa fa-unlock me-1" /> Mở phòng ({selectedLockedDates.length})
+            </Button>
+          )}
         </Col>
       </Row>
 
