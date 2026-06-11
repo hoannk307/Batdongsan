@@ -27,6 +27,21 @@ function getFirstDayOfMonth(month, year) {
   return d === 0 ? 6 : d - 1; // Monday = 0
 }
 
+function stringToColor(str) {
+  if (!str) return "#4361ee";
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const colors = [
+    "#4361ee", "#f72585", "#7209b7", "#4cc9f0", "#560bad", 
+    "#f77f00", "#d00000", "#00b4d8", "#03045e", "#2a9d8f", 
+    "#e76f51", "#264653", "#8338ec", "#ff006e", "#3a86ff",
+    "#0077b6", "#fb8500", "#023e8a", "#e07a5f", "#3d405b"
+  ];
+  return colors[Math.abs(hash) % colors.length];
+}
+
 export default function BookingCalendar() {
   const now = new Date();
   const [rooms, setRooms] = useState([]);
@@ -210,10 +225,12 @@ export default function BookingCalendar() {
       position: "relative",
     };
     if (status?.type === "booked" && isSelected) {
-      return { ...base, backgroundColor: "#e63946", color: "#fff", border: "2px solid #c1121f", boxShadow: "0 0 0 2px #f72585" };
+      const bgColor = stringToColor(String(status.booking.id));
+      return { ...base, backgroundColor: bgColor, color: "#fff", border: `2px solid ${bgColor}`, boxShadow: "0 0 0 2px #fff, 0 0 0 4px #000" };
     }
     if (status?.type === "booked") {
-      return { ...base, backgroundColor: "#4361ee", color: "#fff", border: "2px solid #3a56d4" };
+      const bgColor = stringToColor(String(status.booking.id));
+      return { ...base, backgroundColor: bgColor, color: "#fff", border: `2px solid ${bgColor}` };
     }
     if (status?.type === "locked" && isSelected) {
       return { ...base, backgroundColor: "#6c757d", color: "#fff", border: "2px solid #495057", boxShadow: "0 0 0 2px #f72585" };
@@ -283,7 +300,7 @@ export default function BookingCalendar() {
       <Row className="mb-3">
         <Col className="d-flex gap-3 align-items-center flex-wrap">
           <span className="d-flex align-items-center gap-1">
-            <span style={{ width: 16, height: 16, borderRadius: 4, background: "#4361ee", display: "inline-block" }} /> Đã đặt
+            <span style={{ width: 16, height: 16, borderRadius: 4, background: "linear-gradient(45deg, #4361ee, #f72585, #7209b7)", display: "inline-block" }} /> Đã đặt (màu ngẫu nhiên theo booking)
           </span>
           <span className="d-flex align-items-center gap-1">
             <span style={{ width: 16, height: 16, borderRadius: 4, background: "#adb5bd", display: "inline-block" }} /> Khóa

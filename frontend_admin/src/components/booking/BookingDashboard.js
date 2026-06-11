@@ -27,7 +27,12 @@ function stringToColor(str) {
   for (let i = 0; i < str.length; i++) {
     hash = str.charCodeAt(i) + ((hash << 5) - hash);
   }
-  const colors = ["#4361ee", "#f72585", "#7209b7", "#3a0ca3", "#4cc9f0", "#4895ef", "#560bad", "#480ca8", "#b5179e", "#f77f00"];
+  const colors = [
+    "#4361ee", "#f72585", "#7209b7", "#4cc9f0", "#560bad", 
+    "#f77f00", "#d00000", "#00b4d8", "#03045e", "#2a9d8f", 
+    "#e76f51", "#264653", "#8338ec", "#ff006e", "#3a86ff",
+    "#0077b6", "#fb8500", "#023e8a", "#e07a5f", "#3d405b"
+  ];
   return colors[Math.abs(hash) % colors.length];
 }
 
@@ -109,7 +114,7 @@ export default function BookingDashboard() {
       <Row className="mb-2">
         <Col className="d-flex gap-3 align-items-center flex-wrap small">
           <span className="d-flex align-items-center gap-1">
-            <span style={{ width: 14, height: 14, borderRadius: 3, background: "#4361ee", display: "inline-block" }} /> Đã đặt
+            <span style={{ width: 14, height: 14, borderRadius: 3, background: "linear-gradient(45deg, #4361ee, #f72585, #7209b7)", display: "inline-block" }} /> Đã đặt (màu ngẫu nhiên theo booking)
           </span>
           <span className="d-flex align-items-center gap-1">
             <span style={{ width: 14, height: 14, borderRadius: 3, background: "#adb5bd", display: "inline-block" }} /> Khóa
@@ -184,7 +189,7 @@ export default function BookingDashboard() {
 
                   if (cell?.type === "booked") {
                     const sourceName = cell.booking.sources?.name || "";
-                    bgColor = stringToColor(sourceName);
+                    bgColor = stringToColor(String(cell.booking.id));
                     content = (
                       <span style={{ fontSize: 8, color: "#fff", lineHeight: 1.1, display: "block", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 34 }}>
                         {sourceName || cell.booking.customer_name?.charAt(0) || "•"}
