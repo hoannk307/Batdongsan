@@ -140,7 +140,6 @@ export default function BookingForm({ isOpen, toggle, roomId, selectedDates, onS
     setSaving(true);
     try {
       const payload = {
-        room_id: roomId,
         customer_name: form.customer_name,
         customer_phone: form.customer_phone || null,
         source_id: form.source_id ? Number(form.source_id) : null,
@@ -167,6 +166,7 @@ export default function BookingForm({ isOpen, toggle, roomId, selectedDates, onS
         await putData(`/api/booking/bookings/${editBooking.id}`, payload);
         toast.success("Cập nhật booking thành công.");
       } else {
+        payload.room_id = roomId;
         await postData("/api/booking/bookings", payload);
         toast.success("Tạo booking thành công.");
       }
