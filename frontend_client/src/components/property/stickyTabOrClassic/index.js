@@ -29,7 +29,6 @@ const BodyContent = ({ side }) => {
       getData(`/api/batdongsan/${id}`)
         .then((res) => {
           const propertyObj = res?.data?.data ?? null;
-          console.log("[SingleProperty] Loaded:", propertyObj);
           setSingleData(propertyObj);
 
           // Lấy thông tin chi tiết user (chủ bất động sản)

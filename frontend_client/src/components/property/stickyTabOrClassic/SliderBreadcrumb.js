@@ -11,8 +11,8 @@ import TopTitle from "./TopTitle";
 
 const SliderBreadcrumbSection = ({ singleData }) => {
   const breadcrumbBg =
-    singleData?.images?.length > 0
-      ? singleData.images.map((image) => image.url)
+    singleData?.img?.length > 0
+      ? singleData.img.map((image) => image)
       : ["/assets/images/property/4.jpg", "/assets/images/property/5.jpg", "/assets/images/property/4.jpg", "/assets/images/property/2.jpg"];
   return (
     <section className="ratio_40 breadcrumb-section p-0 single-property-images">
