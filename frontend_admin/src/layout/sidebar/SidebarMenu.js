@@ -8,6 +8,28 @@ const SidebarMenu = ({ setToggle }) => {
     const router = useRouter();
     const [activeMenu, setActiveMenu] = useState();
     const [chiledMenu, setChiledMenu] = useState();
+    const [filteredMenuItems, setFilteredMenuItems] = useState([]);
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const userStr = localStorage.getItem("user");
+            let userRole = "";
+            if (userStr) {
+                try {
+                    userRole = JSON.parse(userStr).role;
+                } catch (e) {
+                    console.error("Error parsing user from localStorage", e);
+                }
+            }
+            const items = SidebarMenuItem.filter((item) => {
+                if (userRole === "ADMIN") {
+                    return true;
+                }
+                return ["Booking", "My Properies"].includes(item.title);
+            });
+            setFilteredMenuItems(items);
+        }
+    }, []);
 
     const handleLinkClick = (title) => {
         setActiveMenu(prev => prev !== title ? title : '');
@@ -18,7 +40,7 @@ const SidebarMenu = ({ setToggle }) => {
 
     useEffect(() => {
         if (router.asPath) {
-            SidebarMenuItem.forEach((item) => {
+            filteredMenuItems.forEach((item) => {
                 if (item.children) {
                     item.children.forEach((child) => {
                         if (child.path === router.asPath) { setChiledMenu(child.title); setActiveMenu(item.title); return true }
@@ -30,12 +52,12 @@ const SidebarMenu = ({ setToggle }) => {
                 }
             })
         }
-    }, [router])
+    }, [router, filteredMenuItems])
 
     return (
         <ul className="sidebar-menu custom-scrollbar">
             {
-                SidebarMenuItem && SidebarMenuItem.map((item, i) => {
+                filteredMenuItems && filteredMenuItems.map((item, i) => {
                     return (
                         <li key={i} className="sidebar-item">
                             {item.type === 'link' && <Link href={`${item.path}`} className={`sidebar-link only-link ${activeMenu === item.title ? 'active' : ''}`} onClick={() => handleLinkClick(item.title)}>

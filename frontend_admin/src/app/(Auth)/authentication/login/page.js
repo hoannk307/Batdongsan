@@ -3,12 +3,13 @@ import { Field, Form, Formik } from 'formik'
 import Link from 'next/link'
 import React, { useState } from 'react'
 import * as Yup from 'yup';
-import { Lock, Mail } from 'react-feather'
+import { Lock, User } from 'react-feather'
 import { Card, CardBody, Col, Container, Row } from 'reactstrap'
 import { toast } from 'react-toastify';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Img from '@/components/Common/Image';
 import Cookies from 'js-cookie';
+import { postData } from '@/utils/apiRequests';
 
 const LogIn = () => {
     const router = useRouter();
@@ -17,22 +18,13 @@ const LogIn = () => {
 
     const login = async (values, { setSubmitting }) => {
         try {
-            const res = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(values),
-            });
+            const payload = {
+                usernameOrEmail: values.usernameOrEmail,
+                password: values.password,
+            };
+            const res = await postData('/api/auth/login', payload);
 
-            const data = await res.json().catch(() => null);
-
-            if (!res.ok) {
-                const message = Array.isArray(data?.message)
-                    ? data.message.join(', ')
-                    : data?.message;
-                throw new Error(message || 'Login failed');
-            }
-
-            const { user, token } = data || {};
+            const { user, token } = res.data || {};
 
             if (typeof window !== "undefined" && token && user) {
                 Cookies.set("accessToken", token);
@@ -44,7 +36,9 @@ const LogIn = () => {
             const returnTo = searchParams.get('returnTo');
             router.push(returnTo || '/dashboard');
         } catch (error) {
-            toast.error(error.message || 'Please check your email and password..!');
+            const errorMessage = error.response?.data?.message || error.message;
+            const message = Array.isArray(errorMessage) ? errorMessage.join(', ') : errorMessage;
+            toast.error(message || 'Please check your username/email and password..!');
         } finally {
             setSubmitting(false);
         }
@@ -62,11 +56,11 @@ const LogIn = () => {
                                 </div>
                                 <Formik
                                     initialValues={{
-                                        email: "",
+                                        usernameOrEmail: "",
                                         password: ""
                                     }}
                                     validationSchema={Yup.object().shape({
-                                        email: Yup.string().required('Enter valid Email..!'),
+                                        usernameOrEmail: Yup.string().required('Enter valid Username or Email..!'),
                                         password: Yup.string().required('Password is required..!')
                                     })}
                                     onSubmit={login}>
@@ -75,11 +69,11 @@ const LogIn = () => {
                                             <div className="form-group">
                                                 <div className="input-group">
                                                     <div className="input-group-prepend">
-                                                        <Mail size={20} />
+                                                        <User size={20} />
                                                     </div>
-                                                    <Field type="email" className={`form-control ${errors.email && touched.email ? 'is-invalid' : ''}`} name='email' placeholder="Enter email" />
+                                                    <Field type="text" className={`form-control ${errors.usernameOrEmail && touched.usernameOrEmail ? 'is-invalid' : ''}`} name='usernameOrEmail' placeholder="Enter username or email" />
                                                 </div>
-                                                {(errors.email && touched.email) && <div className='text-danger ms-4'>{errors.email}</div>}
+                                                {(errors.usernameOrEmail && touched.usernameOrEmail) && <div className='text-danger ms-4'>{errors.usernameOrEmail}</div>}
                                             </div>
                                             <div className="form-group">
                                                 <div className="input-group">
@@ -93,7 +87,7 @@ const LogIn = () => {
                                                 </div>
                                                 {(errors.password && touched.password) && <div className='text-danger ms-4'>{errors.password}</div>}
                                                 <div className="important-note">
-                                                    password should be a minimum of 8 characters and should contains letters and numbers
+                                                    Mật khẩu phải có ít nhất 8 ký tự, bao gồm cả chữ và số
                                                 </div>
                                             </div>
                                             <div className="d-flex">
@@ -122,21 +116,9 @@ const LogIn = () => {
                                             </Link>
                                         </Col>
                                         <Col sm='6'>
-                                            <Link href="https://twitter.com/" className="btn btn-social btn-flat twitter p-0">
-                                                <i className="fab fa-twitter" />
-                                                <span>Twitter</span>
-                                            </Link>
-                                        </Col>
-                                        <Col sm='6'>
                                             <Link href="https://accounts.google.com/" className="btn btn-social btn-flat google p-0">
                                                 <i className="fab fa-google" />
                                                 <span>Google</span>
-                                            </Link>
-                                        </Col>
-                                        <Col sm='6'>
-                                            <Link href="https://www.linkedin.com/" className="btn btn-social btn-flat linkedin p-0">
-                                                <i className="fab fa-linkedin-in" />
-                                                <span>Linkedin</span>
                                             </Link>
                                         </Col>
                                     </Row>

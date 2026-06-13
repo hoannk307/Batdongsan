@@ -8,6 +8,7 @@ import { Card, CardBody, Col, Container, Row } from "reactstrap";
 import { toast } from 'react-toastify';
 import Img from "@/components/Common/Image";
 import { useRouter } from "next/navigation";
+import { postData } from "@/utils/apiRequests";
 
 const SignUp = () => {
   const [showpassword, setShowpassword] = useState(false);
@@ -15,25 +16,21 @@ const SignUp = () => {
 
   const signup = async (values, { setSubmitting }) => {
     try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
-      });
-
-      const data = await res.json().catch(() => null);
-
-      if (!res.ok) {
-        const message = Array.isArray(data?.message)
-          ? data.message.join(', ')
-          : data?.message;
-        throw new Error(message || 'Registration failed');
-      }
+      const payload = {
+        username: values.name,
+        full_name: values.name,
+        email: values.email,
+        phone: values.phone ? String(values.phone) : undefined,
+        password: values.password,
+      };
+      await postData('/api/auth/register', payload);
 
       toast.success('Account created successfully');
       router.push('/authentication/login');
     } catch (error) {
-      toast.error(error.message || 'Registration failed. Please try again.');
+      const errorMessage = error.response?.data?.message || error.message;
+      const message = Array.isArray(errorMessage) ? errorMessage.join(', ') : errorMessage;
+      toast.error(message || 'Registration failed. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -84,7 +81,7 @@ const SignUp = () => {
                           <div className='input-group-prepend'>
                             <Phone size={20} />
                           </div>
-                          <Field type='number' name='phone' className={`form-control ${errors.phone && touched.phone ? "is-invalid" : ""}`} placeholder='Nhập số điện thoại' />
+                          <Field type='text' name='phone' className={`form-control ${errors.phone && touched.phone ? "is-invalid" : ""}`} placeholder='Nhập số điện thoại' />
                         </div>
                         {errors.phone && touched.phone && <div className='text-danger ms-4'>{errors.phone}</div>}
                       </div>

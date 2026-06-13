@@ -1,6 +1,7 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -16,35 +17,49 @@ export class AuthService {
     const { password, ...rest } = registerDto;
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await this.prisma.users.create({
-      data: {
-        ...rest,
-        password: hashedPassword,
-        updated_at: new Date(),
-      },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        full_name: true,
-        phone: true,
-        role: true,
-        avatar: true,
-        created_at: true,
-      },
-    });
+    try {
+      const user = await this.prisma.users.create({
+        data: {
+          ...rest,
+          password: hashedPassword,
+          updated_at: new Date(),
+        },
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          full_name: true,
+          phone: true,
+          role: true,
+          avatar: true,
+          created_at: true,
+        },
+      });
 
-    const token = this.jwtService.sign({ sub: user.id, email: user.email });
+      const token = this.jwtService.sign({ sub: user.id, email: user.email });
 
-    return {
-      user,
-      token,
-    };
+      return {
+        user,
+        token,
+      };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new ConflictException('Username or Email already exists');
+        }
+      }
+      throw error;
+    }
   }
 
-  async validateUser(email: string, password: string) {
-    const user = await this.prisma.users.findUnique({
-      where: { email },
+  async validateUser(usernameOrEmail: string, password: string) {
+    const user = await this.prisma.users.findFirst({
+      where: {
+        OR: [
+          { email: usernameOrEmail },
+          { username: usernameOrEmail }
+        ]
+      },
     });
 
     if (!user) {
@@ -62,7 +77,7 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-    const user = await this.validateUser(loginDto.email, loginDto.password);
+    const user = await this.validateUser(loginDto.usernameOrEmail, loginDto.password);
 
     const token = this.jwtService.sign({ sub: user.id, email: user.email });
 
