@@ -7,7 +7,7 @@ import NoSsr from "../../utils/NoSsr";
 const ImageSlider = ({ images }) => {
   return (
     <NoSsr>
-      <Slider className="property-slider" {...propertySlider}>
+      <Slider className="property-slider" {...propertySlider} dots={false}>
         {images?.map((data, i) => (
           <div key={i}>
             <div>

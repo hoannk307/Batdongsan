@@ -41,14 +41,14 @@ const FeaturePropertySection = ({ value }) => {
                             <Col xl="6" lg="5">
                               <div className="feature-image">
                                 <div className="zoom">
-                                  <Item original={data.img} width="1000" height="600" key={i}>
+                                  {/* <Item original={data.img} width="1000" height="600" key={i}>
                                     {({ ref, open }) => (
                                       <div className="feature-overlay" ref={ref} onClick={open}>
                                         <span>+</span>
                                       </div>
                                     )}
-                                  </Item>
-                                  <Img src={data.img} className="bg-img" />
+                                  </Item> */}
+                                  <Img src={data.img[0]} className="bg-img" />
                                 </div>
 
                                 <span className="label label-solid label-lg label-flat">Featured</span>
