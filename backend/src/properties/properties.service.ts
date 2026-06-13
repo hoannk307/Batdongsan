@@ -195,11 +195,19 @@ export class PropertiesService {
           },
         });
 
-        for (const meta of fileMetas) {
-          await tx.$executeRaw`
-            INSERT INTO file_attach (object_id, path, nghiepvu_code, type, extend, name)
-            VALUES (${createdProperty.id}, ${meta.keyPath}, 'BDS', ${meta.logicalType}, ${meta.ext}, ${meta.name})
-          `;
+        const fileAttachData = fileMetas.map(meta => ({
+          object_id: createdProperty.id,
+          path: meta.keyPath,
+          nghiepvu_code: 'BDS',
+          type: meta.logicalType,
+          extend: meta.ext,
+          name: meta.name
+        }));
+
+        if (fileAttachData.length > 0) {
+          await tx.file_attach.createMany({
+            data: fileAttachData
+          });
         }
 
         return createdProperty;
