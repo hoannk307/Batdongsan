@@ -80,6 +80,22 @@ export class PropertiesController {
     return this.propertiesService.findAll(query);
   }
 
+  @Get('admin/list')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Lấy danh sách bất động sản cho Admin (phân quyền theo role)' })
+  findAdminList(
+    @Request() req,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.propertiesService.findAdminList(
+      req.user.userId,
+      page ? +page : 1,
+      limit ? +limit : 20,
+    );
+  }
+
   /**
    * POST /properties/search
    *

@@ -36,9 +36,17 @@ const LogIn = () => {
             const returnTo = searchParams.get('returnTo');
             router.push(returnTo || '/dashboard');
         } catch (error) {
-            const errorMessage = error.response?.data?.message || error.message;
+            const status = error.response?.status;
+            let errorMessage = error.response?.data?.message;
+            
+            if (status === 401) {
+                errorMessage = 'Sai tên đăng nhập hoặc mật khẩu!';
+            } else if (!errorMessage) {
+                errorMessage = 'Đã có lỗi xảy ra, vui lòng thử lại!';
+            }
+
             const message = Array.isArray(errorMessage) ? errorMessage.join(', ') : errorMessage;
-            toast.error(message || 'Please check your username/email and password..!');
+            toast.error(message);
         } finally {
             setSubmitting(false);
         }

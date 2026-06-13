@@ -25,6 +25,7 @@ const AddPropertyForm = () => {
   const [provinces, setProvinces] = useState([]);
   const [wards, setWards] = useState([]);
   const [isLoadingWards, setIsLoadingWards] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const apiBaseUrl = "/api";
 
   useEffect(() => {
@@ -32,6 +33,21 @@ const AddPropertyForm = () => {
       if (!apiBaseUrl) {
         console.warn("API_URL is not defined. Cannot fetch property defaults.");
         return;
+      }
+
+      // Check user role
+      if (typeof window !== "undefined") {
+        try {
+          const userStr = localStorage.getItem("user");
+          if (userStr) {
+            const userObj = JSON.parse(userStr);
+            if (userObj?.role === "ADMIN" || userObj?.role === "admin") {
+              setIsAdmin(true);
+            }
+          }
+        } catch (e) {
+          console.error(e);
+        }
       }
 
       try {
@@ -357,18 +373,20 @@ const AddPropertyForm = () => {
             <Col sm='12' className='form-group'>
               <Field type='textarea' name='description' component={ReactstrapInput} className='form-control' rows={4} label='Description' />
             </Col>
-            <Col sm='4' className='form-group'>
-              <FormGroup switch>
-                <Input
-                  type='switch'
-                  id='outstanding'
-                  name='outstanding'
-                  checked={values.outstanding}
-                  onChange={() => setFieldValue('outstanding', !values.outstanding)}
-                />
-                <Label check htmlFor='outstanding' style={{ cursor: 'pointer' }}>BĐS Nổi bật</Label>
-              </FormGroup>
-            </Col>
+            {isAdmin && (
+              <Col sm='4' className='form-group'>
+                <FormGroup switch>
+                  <Input
+                    type='switch'
+                    id='outstanding'
+                    name='outstanding'
+                    checked={values.outstanding}
+                    onChange={() => setFieldValue('outstanding', !values.outstanding)}
+                  />
+                  <Label check htmlFor='outstanding' style={{ cursor: 'pointer' }}>BĐS Nổi bật</Label>
+                </FormGroup>
+              </Col>
+            )}
             <Col sm='4' className='form-group'>
            
             </Col>

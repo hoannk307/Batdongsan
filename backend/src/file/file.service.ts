@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { createReadStream } from 'fs';
 import { Readable } from 'stream';
 
@@ -135,6 +135,23 @@ export class FileService {
       contentType: result.ContentType || 'application/octet-stream',
       contentLength: length,
     };
+  }
+
+  async deleteFile(key: string): Promise<void> {
+    if (!this.isConfigured || !this.s3) {
+      console.warn('⚠️ Cloudflare R2 is not configured. File deletion will be skipped.');
+      return;
+    }
+    try {
+      await this.s3.send(
+        new DeleteObjectCommand({
+          Bucket: this.bucket,
+          Key: key,
+        }),
+      );
+    } catch (error) {
+      console.error(`Failed to delete file ${key} from R2:`, error);
+    }
   }
 }
 

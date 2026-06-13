@@ -3,9 +3,12 @@ import Breadcrumb from '@/components/Common/Breadcrumb'
 import EditPropertyForm from '@/components/myproperties/editProperty/EditPropertyForm'
 import React, { Fragment } from 'react'
 import { Card, CardBody, CardHeader, Col, Container, Row } from 'reactstrap'
- 
+import { useParams } from 'next/navigation'
 
 const EditProperty = () => {
+    const params = useParams();
+    const id = params?.id;
+
     return (
         <Fragment>
             <Breadcrumb title='Edit Property' titleText='Welcome to admin panel' parent='My properties' />
@@ -17,7 +20,7 @@ const EditProperty = () => {
                                 <h5>Edit property details</h5>
                             </CardHeader>
                             <CardBody className="card-body admin-form">
-                                <EditPropertyForm />
+                                <EditPropertyForm propertyId={id} />
                             </CardBody>
                         </Card>
                     </Col>

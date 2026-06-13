@@ -18,18 +18,8 @@ export const SidebarMenuItem = [
                 type: 'link'
             },
             {
-                path: "/myproperties/edit-property",
-                title: 'Edit Propery',
-                type: 'link'
-            },
-            {
                 path: "/myproperties/propertylist",
                 title: 'Property List',
-                type: 'link'
-            },
-            {
-                path: "/myproperties/favourites",
-                title: 'Favourites',
                 type: 'link'
             }
         ]

@@ -1,239 +1,297 @@
-import React from "react";
-import { Field, Form, Formik } from "formik";
-import { Button, Col, Label, Row, FormGroup, Input } from "reactstrap";
-import * as Yup from "yup";
-import { ReactstrapInput, ReactstrapSelect } from "@/components/utils/ReactStarpInputsValidation";
-import DropZones from "@/components/Common/Dropzones";
+'use client';
 
-const EditPropertyForm = () => {
+import axios from "axios";
+import { Field, Form, Formik } from "formik";
+import React, { useEffect, useState } from "react";
+import { Button, Col, Row, FormGroup, Label, Input, Spinner } from "reactstrap";
+import * as Yup from "yup";
+import { toast } from "react-toastify";
+import { ReactstrapInput, ReactstrapSelect } from "@/components/utils/ReactStarpInputsValidation";
+import { getData } from "@/components/utils/getData";
+
+const DEFAULT_PROVINCE_ID = "93";
+const DEFAULT_WARD_ID = "152";
+
+const EditPropertyForm = ({ propertyId }) => {
+  const [propertyDefaults, setPropertyDefaults] = useState({
+    propertyTypes: [],
+    propertyStatuses: [],
+  });
+  const [provinces, setProvinces] = useState([]);
+  const [wards, setWards] = useState([]);
+  const [isLoadingWards, setIsLoadingWards] = useState(false);
+  const [initialData, setInitialData] = useState(null);
+  const [isLoadingData, setIsLoadingData] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  const apiBaseUrl = "/api";
+
+  // Fetch defaults and property data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Check user role
+        if (typeof window !== "undefined") {
+          try {
+            const userStr = localStorage.getItem("user");
+            if (userStr) {
+              const userObj = JSON.parse(userStr);
+              if (userObj?.role === "ADMIN" || userObj?.role === "admin") {
+                setIsAdmin(true);
+              }
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }
+
+        // Fetch form defaults
+        const defRes = await getData(`${apiBaseUrl}/properties/defaults/options`);
+        if (defRes?.data) {
+          setPropertyDefaults({
+            propertyTypes: defRes.data.propertyTypes || [],
+            propertyStatuses: defRes.data.propertyStatuses || [],
+          });
+        }
+
+        // Fetch provinces
+        const provRes = await getData(`${apiBaseUrl}/locations/provinces`);
+        if (Array.isArray(provRes?.data)) {
+          setProvinces(provRes.data.map((p) => ({ id: p.id, name: p.name })));
+        }
+
+        // Fetch existing property
+        if (propertyId) {
+          const propRes = await getData(`${apiBaseUrl}/properties/${propertyId}`);
+          if (propRes?.data) {
+            const prop = propRes.data;
+            setInitialData({
+              propertyType: prop.property_type || "",
+              propertyStatus: prop.property_status || "",
+              beds: prop.beds ? String(prop.beds) : "",
+              baths: prop.baths ? String(prop.baths) : "",
+              area: prop.area ? String(prop.area) : "",
+              price: prop.price ? String(prop.price) : "",
+              description: prop.description || "",
+              anyCity: prop.any_city || DEFAULT_PROVINCE_ID,
+              anyWard: prop.any_ward || DEFAULT_WARD_ID,
+              landmark: prop.landmark || "",
+              outstanding: !!prop.outstanding,
+            });
+
+            // Fetch wards for the selected province
+            if (prop.any_city) {
+              await fetchWardsByProvince(prop.any_city);
+            } else {
+              await fetchWardsByProvince(DEFAULT_PROVINCE_ID);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load initial data", error);
+        toast.error("Không thể tải thông tin bất động sản.");
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    fetchData();
+  }, [propertyId]);
+
+  const fetchWardsByProvince = async (provinceId) => {
+    if (!provinceId) {
+      setWards([]);
+      return;
+    }
+    try {
+      setIsLoadingWards(true);
+      const response = await getData(`${apiBaseUrl}/locations/wards?province_id=${provinceId}`);
+      if (Array.isArray(response?.data)) {
+        setWards(response.data.map((ward) => ({ id: ward.id, name: ward.name })));
+      } else {
+        setWards([]);
+      }
+    } catch (error) {
+      console.error("Failed to fetch wards", error);
+      setWards([]);
+    } finally {
+      setIsLoadingWards(false);
+    }
+  };
+
+  const handleProvinceChange = async (event, setFieldValue) => {
+    const provinceId = event.target.value;
+    setFieldValue("anyCity", provinceId);
+    setFieldValue("anyWard", "");
+
+    if (provinceId) {
+      await fetchWardsByProvince(provinceId);
+    } else {
+      setWards([]);
+    }
+  };
+
+  const getStoredToken = () => {
+    if (typeof window === "undefined") return null;
+    const directToken = localStorage.getItem("accessToken") || localStorage.getItem("token");
+    if (directToken) return directToken;
+
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const parsed = JSON.parse(storedUser);
+        return parsed?.token || parsed?.accessToken || null;
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const handleSubmit = async (values, { setSubmitting }) => {
+    const payload = {
+      property_type: values.propertyType,
+      property_status: values.propertyStatus,
+      beds: values.beds !== "" ? Number(values.beds) : undefined,
+      baths: values.baths !== "" ? Number(values.baths) : undefined,
+      area: values.area !== "" ? Number(values.area) : undefined,
+      price: values.price !== "" ? Number(values.price) : undefined,
+      description: values.description,
+      any_city: values.anyCity,
+      any_ward: values.anyWard,
+      landmark: values.landmark,
+      outstanding: !!values.outstanding,
+    };
+
+    // Remove undefined
+    Object.keys(payload).forEach((key) => {
+      if (payload[key] === undefined) delete payload[key];
+    });
+
+    try {
+      const token = getStoredToken();
+      await axios.patch(`${apiBaseUrl}/properties/${propertyId}`, payload, {
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+
+      toast.success("Cập nhật bất động sản thành công.");
+      // Optional: window.history.back();
+    } catch (error) {
+      const messageFromApi = error?.response?.data?.message;
+      const normalizedMessage = Array.isArray(messageFromApi) ? messageFromApi.join(", ") : messageFromApi;
+      toast.error(normalizedMessage || "Lỗi khi cập nhật bất động sản.");
+      console.error("Failed to update property", error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (typeof window !== "undefined") {
+      window.history.back();
+    }
+  };
+
+  if (isLoadingData) {
+    return <div className="text-center p-5"><Spinner color="primary" /> Đang tải dữ liệu...</div>;
+  }
+
+  if (!initialData) {
+    return <div className="text-center p-5 text-danger">Không tìm thấy bất động sản.</div>;
+  }
+
+  const fallbackPropertyTypes = ["Nhà đất", "Căn hộ chung cư"].map((label) => ({ id: label, name: label }));
+  const fallbackPropertyStatuses = [{ id: "FOR_RENT", name: "Cho thuê" }, { id: "FOR_SALE", name: "Bán" }];
+
+  const propertyTypeOptions = propertyDefaults.propertyTypes.length > 0 ? propertyDefaults.propertyTypes : fallbackPropertyTypes;
+  const propertyStatusOptions = propertyDefaults.propertyStatuses.length > 0 ? propertyDefaults.propertyStatuses : fallbackPropertyStatuses;
+
   return (
     <Formik
-      initialValues={{
-        propertyType: "",
-        propertyStatus: "",
-        propertyPrice: "",
-        password: "",
-        maxRooms: "",
-        beds: "",
-        baths: "",
-        area: "",
-        price: "",
-        agencies: "",
-        description: "",
-        address: "",
-        zip: "",
-        anyCountry: "",
-        anyCity: "",
-        landmark: "",
-        mp4Link: "",
-        outstanding: false,
-        checkBoxes: [],
-      }}
+      initialValues={initialData}
+      enableReinitialize={true}
       validationSchema={Yup.object().shape({
         propertyType: Yup.string().required(),
         propertyStatus: Yup.string().required(),
-        propertyPrice: Yup.number().required(),
-        maxRooms: Yup.string().required(),
         beds: Yup.string().required(),
         baths: Yup.string().required(),
         area: Yup.string().required(),
         price: Yup.number().required(),
-        agencies: Yup.string().required(),
         description: Yup.string().required(),
-        address: Yup.string().required(),
-        zip: Yup.string().min(6).max(6).required(),
-        anyCountry: Yup.string().required(),
         anyCity: Yup.string().required(),
+        anyWard: Yup.string().required(),
         landmark: Yup.string().required(),
       })}
-      onSubmit={(values) => {
-        alert("Your data is submitted check console");
-      }}
+      onSubmit={handleSubmit}
     >
-      {({ isSubmitting, setFieldValue, values, ...props }) => (
+      {({ isSubmitting, setFieldValue, values }) => (
         <Form>
           <Row className='gx-3'>
             <Col sm='4' className='form-group'>
-              <Field name='propertyType' type='text' component={ReactstrapInput} className='form-control' placeholder='villa' label='Property Type' />
+              <Field name='propertyType' component={ReactstrapSelect} className='form-control' label='Loại bất động sản' inputprops={{ options: propertyTypeOptions, defaultOption: "Loại bất động sản" }} />
             </Col>
             <Col sm='4' className='form-group'>
-              <Field
-                name='propertyStatus'
-                component={ReactstrapSelect}
-                className='form-control'
-                label='Property Status'
-                inputprops={{
-                  options: ["For Rent", "For sale"],
-                  defaultOption: "Property Status",
-                }}
-              />
+              <Field name='propertyStatus' component={ReactstrapSelect} className='form-control' label='Nhu cầu bán/cho thuê' inputprops={{ options: propertyStatusOptions, defaultOption: "Nhu cầu" }} />
+            </Col>
+            <Col sm='4' className='form-group'></Col>
+            <Col sm='4' className='form-group'>
+              <Field name='beds' component={ReactstrapSelect} className='form-control' label='Phòng ngủ' inputprops={{ options: ["1", "2", "3", "4", "5", "6"], defaultOption: "Phòng ngủ" }} />
             </Col>
             <Col sm='4' className='form-group'>
-              <Field name='propertyPrice' type='text' className='form-control' component={ReactstrapInput} label='Property Price' placeholder='$3000' />
+              <Field name='baths' component={ReactstrapSelect} className='form-control' label='Phòng tắm/vệ sinh' inputprops={{ options: ["1", "2", "3", "4", "5", "6"], defaultOption: "Phòng tắm/vệ sinh" }} />
+            </Col>
+            <Col sm='4' className='form-group'></Col>
+            <Col sm='4' className='form-group'>
+              <Field name='area' type='text' className='form-control' component={ReactstrapInput} label='Diện tích' placeholder='85' />
             </Col>
             <Col sm='4' className='form-group'>
-              <Field
-                name='maxRooms'
-                component={ReactstrapSelect}
-                className='form-control'
-                label='Max Rooms'
-                inputprops={{
-                  options: ["1", "2", "3", "4", "5", "6"],
-                  defaultOption: "Max Rooms",
-                }}
-              />
-            </Col>
-            <Col sm='4' className='form-group'>
-              <Field
-                name='beds'
-                component={ReactstrapSelect}
-                className='form-control'
-                label='Beds'
-                inputprops={{
-                  options: ["1", "2", "3", "4", "5", "6"],
-                  defaultOption: "Beds",
-                }}
-              />
-            </Col>
-            <Col sm='4' className='form-group'>
-              <Field
-                name='baths'
-                component={ReactstrapSelect}
-                className='form-control'
-                label='Baths'
-                inputprops={{
-                  options: ["1", "2", "3", "4", "5", "6"],
-                  defaultOption: "Baths",
-                }}
-              />
-            </Col>
-            <Col sm='4' className='form-group'>
-              <Field name='area' type='text' className='form-control' component={ReactstrapInput} label='Area' placeholder='85 Sq Ft' />
-            </Col>
-            <Col sm='4' className='form-group'>
-              <Field name='price' type='text' className='form-control' component={ReactstrapInput} label='Price' placeholder='$3000' />
-            </Col>
-            <Col sm='4' className='form-group'>
-              <Field
-                name='agencies'
-                component={ReactstrapSelect}
-                className='form-control'
-                label='Agencies'
-                inputprops={{
-                  options: ["1", "2", "3", "4", "5", "6"],
-                  defaultOption: "Agencies",
-                }}
-              />
+              <Field name='price' type='text' className='form-control' component={ReactstrapInput} label='Giá' placeholder='3000000000' />
             </Col>
             <Col sm='12' className='form-group'>
               <Field type='textarea' name='description' component={ReactstrapInput} className='form-control' rows={4} label='Description' />
             </Col>
-            <Col sm='4' className='form-group'>
-              <FormGroup switch>
-                <Input
-                  type='switch'
-                  id='outstanding-edit'
-                  name='outstanding'
-                  checked={values.outstanding}
-                  onChange={() => setFieldValue('outstanding', !values.outstanding)}
-                />
-                <Label check htmlFor='outstanding-edit' style={{ cursor: 'pointer' }}>BĐS Nổi bật</Label>
-              </FormGroup>
+            {isAdmin && (
+              <Col sm='4' className='form-group'>
+                <FormGroup switch>
+                  <Input type='switch' id='outstanding' name='outstanding' checked={values.outstanding} onChange={() => setFieldValue('outstanding', !values.outstanding)} />
+                  <Label check htmlFor='outstanding' style={{ cursor: 'pointer' }}>BĐS Nổi bật</Label>
+                </FormGroup>
+              </Col>
+            )}
+          </Row>
+
+          <div className='form-inputs'>
+            <h6>Địa chỉ</h6>
+            <Row className=' gx-3'>
+              <Col sm='4' className='form-group'>
+                <Field name='anyCity' component={ReactstrapSelect} className='form-control' label='Tỉnh/Thành phố' inputprops={{ options: provinces, defaultOption: "Tỉnh/Thành phố" }} onChange={(event) => handleProvinceChange(event, setFieldValue)} />
+              </Col>
+              <Col sm='4' className='form-group'>
+                <Field name='anyWard' component={ReactstrapSelect} className='form-control' label='Phường/Xã' inputprops={{ options: wards, defaultOption: isLoadingWards ? "Đang tải..." : "Phường/Xã" }} disabled={isLoadingWards || !values.anyCity} />
+              </Col>
+              <Col sm='4' className='form-group'>
+                <Field name='landmark' type='text' component={ReactstrapInput} className='form-control' placeholder='Địa chỉ cụ thể' label='Chi tiết' />
+              </Col>
+            </Row>
+          </div>
+
+          <div className='form-inputs mb-4'>
+             <p className="text-muted small"><em>* Tính năng cập nhật Hình ảnh/Video đang được xây dựng trong tương lai. Hiện tại chỉ hỗ trợ sửa thông tin văn bản.</em></p>
+          </div>
+
+          <Row className='gx-3'>
+            <Col sm='12' className='form-btn'>
+              <Button type='submit' className='btn btn-gradient btn-pill' disabled={isSubmitting}>
+                {isSubmitting ? "Đang lưu..." : "Lưu thay đổi"}
+              </Button>
+              <Button type='button' className='btn btn-dashed btn-pill' onClick={handleCancel}>
+                Hủy bỏ
+              </Button>
             </Col>
           </Row>
-          <div className='form-inputs'>
-            <Row className=' gx-3'>
-              <Col sm='6' className='form-group'>
-                <Field type='text' name='address' component={ReactstrapInput} className='form-control' label='Address' placeholder='Address of your property' />
-              </Col>
-              <Col sm='6' className='form-group'>
-                <Field type='text' name='zip' component={ReactstrapInput} className='form-control' label='Zip code' placeholder='39702' />
-              </Col>
-              <Col sm='4' className='form-group'>
-                <Field
-                  name='anyCountry'
-                  component={ReactstrapSelect}
-                  className='form-control'
-                  label='Any country'
-                  inputprops={{
-                    options: ["1", "2", "3", "4", "5", "6"],
-                    defaultOption: "Any country",
-                  }}
-                />
-              </Col>
-              <Col sm='4' className='form-group'>
-                <Field
-                  name='anyCity'
-                  component={ReactstrapSelect}
-                  className='form-control'
-                  label='Any City'
-                  inputprops={{
-                    options: ["1", "2", "3", "4", "5", "6"],
-                    defaultOption: "Any City",
-                  }}
-                />
-              </Col>
-              <Col sm='4' className='form-group'>
-                <Field name='landmark' type='text' component={ReactstrapInput} className='form-control' placeholder='landmark place name' label='Landmark' />
-              </Col>
-            </Row>
-          </div>
-          <div className='dropzone-admin form-inputs'>
-            <label>Media</label>
-            <div className='dropzone' id='multiFileUpload'>
-              <div className='dz-message needsclick'>
-                <DropZones />
-              </div>
-            </div>
-            <Row className='gx-3'>
-              <Col sm='12' className='form-group'>
-                <Field name='mp4Link' component={ReactstrapInput} type='text' className='form-control' placeholder='mp4 video link' label='Video (mp4)' />
-              </Col>
-              <Col sm='12' className='form-group mb-0'>
-                <label>Additional features</label>
-                <div className='additional-checkbox'>
-                  <Label htmlFor='chk-ani'>
-                    <Field name='checkBoxes' value='Emergency Exit' className='checkbox_animated' id='chk-ani' type='checkbox' /> Emergency Exit
-                  </Label>
-                  <Label htmlFor='chk-ani1'>
-                    <Field name='checkBoxes' value='CCTV' className='checkbox_animated' id='chk-ani1' type='checkbox' /> CCTV
-                  </Label>
-                  <Label htmlFor='chk-ani2'>
-                    <Field name='checkBoxes' value='Free Wi-Fi' className='checkbox_animated' id='chk-ani2' type='checkbox' /> Free Wi-Fi
-                  </Label>
-                  <Label htmlFor='chk-ani3'>
-                    <Field name='checkBoxes In The Area' value='Free Parking In The Area' className='checkbox_animated' id='chk-ani3' type='checkbox' /> Free Parking In The Area
-                  </Label>
-                  <Label htmlFor='chk-ani4'>
-                    <Field name='checkBoxes' value='Air Conditioning' className='checkbox_animated' id='chk-ani4' type='checkbox' /> Air Conditioning
-                  </Label>
-                  <Label htmlFor='chk-ani5'>
-                    <Field name='checkBoxes' value='Air Conditioning' className='checkbox_animated' id='chk-ani5' type='checkbox' /> Security Guard
-                  </Label>
-                  <Label htmlFor='chk-ani6'>
-                    <Field name='checkBoxes' value='Air Conditioning' className='checkbox_animated' id='chk-ani6' type='checkbox' /> Terrance
-                  </Label>
-                  <Label htmlFor='chk-ani7'>
-                    <Field name='checkBoxes' value='Air Conditioning' className='checkbox_animated' id='chk-ani7' type='checkbox' /> Laundry Service
-                  </Label>
-                  <Label htmlFor='chk-ani8'>
-                    <Field name='checkBoxes' value='Air Conditioning' className='checkbox_animated' id='chk-ani8' type='checkbox' /> Elevator Lift
-                  </Label>
-                  <Label htmlFor='chk-ani9'>
-                    <Field name='checkBoxes' value='Air Conditioning' className='checkbox_animated' id='chk-ani9' type='checkbox' /> Balcony
-                  </Label>
-                </div>
-              </Col>
-              <Col sm='12' className='form-btn'>
-                <Button type='submit' className='btn btn-gradient btn-pill'>
-                  Submit
-                </Button>
-                <Button type='submit' className='btn btn-dashed btn-pill'>
-                  Cancel
-                </Button>
-              </Col>
-            </Row>
-          </div>
         </Form>
       )}
     </Formik>

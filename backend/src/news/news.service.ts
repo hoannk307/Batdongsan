@@ -461,9 +461,31 @@ export class NewsService {
   }
 
   async remove(id: number) {
-    return this.prisma.news.delete({
-      where: { id },
+    const existingNews = await this.prisma.news.findUnique({ where: { id } });
+    if (!existingNews) {
+      throw new NotFoundException('News not found');
+    }
+
+    const newsItemWithFiles = await this.getNewsWithFiles(existingNews);
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.file_attach.deleteMany({
+        where: { object_id: id, nghiepvu_code: 'NEWS' },
+      });
+      await tx.news.delete({
+        where: { id },
+      });
     });
+
+    if (newsItemWithFiles && newsItemWithFiles.file_attach) {
+      for (const file of newsItemWithFiles.file_attach) {
+        if (file.path) {
+          await this.fileService.deleteFile(file.path);
+        }
+      }
+    }
+
+    return { message: 'Deleted successfully' };
   }
 
   async findLatest(limit = 6, category?: string) {

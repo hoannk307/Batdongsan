@@ -4,15 +4,7 @@ import Link from "next/link";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { Button, Col, Input, Row, Table } from "reactstrap";
 import { toast } from "react-toastify";
-import axios from "axios";
-
-function getAuthHeaders() {
-  if (typeof window === "undefined") return {};
-  const token = localStorage.getItem("accessToken") || localStorage.getItem("token") || (() => {
-    try { return JSON.parse(localStorage.getItem("user") || "{}")?.token; } catch { return null; }
-  })();
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
+import { getData, deleteData } from "@/utils/apiRequests";
 
 const DEFAULT_LIMIT = 20;
 
@@ -36,7 +28,7 @@ export default function NewsList() {
         ...(status ? { status } : {}),
         ...(category ? { category } : {}),
       }).toString();
-      const res = await axios.get(`/api/news?${query}`, { headers: getAuthHeaders() });
+      const res = await getData(`/api/news?${query}`);
       setRows(res.data?.data || []);
       setPagination(res.data?.pagination || null);
     } catch (error) {
@@ -64,9 +56,9 @@ export default function NewsList() {
   }, [rows, keyword]);
 
   const onDelete = async (id) => {
-    if (!confirm("Xóa bài viết này?")) return;
+    if (!window.confirm("Bạn có chắc chắn muốn xóa bài viết này không?")) return;
     try {
-      await axios.delete(`/api/news/${id}`, { headers: getAuthHeaders() });
+      await deleteData(`/api/news/${id}`);
       toast.success("Đã xóa bài viết.");
       load();
     } catch (error) {

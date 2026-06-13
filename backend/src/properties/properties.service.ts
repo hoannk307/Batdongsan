@@ -219,6 +219,62 @@ export class PropertiesService {
     }
   }
 
+  async findAdminList(userId: number, page = 1, limit = 20) {
+    const user = await this.prisma.users.findUnique({ where: { id: userId } });
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.propertiesWhereInput = {};
+    if (user && user.role !== 'ADMIN') {
+      where.user_id = userId;
+    }
+
+    const [rawProperties, total] = await Promise.all([
+      this.prisma.properties.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { created_at: 'desc' },
+      }),
+      this.prisma.properties.count({ where }),
+    ]);
+
+    const properties = await this.getPropertiesWithFiles(rawProperties);
+
+    const locationIds = [
+      ...new Set([
+        ...properties.map((p) => p.any_city).filter(Boolean),
+        ...properties.map((p) => p.any_ward).filter(Boolean),
+      ]),
+    ].map(Number).filter((n) => !isNaN(n));
+
+    const locationMap = new Map<string, string>();
+    if (locationIds.length > 0) {
+      const locations = await this.prisma.locations.findMany({
+        where: { id: { in: locationIds } },
+        select: { id: true, name: true },
+      });
+      locations.forEach((loc) => locationMap.set(String(loc.id), loc.name));
+    }
+
+    const dataWithAddress = properties.map((p) => {
+      const cityName = locationMap.get(p.any_city) ?? p.any_city ?? '';
+      const wardName = locationMap.get(p.any_ward) ?? p.any_ward ?? '';
+      const address = [cityName, wardName].filter(Boolean).join(', ');
+      const price_string = this.formatPriceVND(Number(p.price));
+      return { ...p, address, price_string };
+    });
+
+    return {
+      data: dataWithAddress,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
   async findAll(query: SearchPropertyDto) {
     const {
       page = 1,
@@ -425,13 +481,33 @@ export class PropertiesService {
       throw new NotFoundException('Property not found');
     }
 
-    if (property.user_id !== userId) {
+    const user = await this.prisma.users.findUnique({ where: { id: userId } });
+    const isAdmin = user && user.role === 'ADMIN';
+
+    if (property.user_id !== userId && !isAdmin) {
       throw new ForbiddenException('You can only delete your own properties');
     }
 
-    return this.prisma.properties.delete({
-      where: { id },
+    const propertyWithFiles = await this.getPropertyWithFiles(property);
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.file_attach.deleteMany({
+        where: { object_id: id, nghiepvu_code: 'BDS' },
+      });
+      await tx.properties.delete({
+        where: { id },
+      });
     });
+
+    if (propertyWithFiles && propertyWithFiles.file_attach) {
+      for (const file of propertyWithFiles.file_attach) {
+        if (file.path) {
+          await this.fileService.deleteFile(file.path);
+        }
+      }
+    }
+
+    return { message: 'Deleted successfully' };
   }
 
   /**
