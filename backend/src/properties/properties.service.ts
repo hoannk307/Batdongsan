@@ -506,6 +506,47 @@ export class PropertiesService {
     return { ...property, address, price_string, cityName, wardName };
   }
 
+  async findAdminOne(id: number, userId: number) {
+    const rawProperty = await this.prisma.properties.findUnique({
+      where: { id },
+    });
+
+    if (!rawProperty) {
+      throw new NotFoundException('Property not found');
+    }
+
+    const user = await this.prisma.users.findUnique({ where: { id: userId } });
+    const isAdmin = user?.role === 'ADMIN';
+
+    if (rawProperty.user_id !== userId && !isAdmin) {
+      throw new ForbiddenException('You can only view your own properties');
+    }
+
+    const property = await this.getPropertyWithFiles(rawProperty);
+
+    // ── Resolve address & price_string ──────────────────────────────────────
+    const locationIds = [property.any_city, property.any_ward]
+      .filter(Boolean)
+      .map(Number)
+      .filter((n) => !isNaN(n));
+
+    const locationMap = new Map<string, string>();
+    if (locationIds.length > 0) {
+      const locations = await this.prisma.locations.findMany({
+        where: { id: { in: locationIds } },
+        select: { id: true, name: true },
+      });
+      locations.forEach((loc) => locationMap.set(String(loc.id), loc.name));
+    }
+
+    const cityName = locationMap.get(property.any_city) ?? property.any_city ?? '';
+    const wardName = locationMap.get(property.any_ward) ?? property.any_ward ?? '';
+    const address = [cityName, wardName].filter(Boolean).join(', ');
+    const price_string = this.formatPriceVND(Number(property.price));
+
+    return { ...property, address, price_string, cityName, wardName };
+  }
+
   /**
    * Tăng lượt xem +1 theo kiểu atomic (tránh race condition).
    * Dùng Prisma update với increment thay vì đọc rồi ghi.

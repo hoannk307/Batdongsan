@@ -1842,6 +1842,17 @@
       }
     }
   }
+
+  @media (min-width: 1920px) {
+    &.ratio_40 {
+      .bg-size {
+        height: 600px;
+        &:before {
+          padding-top: 0;
+        }
+      }
+    }
+  }
 }
 
 .image_section {

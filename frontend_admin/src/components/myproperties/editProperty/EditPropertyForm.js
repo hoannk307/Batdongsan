@@ -7,7 +7,7 @@ import { Button, Col, Row, FormGroup, Label, Input, Spinner } from "reactstrap";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
 import { ReactstrapInput, ReactstrapSelect } from "@/components/utils/ReactStarpInputsValidation";
-import { getData } from "@/components/utils/getData";
+import { getData } from "@/utils/apiRequests";
 
 const DEFAULT_PROVINCE_ID = "93";
 const DEFAULT_WARD_ID = "152";
@@ -78,6 +78,7 @@ const EditPropertyForm = ({ propertyId }) => {
               landmark: prop.landmark || "",
               googleMapCoordinates: prop.google_map_coordinates || "",
               outstanding: !!prop.outstanding,
+              status: prop.status || "DRAFT",
             });
 
             // Fetch wards for the selected province
@@ -163,6 +164,7 @@ const EditPropertyForm = ({ propertyId }) => {
       landmark: values.landmark,
       google_map_coordinates: values.googleMapCoordinates,
       outstanding: !!values.outstanding,
+      status: values.status,
     };
 
     // Remove undefined
@@ -226,6 +228,7 @@ const EditPropertyForm = ({ propertyId }) => {
         anyCity: Yup.string().required(),
         anyWard: Yup.string().required(),
         landmark: Yup.string().required(),
+        status: Yup.string().required(),
       })}
       onSubmit={handleSubmit}
     >
@@ -238,7 +241,13 @@ const EditPropertyForm = ({ propertyId }) => {
             <Col sm='4' className='form-group'>
               <Field name='propertyStatus' component={ReactstrapSelect} className='form-control' label='Nhu cầu bán/cho thuê' inputprops={{ options: propertyStatusOptions, defaultOption: "Nhu cầu" }} />
             </Col>
-            <Col sm='4' className='form-group'></Col>
+            {isAdmin ? (
+              <Col sm='4' className='form-group'>
+                <Field name='status' component={ReactstrapSelect} className='form-control' label='Trạng thái duyệt' inputprops={{ options: [{ id: "DRAFT", name: "Chờ duyệt (Draft)" }, { id: "PUBLISHED", name: "Đã duyệt (Published)" }], defaultOption: "Trạng thái duyệt" }} />
+              </Col>
+            ) : (
+              <Col sm='4' className='form-group'></Col>
+            )}
             <Col sm='4' className='form-group'>
               <Field name='beds' component={ReactstrapSelect} className='form-control' label='Phòng ngủ' inputprops={{ options: ["1", "2", "3", "4", "5", "6"], defaultOption: "Phòng ngủ" }} />
             </Col>

@@ -58,7 +58,7 @@ const BodyContent = ({ side }) => {
   return (
     <NoSsr>
       <SliderBreadcrumbSection singleData={singleData} />
-      <section className="single-property">
+      <section className="single-property" >
         <Container>
           <Row className=" ratio_65">
             <Sidebar mortgage={true} side={side} singleProperty={true}>

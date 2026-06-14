@@ -9,7 +9,7 @@ import * as Yup from "yup";
 import { toast } from "react-toastify";
 import { ReactstrapInput, ReactstrapSelect } from "@/components/utils/ReactStarpInputsValidation";
 import DropZones from "@/components/Common/Dropzones";
-import { getData } from "@/components/utils/getData";
+import { getData } from "@/utils/apiRequests";
 import { API_BASE_URL, DEV_ACCESS_TOKEN } from "@/config/env";
 
 const DEFAULT_PROVINCE_ID = "93";

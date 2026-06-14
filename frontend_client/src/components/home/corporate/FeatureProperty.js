@@ -51,7 +51,7 @@ const FeaturePropertySection = ({ value }) => {
                                   <Img src={data.img[0]} className="bg-img" />
                                 </div>
 
-                                <span className="label label-solid label-lg label-flat">Featured</span>
+                                <span className="label label-solid label-lg label-flat">Hot</span>
                               </div>
                             </Col>
                             <Col xl="6" lg="7">
@@ -82,18 +82,18 @@ const FeaturePropertySection = ({ value }) => {
                                     <span className="label label-light label-flat label-lg">{data.area} m2</span>
                                   </li>
                                 </ul>
-                                <ul className="feature-price">
-                                  <li>
+                                <div className="feature-price" style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                                  <div>
                                     <h3>{data.price_string}</h3>
-                                  </li>
-                                  <li>
+                                  </div>
+                                  <div>
                                     <Link href="/agent/submit-property">
                                       <button type="button" className="btn btn-solid btn-flat">
-                                        submit property
+                                        Xem thêm
                                       </button>
                                     </Link>
-                                  </li>
-                                </ul>
+                                  </div>
+                                </div>
                               </div>
                             </Col>
                           </Row>

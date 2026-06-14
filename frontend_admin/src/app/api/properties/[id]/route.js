@@ -3,7 +3,7 @@ import { getBackendBaseUrl, fetchWithTimeout, isConnectionError } from "@/lib/ap
 
 export async function GET(req, { params }) {
   const { id } = await params;
-  const targetUrl = `${getBackendBaseUrl()}/properties/${id}`;
+  const targetUrl = `${getBackendBaseUrl()}/properties/admin/${id}`;
   const authHeader = req.headers.get("Authorization");
 
   try {

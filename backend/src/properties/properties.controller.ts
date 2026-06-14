@@ -215,6 +215,18 @@ export class PropertiesController {
     return this.propertiesService.findByFilter(filterDto);
   }
 
+  @Get('admin/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Lấy chi tiết bất động sản cho Admin/Owner' })
+  findAdminOne(@Param('id') id: string, @Request() req) {
+    const numId = +id;
+    if (!Number.isFinite(numId) || numId <= 0) {
+      return { error: 'ID không hợp lệ', statusCode: 400 };
+    }
+    return this.propertiesService.findAdminOne(numId, req.user.userId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Lấy chi tiết bất động sản' })
   findOne(@Param('id') id: string) {

@@ -1,7 +1,8 @@
 "use client";
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import PropertyBoxFour from "@/components/Common/Propertybox/PropertyBoxOne";
-import { getData } from "@/components/utils/getData";
+import UserPanel from "@/components/manage-users/allusers/UserPanel";
+import { getData } from "@/utils/apiRequests";
 import React, { Fragment, useEffect, useState } from "react";
 import { Col, Container, Row } from "reactstrap";
 
