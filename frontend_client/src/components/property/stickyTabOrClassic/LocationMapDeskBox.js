@@ -8,7 +8,11 @@ const LocationMapDeskBox = ({ singleData }) => {
     .filter(Boolean)
     .join(", ");
 
-  const mapSrc = address
+  const coords = singleData?.google_map_coordinates;
+
+  const mapSrc = coords
+    ? `https://maps.google.com/maps?q=${encodeURIComponent(coords)}&output=embed`
+    : address
     ? `https://maps.google.com/maps?q=${encodeURIComponent(address)}&output=embed`
     : DEFAULT_MAP_SRC;
 

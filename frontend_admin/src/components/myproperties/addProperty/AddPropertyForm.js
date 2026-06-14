@@ -202,6 +202,7 @@ const AddPropertyForm = () => {
       anyCity,
       anyWard,
       landmark,
+      googleMapCoordinates,
       outstanding,
       // mp4Link: bỏ qua vì backend chưa hỗ trợ
     } = values;
@@ -217,6 +218,7 @@ const AddPropertyForm = () => {
       any_city: anyCity,
       any_ward: anyWard,
       landmark,
+      google_map_coordinates: googleMapCoordinates,
       outstanding: !!outstanding,
     };
 
@@ -288,6 +290,7 @@ const AddPropertyForm = () => {
         anyCity: DEFAULT_PROVINCE_ID, // Tỉnh thành phố
         anyWard: DEFAULT_WARD_ID,// phường xã
         landmark: "", // Địa điểm cụ thể
+        googleMapCoordinates: "", // Tọa độ google map
         mp4Link: "",
         outstanding: false,
       }}
@@ -422,6 +425,9 @@ const AddPropertyForm = () => {
               </Col>
               <Col sm='4' className='form-group'>
                 <Field name='landmark' type='text' component={ReactstrapInput} className='form-control' placeholder='Địa chỉ cụ thể' label='Chi tiết' />
+              </Col>
+              <Col sm='12' className='form-group'>
+                <Field name='googleMapCoordinates' type='text' component={ReactstrapInput} className='form-control' placeholder='Ví dụ: 12.273028, 109.201023' label='Tọa độ Google Map' />
               </Col>
             </Row>
           </div>

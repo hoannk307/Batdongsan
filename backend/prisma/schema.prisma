@@ -79,23 +79,25 @@ model tags {
 }
 
 model properties {
-  id              Int            @id @default(autoincrement())
-  property_type   String         @db.VarChar(100)
-  property_status PropertyStatus
-  beds            Int            @default(0)
-  baths           Int            @default(0)
-  area            Decimal        @db.Decimal(10, 2)
-  price           Decimal        @db.Decimal(15, 2)
-  description     String?
-  any_city        String         @db.VarChar(100)
-  any_ward        String         @db.VarChar(100)
-  landmark        String?        @db.VarChar(255)
-  created_at      DateTime       @default(now())
-  user_id         Int?
-  updated_at      DateTime?      @db.Date
-  view_count      Int            @default(0)
-  outstanding     Boolean?       @default(false)
-  favorites       favorites[]
+  id                     Int                   @id @default(autoincrement())
+  property_type          String                @db.VarChar(100)
+  property_status        PropertyStatus
+  beds                   Int                   @default(0)
+  baths                  Int                   @default(0)
+  area                   Decimal               @db.Decimal(10, 2)
+  price                  Decimal               @db.Decimal(15, 2)
+  description            String?
+  any_city               String                @db.VarChar(100)
+  any_ward               String                @db.VarChar(100)
+  landmark               String?               @db.VarChar(255)
+  google_map_coordinates String?               @db.VarChar(255)
+  status                 PropertyPublishStatus @default(PUBLISHED)
+  created_at             DateTime              @default(now())
+  user_id                Int?
+  updated_at             DateTime?             @db.Date
+  view_count             Int                   @default(0)
+  outstanding            Boolean?              @default(false)
+  favorites              favorites[]
 
   @@index([any_city])
   @@index([area])
@@ -240,4 +242,9 @@ enum BkBookingStatus {
   COMPLETED
   DEPOSITED
   UNPAID
+}
+
+enum PropertyPublishStatus {
+  DRAFT
+  PUBLISHED
 }

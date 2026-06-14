@@ -81,4 +81,14 @@ export class CreatePropertyDto {
   })
   outstanding?: boolean;
 
+  @ApiProperty({ example: '12.273028, 109.201023', description: 'Tọa độ Google Map', required: false })
+  @IsOptional()
+  @IsString()
+  google_map_coordinates?: string;
+
+  @ApiProperty({ enum: ['DRAFT', 'PUBLISHED'], description: 'Trạng thái xuất bản', required: false })
+  @IsOptional()
+  @IsEnum(['DRAFT', 'PUBLISHED'])
+  status?: any;
+
 }

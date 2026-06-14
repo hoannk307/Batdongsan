@@ -76,6 +76,7 @@ const EditPropertyForm = ({ propertyId }) => {
               anyCity: prop.any_city || DEFAULT_PROVINCE_ID,
               anyWard: prop.any_ward || DEFAULT_WARD_ID,
               landmark: prop.landmark || "",
+              googleMapCoordinates: prop.google_map_coordinates || "",
               outstanding: !!prop.outstanding,
             });
 
@@ -160,6 +161,7 @@ const EditPropertyForm = ({ propertyId }) => {
       any_city: values.anyCity,
       any_ward: values.anyWard,
       landmark: values.landmark,
+      google_map_coordinates: values.googleMapCoordinates,
       outstanding: !!values.outstanding,
     };
 
@@ -274,6 +276,9 @@ const EditPropertyForm = ({ propertyId }) => {
               </Col>
               <Col sm='4' className='form-group'>
                 <Field name='landmark' type='text' component={ReactstrapInput} className='form-control' placeholder='Địa chỉ cụ thể' label='Chi tiết' />
+              </Col>
+              <Col sm='12' className='form-group'>
+                <Field name='googleMapCoordinates' type='text' component={ReactstrapInput} className='form-control' placeholder='Ví dụ: 12.273028, 109.201023' label='Tọa độ Google Map' />
               </Col>
             </Row>
           </div>

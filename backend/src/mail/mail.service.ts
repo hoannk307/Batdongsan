@@ -63,13 +63,13 @@ export class MailService {
       `SDT     : ${senderPhone || 'Khong cung cap'}`,
       '',
       propertyTitle ? `BDS quan tam: ${propertyTitle}` : '',
-      propertyId    ? `Ma BDS     : #${propertyId}` : '',
+      propertyId ? `Ma BDS     : #${propertyId}` : '',
       propertyAddress ? `Dia chi    : ${propertyAddress}` : '',
       '',
       message ? `Noi dung:\n${message}` : '',
       '',
       '---',
-      'Email nay duoc gui tu he thong Bat Dong San.',
+      'Email nay duoc gui tu nhatranglands.vn.',
     ].filter(Boolean).join('\n');
 
     const htmlBody = `
@@ -125,7 +125,7 @@ export class MailService {
     try {
       await this.transporter.sendMail({
         // Dùng ASCII trong from-name để tránh spam filter
-        from: `"He Thong Bat Dong San" <${this.config.get<string>('MAIL_USER')}>`,
+        from: `"nhatranglands.vn" <${this.config.get<string>('MAIL_USER')}>`,
         to: toEmail,
         // replyTo dạng đầy đủ: "Tên" <email> – rõ ràng hơn cho mail server
         replyTo: `"${senderName}" <${senderEmail}>`,
@@ -143,6 +143,42 @@ export class MailService {
     } catch (error) {
       this.logger.error(`❌ Gửi email thất bại tới ${toEmail}:`, error);
       throw new InternalServerErrorException('Không thể gửi email. Vui lòng thử lại sau.');
+    }
+  }
+
+  async sendPropertyApprovalRequest(adminEmails: string[], propertyId: number, propertyType: string, userFullName: string): Promise<void> {
+    const subject = `[Yêu cầu phê duyệt] Bất động sản mới cần duyệt #${propertyId}`;
+    const textBody = `Người dùng ${userFullName} vừa đăng một bất động sản mới (Loại: ${propertyType}, ID: ${propertyId}) cần được admin phê duyệt.\nVui lòng đăng nhập vào hệ thống admin để kiểm tra và phê duyệt.`;
+
+    const htmlBody = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+        <div style="background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); padding: 24px 32px;">
+          <h2 style="color: #fff; margin: 0; font-size: 22px;">📋 Yêu cầu phê duyệt BĐS</h2>
+        </div>
+        <div style="padding: 28px 32px; background: #ffffff;">
+          <p>Chào Admin,</p>
+          <p>Người dùng <strong>${userFullName}</strong> vừa đăng hoặc cập nhật một bất động sản mới cần được phê duyệt.</p>
+          <ul>
+            <li><strong>Mã BĐS:</strong> #${propertyId}</li>
+            <li><strong>Loại BĐS:</strong> ${propertyType}</li>
+          </ul>
+          <p>Vui lòng đăng nhập vào hệ thống để kiểm tra và phê duyệt tin đăng này.</p>
+        </div>
+      </div>
+    `;
+
+    try {
+      await this.transporter.sendMail({
+        from: `"nhatranglands.vn" <${this.config.get<string>('MAIL_USER')}>`,
+        to: adminEmails.join(','),
+        subject,
+        text: textBody,
+        html: htmlBody,
+      });
+      this.logger.log(`✅ Đã gửi email yêu cầu phê duyệt tới admins: ${adminEmails.join(', ')}`);
+    } catch (error) {
+      this.logger.error(`❌ Gửi email yêu cầu phê duyệt thất bại:`, error);
+      // Don't throw to prevent blocking the property creation
     }
   }
 }

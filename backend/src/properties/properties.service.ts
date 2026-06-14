@@ -11,6 +11,7 @@ import {
   PropertyTypeDefault,
 } from './enums/property-defaults.enum';
 import { FileService } from '../file/file.service';
+import { MailService } from '../mail/mail.service';
 import { extname } from 'path';
 
 @Injectable()
@@ -18,6 +19,7 @@ export class PropertiesService {
   constructor(
     private prisma: PrismaService,
     private readonly fileService: FileService,
+    private readonly mailService: MailService,
   ) { }
 
   async findLatest(params: { page?: number; limit?: number }) {
@@ -27,11 +29,12 @@ export class PropertiesService {
 
     const [rawProperties, total] = await Promise.all([
       this.prisma.properties.findMany({
+        where: { status: 'PUBLISHED' as any },
         skip,
         take: limit,
         orderBy: { created_at: 'desc' },
       }),
-      this.prisma.properties.count(),
+      this.prisma.properties.count({ where: { status: 'PUBLISHED' as any } }),
     ]);
 
     const properties = await this.getPropertiesWithFiles(rawProperties);
@@ -79,7 +82,7 @@ export class PropertiesService {
     const limit = params?.limit && params.limit > 0 ? params.limit : 10;
     const skip = (page - 1) * limit;
 
-    const where = { outstanding: true };
+    const where = { outstanding: true, status: 'PUBLISHED' as any };
 
     const [rawProperties, total] = await Promise.all([
       this.prisma.properties.findMany({
@@ -132,12 +135,40 @@ export class PropertiesService {
   }
 
   async create(userId: number, createPropertyDto: CreatePropertyDto) {
+    const user = await this.prisma.users.findUnique({ where: { id: userId } });
+    const isAdmin = user?.role === 'ADMIN';
+
+    let status = createPropertyDto.status || 'DRAFT';
+    if (!isAdmin) {
+      status = 'DRAFT';
+    } else if (!createPropertyDto.status) {
+      status = 'PUBLISHED';
+    }
+
     const property = await this.prisma.properties.create({
       data: {
         ...createPropertyDto,
+        status: status as any,
         user_id: userId,
       },
     });
+
+    if (!isAdmin) {
+      const admins = await this.prisma.users.findMany({ where: { role: 'ADMIN' } });
+      const adminEmails = admins.map(a => a.email);
+      adminEmails.push('nhatrangland.bds@gmail.com');
+      const uniqueAdminEmails = [...new Set(adminEmails)];
+      
+      if (uniqueAdminEmails.length > 0) {
+        // Send email asynchronously without awaiting it
+        this.mailService.sendPropertyApprovalRequest(
+          uniqueAdminEmails,
+          property.id,
+          property.property_type,
+          user?.full_name || user?.username || 'Unknown'
+        ).catch(e => Logger.error('Failed to send approval email', e));
+      }
+    }
 
     return this.getPropertyWithFiles(property);
   }
@@ -187,10 +218,21 @@ export class PropertiesService {
       });
 
       // Transaction: tạo property + insert vào bảng file_attach
+      const user = await this.prisma.users.findUnique({ where: { id: userId } });
+      const isAdmin = user?.role === 'ADMIN';
+
+      let status = createPropertyDto.status || 'DRAFT';
+      if (!isAdmin) {
+        status = 'DRAFT';
+      } else if (!createPropertyDto.status) {
+        status = 'PUBLISHED';
+      }
+
       const property = await this.prisma.$transaction(async (tx) => {
         const createdProperty = await tx.properties.create({
           data: {
             ...createPropertyDto,
+            status: status as any,
             user_id: userId,
           },
         });
@@ -216,6 +258,22 @@ export class PropertiesService {
       // Sau khi transaction DB thành công, mới upload file lên Cloudflare
       for (const meta of fileMetas) {
         await this.fileService.uploadFileWithKey(meta.file, meta.keyPath);
+      }
+
+      if (!isAdmin) {
+        const admins = await this.prisma.users.findMany({ where: { role: 'ADMIN' } });
+        const adminEmails = admins.map(a => a.email);
+        adminEmails.push('nhatrangland.bds@gmail.com');
+        const uniqueAdminEmails = [...new Set(adminEmails)];
+        
+        if (uniqueAdminEmails.length > 0) {
+          this.mailService.sendPropertyApprovalRequest(
+            uniqueAdminEmails,
+            property.id,
+            property.property_type,
+            user?.full_name || user?.username || 'Unknown'
+          ).catch(e => Logger.error('Failed to send approval email', e));
+        }
       }
 
       return this.getPropertyWithFiles(property);
@@ -303,7 +361,9 @@ export class PropertiesService {
     const skip = (page - 1) * limit;
 
     // Build where clause
-    const where: Prisma.propertiesWhereInput = {};
+    const where: Prisma.propertiesWhereInput = {
+      status: 'PUBLISHED' as any,
+    };
 
     if (propertyStatus) {
       where.property_status = propertyStatus;
@@ -417,7 +477,7 @@ export class PropertiesService {
       where: { id },
     });
 
-    if (!rawProperty) {
+    if (!rawProperty || rawProperty.status !== 'PUBLISHED') {
       throw new NotFoundException('Property not found');
     }
 
@@ -468,14 +528,42 @@ export class PropertiesService {
       throw new NotFoundException('Property not found');
     }
 
-    if (property.user_id !== userId) {
+    const user = await this.prisma.users.findUnique({ where: { id: userId } });
+    const isAdmin = user?.role === 'ADMIN';
+
+    if (property.user_id !== userId && !isAdmin) {
       throw new ForbiddenException('You can only update your own properties');
+    }
+
+    let status = updatePropertyDto.status;
+    if (!isAdmin) {
+      // If regular user updates, it goes back to DRAFT for re-approval
+      status = 'DRAFT';
     }
 
     const updatedProperty = await this.prisma.properties.update({
       where: { id },
-      data: updatePropertyDto,
+      data: {
+        ...updatePropertyDto,
+        ...(status ? { status: status as any } : {})
+      },
     });
+
+    if (!isAdmin) {
+      const admins = await this.prisma.users.findMany({ where: { role: 'ADMIN' } });
+      const adminEmails = admins.map(a => a.email);
+      adminEmails.push('nhatrangland.bds@gmail.com');
+      const uniqueAdminEmails = [...new Set(adminEmails)];
+      
+      if (uniqueAdminEmails.length > 0) {
+        this.mailService.sendPropertyApprovalRequest(
+          uniqueAdminEmails,
+          updatedProperty.id,
+          updatedProperty.property_type,
+          user?.full_name || user?.username || 'Unknown'
+        ).catch(e => Logger.error('Failed to send approval email', e));
+      }
+    }
 
     return this.getPropertyWithFiles(updatedProperty);
   }
@@ -545,7 +633,9 @@ export class PropertiesService {
     const skip = (page - 1) * limit;
 
     // ── Build where clause ──────────────────────────────────────────────────
-    const where: Prisma.propertiesWhereInput = {};
+    const where: Prisma.propertiesWhereInput = {
+      status: 'PUBLISHED' as any,
+    };
 
     if (propertyStatus) {
       where.property_status = propertyStatus;
@@ -683,7 +773,9 @@ export class PropertiesService {
     const skip = (page - 1) * limit;
 
     // ── Build where clause ──────────────────────────────────────────────────
-    const where: Prisma.propertiesWhereInput = {};
+    const where: Prisma.propertiesWhereInput = {
+      status: 'PUBLISHED' as any,
+    };
 
     if (property_type) {
       where.property_type = property_type;
