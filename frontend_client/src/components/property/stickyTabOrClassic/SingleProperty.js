@@ -21,7 +21,7 @@ const SinglePropertySection = ({ singleData }) => {
           <SearchBarDeskBox fix={fix} singleData={singleData} />
           {/* <FeatureDeskBox singleData={singleData} /> */}
           <GalleryDeskBox singleData={singleData} />
-          {singleData.video_url && (
+          {singleData?.video_url && (
             <VideoDeskBox singleData={singleData} />
           )}
           <DetailsDeskBox singleData={singleData} />

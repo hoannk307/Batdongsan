@@ -12,7 +12,7 @@ const AboutDeskBox = ({ singleData }) => {
       <h4>Giới thiệu</h4>
       <Row>
         <Col sm='12'>
-          <p>{singleData?.description}</p>
+          <div dangerouslySetInnerHTML={{ __html: singleData?.description }} />
         </Col>
       </Row>
     </div>

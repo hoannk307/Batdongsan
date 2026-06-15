@@ -10,7 +10,8 @@ import { toast } from "react-toastify";
 import { ReactstrapInput, ReactstrapSelect } from "@/components/utils/ReactStarpInputsValidation";
 import DropZones from "@/components/Common/Dropzones";
 import { getData } from "@/utils/apiRequests";
-import { API_BASE_URL, DEV_ACCESS_TOKEN } from "@/config/env";
+import { API_BASE_URL, DEV_ACCESS_TOKEN, TINYMCE_SCRIPT_SRC } from "@/config/env";
+import { Editor } from "@tinymce/tinymce-react";
 
 const DEFAULT_PROVINCE_ID = "93";
 const DEFAULT_WARD_ID = "152";
@@ -27,6 +28,22 @@ const AddPropertyForm = () => {
   const [isLoadingWards, setIsLoadingWards] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const apiBaseUrl = "/api";
+
+  const [resolvedTinymceApiKey, setResolvedTinymceApiKey] = useState("");
+  const [loadingTinymceKey, setLoadingTinymceKey] = useState(false);
+
+  useEffect(() => {
+    if (!resolvedTinymceApiKey) {
+      setLoadingTinymceKey(true);
+      fetch("/api/tinymce-key")
+        .then((r) => r.json())
+        .then((data) => {
+          setResolvedTinymceApiKey(data?.key || "");
+        })
+        .catch(() => setResolvedTinymceApiKey(""))
+        .finally(() => setLoadingTinymceKey(false));
+    }
+  }, [resolvedTinymceApiKey]);
 
   useEffect(() => {
     const fetchDefaults = async () => {
@@ -282,7 +299,7 @@ const AddPropertyForm = () => {
     <Formik
       initialValues={{
         propertyType: "", // Loại bất động sản
-          propertyStatus: "", // Trạng thái bất động sản
+        propertyStatus: "", // Trạng thái bất động sản
         beds: "", // Số phòng ngủ
         baths: "", // Số phòng tắm
         area: "", // Diện tích
@@ -337,9 +354,9 @@ const AddPropertyForm = () => {
               />
             </Col>
             <Col sm='4' className='form-group'>
-             
+              <Field name='area' type='text' className='form-control' component={ReactstrapInput} label='Diện tích' placeholder='85 Sq Ft' />
             </Col>
-            
+
             <Col sm='4' className='form-group'>
               <Field
                 name='beds'
@@ -364,19 +381,13 @@ const AddPropertyForm = () => {
                 }}
               />
             </Col>
-            <Col sm='4' className='form-group'>
-              
-            </Col>
-            <Col sm='4' className='form-group'>
-              <Field name='area' type='text' className='form-control' component={ReactstrapInput} label='Diện tích' placeholder='85 Sq Ft' />
-            </Col>
+
+
             <Col sm='4' className='form-group'>
               <Field name='price' type='text' className='form-control' component={ReactstrapInput} label='Giá' placeholder='$3000' />
             </Col>
-            
-            <Col sm='12' className='form-group'>
-              <Field type='textarea' name='description' component={ReactstrapInput} className='form-control' rows={4} label='Description' />
-            </Col>
+
+
             {isAdmin && (
               <Col sm='4' className='form-group'>
                 <FormGroup switch>
@@ -391,25 +402,22 @@ const AddPropertyForm = () => {
                 </FormGroup>
               </Col>
             )}
-            <Col sm='4' className='form-group'>
-           
-            </Col>
           </Row>
           <div className='form-inputs'>
             <h6>Địa chỉ</h6>
             <Row className=' gx-3'>
               <Col sm='4' className='form-group'>
-              <Field
-                name='anyCity'
-                component={ReactstrapSelect}
-                className='form-control'
-                label='Tỉnh/Thành phố'
-                inputprops={{
-                  options: provinces.length > 0 ? provinces : [],
-                  defaultOption: "Tỉnh/Thành phố",
-                }}
-                onChange={(event) => handleProvinceChange(event, setFieldValue)}
-              />
+                <Field
+                  name='anyCity'
+                  component={ReactstrapSelect}
+                  className='form-control'
+                  label='Tỉnh/Thành phố'
+                  inputprops={{
+                    options: provinces.length > 0 ? provinces : [],
+                    defaultOption: "Tỉnh/Thành phố",
+                  }}
+                  onChange={(event) => handleProvinceChange(event, setFieldValue)}
+                />
               </Col>
               <Col sm='4' className='form-group'>
                 <Field
@@ -418,10 +426,10 @@ const AddPropertyForm = () => {
                   className='form-control'
                   label='Phường/Xã'
                   inputprops={{
-                  options: wards.length > 0 ? wards : [],
-                  defaultOption: isLoadingWards ? "Đang tải..." : "Phường/Xã",
+                    options: wards.length > 0 ? wards : [],
+                    defaultOption: isLoadingWards ? "Đang tải..." : "Phường/Xã",
                   }}
-                disabled={isLoadingWards || !values.anyCity}
+                  disabled={isLoadingWards || !values.anyCity}
                 />
               </Col>
               <Col sm='4' className='form-group'>
@@ -434,26 +442,80 @@ const AddPropertyForm = () => {
           </div>
           <div className='dropzone-admin form-inputs'>
             <h6>Media</h6>
-              <div className='dropzone' id='multiFileUpload'>
-                <div className='dz-message needsclick'>
-                  <DropZones multiple files={uploadedFiles} onFilesChange={setUploadedFiles} />
-                </div>
+            <div className='dropzone' id='multiFileUpload'>
+              <div className='dz-message needsclick'>
+                <DropZones multiple files={uploadedFiles} onFilesChange={setUploadedFiles} />
               </div>
-            <Row className='gx-3'>
+            </div>
+
+          </div>
+          <Row className='gx-3'>
+            <Col sm='12' className='form-group'>
+              <Field name='mp4Link' component={ReactstrapInput} type='text' className='form-control' placeholder='mp4 video link' label='Video (mp4)' />
+            </Col>
+          </Row>
+          <div className='form-inputs'>
+            <Row className="gx-3">
               <Col sm='12' className='form-group'>
-                <Field name='mp4Link' component={ReactstrapInput} type='text' className='form-control' placeholder='mp4 video link' label='Video (mp4)' />
-              </Col>
-              
-              <Col sm='12' className='form-btn'>
-                <Button type='submit' className='btn btn-gradient btn-pill' disabled={isSubmitting}>
-                  {isSubmitting ? "Saving..." : "Submit"}
-                </Button>
-                <Button type='button' className='btn btn-dashed btn-pill' onClick={handleCancel}>
-                  Cancel
-                </Button>
+                <Label>Mô tả (Description)</Label>
+                {loadingTinymceKey ? (
+                  <div className="alert alert-info">Loading TinyMCE API key...</div>
+                ) : !resolvedTinymceApiKey ? (
+                  <div className="alert alert-warning" role="alert">
+                    TinyMCE missing API key. Please set <code>NEXT_PUBLIC_TINYMCE_API_KEY</code> in{" "}
+                    <code>frontend_admin/.env.local</code>.
+                  </div>
+                ) : (
+                  <Editor
+                    apiKey={resolvedTinymceApiKey}
+                    tinymceScriptSrc={
+                      TINYMCE_SCRIPT_SRC ||
+                      `https://cdn.tiny.cloud/1/${resolvedTinymceApiKey}/tinymce/6/tinymce.min.js`
+                    }
+                    value={values.description}
+                    onEditorChange={(content) => setFieldValue('description', content)}
+                    init={{
+                      height: 420,
+                      menubar: true,
+                      plugins: [
+                        "advlist",
+                        "autolink",
+                        "lists",
+                        "link",
+                        "image",
+                        "charmap",
+                        "preview",
+                        "anchor",
+                        "searchreplace",
+                        "visualblocks",
+                        "code",
+                        "fullscreen",
+                        "insertdatetime",
+                        "media",
+                        "table",
+                        "help",
+                        "wordcount",
+                      ],
+                      toolbar:
+                        "undo redo | blocks | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media table | removeformat | code fullscreen | help",
+                      content_style:
+                        "body { font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,'Apple Color Emoji','Segoe UI Emoji'; font-size: 14px; }",
+                    }}
+                  />
+                )}
               </Col>
             </Row>
           </div>
+          <Row className='gx-3'>
+            <Col sm='12' className='form-btn'>
+              <Button type='submit' className='btn btn-gradient btn-pill' disabled={isSubmitting}>
+                {isSubmitting ? "Saving..." : "Submit"}
+              </Button>
+              <Button type='button' className='btn btn-dashed btn-pill' onClick={handleCancel}>
+                Cancel
+              </Button>
+            </Col>
+          </Row>
         </Form>
       )}
     </Formik>

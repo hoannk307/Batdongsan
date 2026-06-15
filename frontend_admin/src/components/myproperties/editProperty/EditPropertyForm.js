@@ -8,6 +8,8 @@ import * as Yup from "yup";
 import { toast } from "react-toastify";
 import { ReactstrapInput, ReactstrapSelect } from "@/components/utils/ReactStarpInputsValidation";
 import { getData } from "@/utils/apiRequests";
+import { TINYMCE_SCRIPT_SRC } from "@/config/env";
+import { Editor } from "@tinymce/tinymce-react";
 
 const DEFAULT_PROVINCE_ID = "93";
 const DEFAULT_WARD_ID = "152";
@@ -23,6 +25,22 @@ const EditPropertyForm = ({ propertyId }) => {
   const [initialData, setInitialData] = useState(null);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+
+  const [resolvedTinymceApiKey, setResolvedTinymceApiKey] = useState("");
+  const [loadingTinymceKey, setLoadingTinymceKey] = useState(false);
+
+  useEffect(() => {
+    if (!resolvedTinymceApiKey) {
+      setLoadingTinymceKey(true);
+      fetch("/api/tinymce-key")
+        .then((r) => r.json())
+        .then((data) => {
+          setResolvedTinymceApiKey(data?.key || "");
+        })
+        .catch(() => setResolvedTinymceApiKey(""))
+        .finally(() => setLoadingTinymceKey(false));
+    }
+  }, [resolvedTinymceApiKey]);
 
   const apiBaseUrl = "/api";
 
@@ -244,39 +262,19 @@ const EditPropertyForm = ({ propertyId }) => {
             <Col sm='4' className='form-group'>
               <Field name='propertyStatus' component={ReactstrapSelect} className='form-control' label='Nhu cầu bán/cho thuê' inputprops={{ options: propertyStatusOptions, defaultOption: "Nhu cầu" }} />
             </Col>
-            {isAdmin ? (
-              <Col sm='4' className='form-group'>
-                <Field name='status' component={ReactstrapSelect} className='form-control' label='Trạng thái duyệt' inputprops={{ options: [{ id: "DRAFT", name: "Chờ duyệt (Draft)" }, { id: "PUBLISHED", name: "Đã duyệt (Published)" }], defaultOption: "Trạng thái duyệt" }} />
-              </Col>
-            ) : (
-              <Col sm='4' className='form-group'></Col>
-            )}
+            <Col sm='4' className='form-group'>
+              <Field name='area' type='text' className='form-control' component={ReactstrapInput} label='Diện tích' placeholder='85' />
+            </Col>
             <Col sm='4' className='form-group'>
               <Field name='beds' component={ReactstrapSelect} className='form-control' label='Phòng ngủ' inputprops={{ options: ["1", "2", "3", "4", "5", "6"], defaultOption: "Phòng ngủ" }} />
             </Col>
             <Col sm='4' className='form-group'>
               <Field name='baths' component={ReactstrapSelect} className='form-control' label='Phòng tắm/vệ sinh' inputprops={{ options: ["1", "2", "3", "4", "5", "6"], defaultOption: "Phòng tắm/vệ sinh" }} />
             </Col>
-            <Col sm='4' className='form-group'></Col>
-            <Col sm='4' className='form-group'>
-              <Field name='area' type='text' className='form-control' component={ReactstrapInput} label='Diện tích' placeholder='85' />
-            </Col>
             <Col sm='4' className='form-group'>
               <Field name='price' type='text' className='form-control' component={ReactstrapInput} label='Giá' placeholder='3000000000' />
             </Col>
-            <Col sm='12' className='form-group'>
-              <Field type='textarea' name='description' component={ReactstrapInput} className='form-control' rows={4} label='Description' />
-            </Col>
-            {isAdmin && (
-              <Col sm='4' className='form-group'>
-                <FormGroup switch>
-                  <Input type='switch' id='outstanding' name='outstanding' checked={values.outstanding} onChange={() => setFieldValue('outstanding', !values.outstanding)} />
-                  <Label check htmlFor='outstanding' style={{ cursor: 'pointer' }}>BĐS Nổi bật</Label>
-                </FormGroup>
-              </Col>
-            )}
           </Row>
-
           <div className='form-inputs'>
             <h6>Địa chỉ</h6>
             <Row className=' gx-3'>
@@ -294,16 +292,81 @@ const EditPropertyForm = ({ propertyId }) => {
               </Col>
             </Row>
           </div>
-
-          <div className='form-inputs mb-4'>
-            <h6>Media</h6>
-            <Row className='gx-3'>
-              <Col sm='12' className='form-group'>
-                <Field name='mp4Link' component={ReactstrapInput} type='text' className='form-control' placeholder='mp4 video link' label='Video (mp4)' />
+          <Row className=' gx-3'>
+            {isAdmin && (
+              <Col sm='4' className='form-group'>
+                <Field name='status' component={ReactstrapSelect} className='form-control' label='Trạng thái duyệt' inputprops={{ options: [{ id: "DRAFT", name: "Chờ duyệt (Draft)" }, { id: "PUBLISHED", name: "Đã duyệt (Published)" }], defaultOption: "Trạng thái duyệt" }} />
               </Col>
-            </Row>
-             <p className="text-muted small"><em>* Tính năng cập nhật Hình ảnh đang được xây dựng trong tương lai. Hiện tại chỉ hỗ trợ sửa thông tin văn bản và Video URL.</em></p>
-          </div>
+            )}
+            {isAdmin && (
+              <Col sm='4' className='form-group'>
+                <Label></Label>
+                <FormGroup switch>
+                  <Input type='switch' id='outstanding' name='outstanding' checked={values.outstanding} onChange={() => setFieldValue('outstanding', !values.outstanding)} />
+                  <Label check htmlFor='outstanding' style={{ cursor: 'pointer' }}>BĐS Nổi bật</Label>
+                </FormGroup>
+              </Col>
+            )}
+          </Row>
+
+
+
+          <Row className='gx-3'>
+            <Col sm='12' className='form-group'>
+              <Field name='mp4Link' component={ReactstrapInput} type='text' className='form-control' placeholder='mp4 video link' label='Video (mp4)' />
+            </Col>
+          </Row>
+
+          <Row className='gx-3'>
+            <Col sm='12' className='form-group'>
+              <Label>Mô tả (Description)</Label>
+              {loadingTinymceKey ? (
+                <div className="alert alert-info">Loading TinyMCE API key...</div>
+              ) : !resolvedTinymceApiKey ? (
+                <div className="alert alert-warning" role="alert">
+                  TinyMCE missing API key. Please set <code>NEXT_PUBLIC_TINYMCE_API_KEY</code> in{" "}
+                  <code>frontend_admin/.env.local</code>.
+                </div>
+              ) : (
+                <Editor
+                  apiKey={resolvedTinymceApiKey}
+                  tinymceScriptSrc={
+                    TINYMCE_SCRIPT_SRC ||
+                    `https://cdn.tiny.cloud/1/${resolvedTinymceApiKey}/tinymce/6/tinymce.min.js`
+                  }
+                  value={values.description}
+                  onEditorChange={(content) => setFieldValue('description', content)}
+                  init={{
+                    height: 420,
+                    menubar: true,
+                    plugins: [
+                      "advlist",
+                      "autolink",
+                      "lists",
+                      "link",
+                      "image",
+                      "charmap",
+                      "preview",
+                      "anchor",
+                      "searchreplace",
+                      "visualblocks",
+                      "code",
+                      "fullscreen",
+                      "insertdatetime",
+                      "media",
+                      "table",
+                      "help",
+                      "wordcount",
+                    ],
+                    toolbar:
+                      "undo redo | blocks | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media table | removeformat | code fullscreen | help",
+                    content_style:
+                      "body { font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,'Apple Color Emoji','Segoe UI Emoji'; font-size: 14px; }",
+                  }}
+                />
+              )}
+            </Col>
+          </Row>
 
           <Row className='gx-3'>
             <Col sm='12' className='form-btn'>
