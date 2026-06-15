@@ -57,6 +57,10 @@ function findEnvLocal(startDir) {
 }
 
 export async function GET() {
+  if (process.env.NEXT_PUBLIC_TINYMCE_API_KEY) {
+    return NextResponse.json({ key: process.env.NEXT_PUBLIC_TINYMCE_API_KEY });
+  }
+
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
 
