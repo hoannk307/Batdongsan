@@ -6,7 +6,7 @@ import React, { useState } from "react";
 import { Button, Modal, ModalBody } from "reactstrap";
 import Img from "../../../utils/BackgroundImageRatio";
 
-const VideoDeskBox = () => {
+const VideoDeskBox = ({ singleData }) => {
   const [modal, setModal] = useState(false);
   const toggle = () => setModal(!modal);
   return (
@@ -14,24 +14,25 @@ const VideoDeskBox = () => {
       <div className='page-section ratio_40'>
         <h4 className='content-title'>video</h4>
         <div className='play-bg-image'>
-          <div>
+          {/* <div>
             <Img src='/assets/images/property/11.jpg' className='bg-img' />
           </div>
           <div className='icon-video'>
             <a>
               <i className='fas fa-play' onClick={() => setModal(true)}></i>
             </a>
-          </div>
+          </div> */}
+          <iframe src={singleData?.url_video} allowFullScreen></iframe>
         </div>
       </div>
-      <Modal className='video-modal' centered size='lg' isOpen={modal} toggle={toggle} modalTransition={{ timeout: 100 }}>
+      {/* <Modal className='video-modal' centered size='lg' isOpen={modal} toggle={toggle} modalTransition={{ timeout: 100 }}>
         <ModalBody className='m-0 p-0'>
           <Button onClick={toggle} type='button' className='btn-close' aria-label='Close'>
             <span aria-hidden='true'>×</span>
           </Button>
-          <iframe src='https://www.youtube.com/embed/Sz_1tkcU0Co' allowFullScreen></iframe>
+          <iframe src={singleData?.url_video} allowFullScreen></iframe>
         </ModalBody>
-      </Modal>
+      </Modal> */}
     </div>
   );
 };

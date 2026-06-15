@@ -39,7 +39,7 @@ const DetailsDeskBox = ({ singleData }) => {
             <ul className='property-list-details'>
               <li>
 
-                <span>Tỉnh/Thành phố :</span> {singleData?.cityName || ""}
+                <span>Tỉnh/Thành phố :</span> {singleData?.any_city_name || ""}
               </li>
               <li>
                 <span>Diện tích :</span>{" "}
@@ -53,7 +53,7 @@ const DetailsDeskBox = ({ singleData }) => {
           <Col md='6' xl='4'>
             <ul className='property-list-details'>
               <li>
-                <span>Phường/Xã :</span> {singleData?.wardName || ""}
+                <span>Phường/Xã :</span> {singleData?.any_ward_name || ""}
               </li>
               <li>
                 <span>Phòng tắm :</span> {singleData?.baths ?? "—"}

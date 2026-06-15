@@ -23,7 +23,7 @@ const SinglePropertySection = ({ singleData }) => {
           <GalleryDeskBox singleData={singleData} />
           <VideoDeskBox singleData={singleData} />
           <DetailsDeskBox singleData={singleData} />
-          <FloorPlanDeskBox singleData={singleData} />
+          {/* <FloorPlanDeskBox singleData={singleData} /> */}
           <LocationMapDeskBox singleData={singleData} />
         </div>
       </div>

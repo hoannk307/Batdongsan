@@ -79,6 +79,7 @@ const EditPropertyForm = ({ propertyId }) => {
               googleMapCoordinates: prop.google_map_coordinates || "",
               outstanding: !!prop.outstanding,
               status: prop.status || "DRAFT",
+              mp4Link: prop.url_video || "",
             });
 
             // Fetch wards for the selected province
@@ -165,6 +166,7 @@ const EditPropertyForm = ({ propertyId }) => {
       google_map_coordinates: values.googleMapCoordinates,
       outstanding: !!values.outstanding,
       status: values.status,
+      url_video: values.mp4Link,
     };
 
     // Remove undefined
@@ -229,6 +231,7 @@ const EditPropertyForm = ({ propertyId }) => {
         anyWard: Yup.string().required(),
         landmark: Yup.string().required(),
         status: Yup.string().required(),
+        mp4Link: Yup.string().optional(),
       })}
       onSubmit={handleSubmit}
     >
@@ -293,7 +296,13 @@ const EditPropertyForm = ({ propertyId }) => {
           </div>
 
           <div className='form-inputs mb-4'>
-             <p className="text-muted small"><em>* Tính năng cập nhật Hình ảnh/Video đang được xây dựng trong tương lai. Hiện tại chỉ hỗ trợ sửa thông tin văn bản.</em></p>
+            <h6>Media</h6>
+            <Row className='gx-3'>
+              <Col sm='12' className='form-group'>
+                <Field name='mp4Link' component={ReactstrapInput} type='text' className='form-control' placeholder='mp4 video link' label='Video (mp4)' />
+              </Col>
+            </Row>
+             <p className="text-muted small"><em>* Tính năng cập nhật Hình ảnh đang được xây dựng trong tương lai. Hiện tại chỉ hỗ trợ sửa thông tin văn bản và Video URL.</em></p>
           </div>
 
           <Row className='gx-3'>

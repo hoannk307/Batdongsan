@@ -86,6 +86,11 @@ export class CreatePropertyDto {
   @IsString()
   google_map_coordinates?: string;
 
+  @ApiProperty({ example: 'https://youtube.com/...', description: 'URL Video', required: false })
+  @IsOptional()
+  @IsString()
+  url_video?: string;
+
   @ApiProperty({ enum: ['DRAFT', 'PUBLISHED'], description: 'Trạng thái xuất bản', required: false })
   @IsOptional()
   @IsEnum(['DRAFT', 'PUBLISHED'])

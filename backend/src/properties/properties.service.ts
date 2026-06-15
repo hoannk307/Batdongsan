@@ -22,6 +22,10 @@ export class PropertiesService {
     private readonly mailService: MailService,
   ) { }
 
+  /**
+   * [FRONTEND_CLIENT]
+   * Lấy danh sách bất động sản mới nhất (trạng thái PUBLISHED).
+   */
   async findLatest(params: { page?: number; limit?: number }) {
     const page = params?.page && params.page > 0 ? params.page : 1;
     const limit = params?.limit && params.limit > 0 ? params.limit : 6;
@@ -63,7 +67,13 @@ export class PropertiesService {
       const wardName = locationMap.get(p.any_ward) ?? p.any_ward ?? '';
       const address = [cityName, wardName].filter(Boolean).join(', ');
       const price_string = this.formatPriceVND(Number(p.price));
-      return { ...p, address, price_string };
+      return { 
+        ...p, 
+        address, 
+        price_string,
+        any_city_name: cityName,
+        any_ward_name: wardName
+      };
     });
 
     return {
@@ -77,6 +87,10 @@ export class PropertiesService {
     };
   }
 
+  /**
+   * [FRONTEND_CLIENT]
+   * Lấy danh sách bất động sản nổi bật (outstanding = true, trạng thái PUBLISHED).
+   */
   async findFeatured(params: { page?: number; limit?: number }) {
     const page = params?.page && params.page > 0 ? params.page : 1;
     const limit = params?.limit && params.limit > 0 ? params.limit : 10;
@@ -120,7 +134,13 @@ export class PropertiesService {
       const wardName = locationMap.get(p.any_ward) ?? p.any_ward ?? '';
       const address = [cityName, wardName].filter(Boolean).join(', ');
       const price_string = this.formatPriceVND(Number(p.price));
-      return { ...p, address, price_string };
+      return { 
+        ...p, 
+        address, 
+        price_string,
+        any_city_name: cityName,
+        any_ward_name: wardName
+      };
     });
 
     return {
@@ -134,6 +154,11 @@ export class PropertiesService {
     };
   }
 
+  /**
+   * [DÙNG CHUNG / FRONTEND_ADMIN]
+   * Tạo bất động sản mới.
+   * Dùng cho User tạo tin (DRAFT) hoặc Admin tạo tin (PUBLISHED).
+   */
   async create(userId: number, createPropertyDto: CreatePropertyDto) {
     const user = await this.prisma.users.findUnique({ where: { id: userId } });
     const isAdmin = user?.role === 'ADMIN';
@@ -174,6 +199,7 @@ export class PropertiesService {
   }
 
   /**
+   * [DÙNG CHUNG / FRONTEND_ADMIN]
    * Tạo bất động sản và đồng thời lưu thông tin file đính kèm (file_attach) trong transaction.
    * Sau khi transaction DB (property + file_attach) thành công thì mới upload file lên Cloudflare R2.
    */
@@ -285,6 +311,11 @@ export class PropertiesService {
     }
   }
 
+  /**
+   * [FRONTEND_ADMIN]
+   * Lấy danh sách quản lý bất động sản.
+   * Admin thấy toàn bộ, User thường chỉ thấy bài của họ. Không phân biệt trạng thái PUBLISHED/DRAFT.
+   */
   async findAdminList(userId: number, page = 1, limit = 20) {
     const user = await this.prisma.users.findUnique({ where: { id: userId } });
     const skip = (page - 1) * limit;
@@ -327,7 +358,13 @@ export class PropertiesService {
       const wardName = locationMap.get(p.any_ward) ?? p.any_ward ?? '';
       const address = [cityName, wardName].filter(Boolean).join(', ');
       const price_string = this.formatPriceVND(Number(p.price));
-      return { ...p, address, price_string };
+      return { 
+        ...p, 
+        address, 
+        price_string,
+        any_city_name: cityName,
+        any_ward_name: wardName
+      };
     });
 
     return {
@@ -341,6 +378,10 @@ export class PropertiesService {
     };
   }
 
+  /**
+   * [FRONTEND_CLIENT]
+   * Lấy danh sách tất cả bất động sản (có phân trang, sắp xếp, trạng thái PUBLISHED).
+   */
   async findAll(query: SearchPropertyDto) {
     const {
       page = 1,
@@ -458,7 +499,13 @@ export class PropertiesService {
       const wardName = locationMap.get(p.any_ward) ?? p.any_ward ?? '';
       const address = [cityName, wardName].filter(Boolean).join(', ');
       const price_string = this.formatPriceVND(Number(p.price));
-      return { ...p, address, price_string };
+      return { 
+        ...p, 
+        address, 
+        price_string,
+        any_city_name: cityName,
+        any_ward_name: wardName
+      };
     });
 
     return {
@@ -472,6 +519,10 @@ export class PropertiesService {
     };
   }
 
+  /**
+   * [FRONTEND_CLIENT]
+   * Xem chi tiết bất động sản (phải là trạng thái PUBLISHED).
+   */
   async findOne(id: number) {
     const rawProperty = await this.prisma.properties.findUnique({
       where: { id },
@@ -503,9 +554,20 @@ export class PropertiesService {
     const address = [cityName, wardName].filter(Boolean).join(', ');
     const price_string = this.formatPriceVND(Number(property.price));
 
-    return { ...property, address, price_string, cityName, wardName };
+    return { 
+      ...property, 
+      address, 
+      price_string, 
+      any_city_name: cityName, 
+      any_ward_name: wardName 
+    };
   }
 
+  /**
+   * [FRONTEND_ADMIN]
+   * Lấy chi tiết bất động sản để chỉnh sửa trong trang quản lý.
+   * Kiểm tra quyền sở hữu bài viết hoặc quyền Admin.
+   */
   async findAdminOne(id: number, userId: number) {
     const rawProperty = await this.prisma.properties.findUnique({
       where: { id },
@@ -544,10 +606,17 @@ export class PropertiesService {
     const address = [cityName, wardName].filter(Boolean).join(', ');
     const price_string = this.formatPriceVND(Number(property.price));
 
-    return { ...property, address, price_string, cityName, wardName };
+    return { 
+      ...property, 
+      address, 
+      price_string, 
+      any_city_name: cityName, 
+      any_ward_name: wardName 
+    };
   }
 
   /**
+   * [FRONTEND_CLIENT]
    * Tăng lượt xem +1 theo kiểu atomic (tránh race condition).
    * Dùng Prisma update với increment thay vì đọc rồi ghi.
    */
@@ -560,6 +629,11 @@ export class PropertiesService {
     return updated;
   }
 
+  /**
+   * [FRONTEND_ADMIN]
+   * Cập nhật thông tin bất động sản.
+   * Nếu user thường cập nhật, trạng thái có thể tự động lùi về DRAFT.
+   */
   async update(id: number, userId: number, updatePropertyDto: UpdatePropertyDto) {
     const property = await this.prisma.properties.findUnique({
       where: { id },
@@ -609,6 +683,11 @@ export class PropertiesService {
     return this.getPropertyWithFiles(updatedProperty);
   }
 
+  /**
+   * [FRONTEND_ADMIN]
+   * Xóa bất động sản và các file đính kèm.
+   * Kiểm tra quyền sở hữu hoặc quyền Admin.
+   */
   async remove(id: number, userId: number) {
     const property = await this.prisma.properties.findUnique({
       where: { id },
@@ -648,6 +727,7 @@ export class PropertiesService {
   }
 
   /**
+   * [FRONTEND_CLIENT]
    * Tìm kiếm bất động sản nâng cao qua POST body.
    * Tương ứng với frontend route: POST /api/batdongsan/search
    *
@@ -773,7 +853,13 @@ export class PropertiesService {
       const wardName = locationMap.get(p.any_ward) ?? p.any_ward ?? '';
       const address = [cityName, wardName].filter(Boolean).join(', ');
       const price_string = this.formatPriceVND(Number(p.price));
-      return { ...p, address, price_string };
+      return { 
+        ...p, 
+        address, 
+        price_string,
+        any_city_name: cityName,
+        any_ward_name: wardName
+      };
     });
 
     return {
@@ -788,6 +874,7 @@ export class PropertiesService {
   }
 
   /**
+   * [FRONTEND_CLIENT]
    * Lấy danh sách bất động sản theo các điều kiện lọc (flat query params)
    * Dùng cho endpoint GET /properties/filter
    *
@@ -920,7 +1007,13 @@ export class PropertiesService {
       const wardName = locationMap.get(p.any_ward) ?? p.any_ward ?? '';
       const address = [cityName, wardName].filter(Boolean).join(', ');
       const price_string = this.formatPriceVND(Number(p.price));
-      return { ...p, address, price_string };
+      return { 
+        ...p, 
+        address, 
+        price_string,
+        any_city_name: cityName,
+        any_ward_name: wardName
+      };
     });
 
     return {
@@ -934,6 +1027,10 @@ export class PropertiesService {
     };
   }
 
+  /**
+   * [DÙNG CHUNG]
+   * Lấy các danh mục, cấu hình mặc định (loại BĐS, trạng thái...).
+   */
   getDefaults() {
     const propertyTypes = Object.values(PropertyTypeDefault).map(
       (value) => ({
@@ -956,6 +1053,7 @@ export class PropertiesService {
   }
 
   /**
+   * [DÙNG CHUNG / HELPER]
    * Chuyển đổi giá (VND) sang chuỗi dạng "X tỷ Y triệu".
    * Chỉ dừng ở hàng tỷ và triệu, bỏ qua phần nhỏ hơn triệu.
    */
@@ -969,6 +1067,10 @@ export class PropertiesService {
     return parts.join(' ') || '0';
   }
 
+  /**
+   * [DÙNG CHUNG / HELPER]
+   * Lấy thông tin các file đính kèm cho một mảng các properties.
+   */
   private async getPropertiesWithFiles(properties: any[]) {
     if (!properties || properties.length === 0) return properties;
     const propertyIds = properties.map(p => p.id);
@@ -993,6 +1095,10 @@ export class PropertiesService {
     }));
   }
 
+  /**
+   * [DÙNG CHUNG / HELPER]
+   * Lấy thông tin file đính kèm cho một property đơn lẻ.
+   */
   private async getPropertyWithFiles(property: any) {
     if (!property) return property;
     const fileAttaches = await this.prisma.file_attach.findMany({

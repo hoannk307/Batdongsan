@@ -33,21 +33,18 @@ const SearchBarDeskBox = ({ fix, singleData }) => {
                 Ảnh
               </a>
             </li>
-            <li>
-              <a className="" href="#video">
-                video
-              </a>
-            </li>
+            {singleData?.url_video &&
+              <li>
+                <a className="" href="#video">
+                  video
+                </a>
+              </li>}
             <li>
               <a className="" href="#details">
                 Thông tin chi tiết
               </a>
             </li>
-            <li>
-              <a className="" href="#floor_plan">
-                Mặt bằng
-              </a>
-            </li>
+
             <li>
               <a className="" href="#location-map">
                 Vị trí

@@ -60,7 +60,7 @@ const FeaturePropertySection = ({ value }) => {
                                   <h3>
                                     <Link href="/property/image-box">{data.title}</Link>
                                   </h3>
-                                  <h6 >{data.address}</h6>
+                                  <h6 >{data.address}<br />{data.landmark}</h6>
                                   <span>
                                     {data.description}
                                   </span>

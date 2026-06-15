@@ -97,6 +97,7 @@ model properties {
   updated_at             DateTime?             @db.Date
   view_count             Int                   @default(0)
   outstanding            Boolean?              @default(false)
+  url_video              String?               @db.VarChar(255)
   favorites              favorites[]
 
   @@index([any_city])

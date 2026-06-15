@@ -68,6 +68,10 @@ export function mapPropertyToCard(p) {
     price_string: p?.property_status === 'FOR_SALE' ? p?.price_string : p?.price_string + "/tháng",
     created_at: p?.created_at || null,
     address: p?.address || "",
+    url_video: p?.url_video || "",
+    any_city_name: p?.any_city_name || "",
+    any_ward_name: p?.any_ward_name || "",
+    landmark: p?.landmark || "",
   };
 }
 
@@ -94,12 +98,15 @@ export function mapPropertyToDetail(p) {
     any_city: p?.any_city || "",
     any_ward: p?.any_ward || "",
     landmark: p?.landmark || "",
+    any_city_name: p?.any_city_name || "",
+    any_ward_name: p?.any_ward_name || "",
     created_at: p?.created_at || null,
     updated_at: p?.updated_at || null,
     user_id: p?.user_id || null,
     date: p?.created_at ? (() => { const d = new Date(p.created_at); return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`; })() : "",
     price_string: p?.property_status === 'FOR_SALE' ? p?.price_string : p?.price_string + "/tháng",
     address: p?.address || "",
+    url_video: p?.url_video || "",
   };
 }
 

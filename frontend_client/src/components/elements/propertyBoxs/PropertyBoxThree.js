@@ -34,6 +34,8 @@ const PropertyBoxThree = ({ data }) => {
 
         </h3>
         {data?.address}
+        <br />
+        {data?.landmark}
         <p className="font-roboto">{data?.details}</p>
         <ul className="icon-property">
           <li>

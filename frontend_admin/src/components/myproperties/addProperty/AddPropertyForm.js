@@ -204,7 +204,7 @@ const AddPropertyForm = () => {
       landmark,
       googleMapCoordinates,
       outstanding,
-      // mp4Link: bỏ qua vì backend chưa hỗ trợ
+      mp4Link,
     } = values;
 
     const payload = {
@@ -220,6 +220,7 @@ const AddPropertyForm = () => {
       landmark,
       google_map_coordinates: googleMapCoordinates,
       outstanding: !!outstanding,
+      url_video: mp4Link,
     };
 
     // Loại bỏ các field undefined để tránh gửi rác lên backend
