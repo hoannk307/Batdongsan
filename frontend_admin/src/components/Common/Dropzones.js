@@ -1,8 +1,9 @@
 import React, { Fragment, useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
+import { toast } from "react-toastify";
 
 // Controlled Dropzone: dùng được cả nội bộ lẫn bên ngoài (AddPropertyForm) truyền files vào
-const DropZones = ({ multiple = true, files, onFilesChange }) => {
+const DropZones = ({ multiple = true, files, onFilesChange, maxFiles = 10, maxSizeMB = 20 }) => {
   const [internalFiles, setInternalFiles] = useState(files || []);
 
   // Đồng bộ khi props.files thay đổi
@@ -23,7 +24,24 @@ const DropZones = ({ multiple = true, files, onFilesChange }) => {
   };
 
   const onDrop = (acceptedFiles) => {
-    setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
+    setFiles((prevFiles) => {
+      let newFiles = [...prevFiles, ...acceptedFiles];
+      
+      if (newFiles.length > maxFiles) {
+        toast.warning(`Chỉ được tải lên tối đa ${maxFiles} tệp.`);
+        newFiles = newFiles.slice(0, maxFiles);
+      }
+      
+      const totalSize = newFiles.reduce((acc, file) => acc + file.size, 0);
+      const maxSizeBytes = maxSizeMB * 1024 * 1024;
+      
+      if (totalSize > maxSizeBytes) {
+        toast.error(`Tổng dung lượng các tệp không được vượt quá ${maxSizeMB}MB.`);
+        return prevFiles; // Hủy thêm các file mới nếu vượt quá dung lượng
+      }
+      
+      return newFiles;
+    });
   };
 
   const removeFile = (indexToRemove) => {
@@ -67,7 +85,19 @@ const DropZones = ({ multiple = true, files, onFilesChange }) => {
                 ) : (
                   <div className='file-placeholder'>{file.name.split(".").pop()?.toUpperCase()} File</div>
                 )}
-                <p className='file-name'>{file.name}</p>
+                <p 
+                  className='file-name' 
+                  title={file.name}
+                  style={{
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    maxWidth: '100%',
+                    display: 'block'
+                  }}
+                >
+                  {file.name}
+                </p>
                 <p className='file-size'>{(file.size / 1024).toFixed(2)} KB</p>
                 <button onClick={() => removeFile(index)} className='remove-button' title='Remove file'>
                   ×
