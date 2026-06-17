@@ -45,7 +45,7 @@ const PropertyBoxThree = ({ data }) => {
                   <use xlinkHref="/assets/svg/icons.svg#key"></use>
                 </svg>
               </div>
-              <span>{data?.rooms} Rooms</span>
+              <span>{data?.baths} WC</span>
             </div>
           </li>
           <li>
@@ -68,7 +68,7 @@ const PropertyBoxThree = ({ data }) => {
                   <use xlinkHref="/assets/svg/icons.svg#home-heart"></use>
                 </svg>
               </div>
-              <span>{data?.beds} Bedrooms</span>
+              <span>{data?.beds} P.Ngủ</span>
             </div>
           </li>
           <li>

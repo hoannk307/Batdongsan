@@ -69,13 +69,13 @@ const FeaturePropertySection = ({ value }) => {
                                   <li>
                                     <div className="d-flex">
                                       <span className="label label-light label-flat label-lg">{data.beds}</span>
-                                      <h6>Bedroom</h6>
+                                      <h6>Phòng ngủ</h6>
                                     </div>
                                   </li>
                                   <li>
                                     <div className="d-flex">
                                       <span className="label label-light label-flat label-lg">{data.baths}</span>
-                                      <h6>Bathroom</h6>
+                                      <h6>WC</h6>
                                     </div>
                                   </li>
                                   <li>
