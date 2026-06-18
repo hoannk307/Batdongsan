@@ -1,4 +1,3 @@
-"use client";
 import React, { Fragment } from "react";
 import NavbarThree from "@/layout/headers/NavbarThree";
 import FooterThree from "@/layout/footers/FooterThree";

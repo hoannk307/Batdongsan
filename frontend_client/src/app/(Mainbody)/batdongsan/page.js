@@ -1,20 +1,13 @@
-/**
- * Trang danh sách bất động sản.
- * Tự động gọi POST /search (nếu có bộ lọc) hoặc GET /list (mặc định),
- * rồi truyền kết quả vào GridView qua prop `value`.
- */
-"use client";
-import React, { Fragment, useEffect, useState } from "react";
+import { Fragment } from "react";
 import FooterThree from "@/layout/footers/FooterThree";
-import NavbarThree from "@/layout/headers/NavbarThree";
-import Breadcrumb from "@/layout/Breadcrumb/Breadcrumb";
 import GridView from "@/components/listing/gridView/grid/GridView";
-
-import { useSearchParams } from "next/navigation";
 import NavbarFour from "@/layout/headers/NavbarFour";
+import HomeBannerSection from "@/components/home/corporate/HomeBanner";
+import { fetchWithTimeout, getBackendBaseUrl } from "@/lib/api/fetchBackend";
+import { mapNewsToBlogItem } from "@/lib/api/mappers/newsMapper";
+import { mapPropertyToCard } from "@/lib/api/mappers/propertyMapper";
 
-/** Các filter params mà InputForm có thể push lên URL */
-/** Mapping từ URL param → filterBody key + hàm transform tương ứng */
+// Helper parameters mapping
 const PARAM_MAP = [
   { param: "property_type", key: "propertyTypes", transform: (v) => [v] },
   { param: "min_baths", key: "minBaths", transform: Number },
@@ -24,81 +17,65 @@ const PARAM_MAP = [
   { param: "min_price", key: "minPrice", transform: Number },
   { param: "max_price", key: "maxPrice", transform: Number },
 ];
-
-/** Các filter params mà InputForm có thể push lên URL */
 const FILTER_PARAMS = PARAM_MAP.map((p) => p.param);
 
-const isDev = process.env.NODE_ENV === "development";
+const BatdongsanPage = async ({ searchParams }) => {
+  const params = await searchParams;
+  const propertyStatus = params?.property_status || "FOR_SALE";
+  const backendApiBaseUrl = getBackendBaseUrl();
+  
+  let value = [];
+  let bdsQuangCao = [];
 
-const LeftSidebar = () => {
-  const [value, setValue] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const searchParams = useSearchParams();
+  // Fetch bdsQuangCao (ads) regardless of filters so the banner doesn't disappear
+  try {
+    const resBds = await fetchWithTimeout(`${backendApiBaseUrl}/news/category/0?page=1&limit=6&status=PUBLISHED`, { cache: "no-store" });
+    const payloadBds = await resBds.json().catch(() => null);
+    if (resBds.ok && Array.isArray(payloadBds?.data)) {
+      bdsQuangCao = payloadBds.data.map(mapNewsToBlogItem);
+    }
+  } catch (error) {
+    console.error("[BatdongsanPage] Error fetching ads:", error);
+  }
 
-  const propertyStatus = searchParams.get("property_status") || "FOR_SALE";
+  // Check if there are any filters applied
+  const hasFilter = FILTER_PARAMS.some((key) => params?.[key]);
 
-  useEffect(() => {
-    // AbortController để hủy request cũ khi searchParams thay đổi (tránh race condition)
-    const controller = new AbortController();
-    const { signal } = controller;
-
-    // Kiểm tra có bộ lọc nào không (ngoài property_status)
-    const hasFilter = FILTER_PARAMS.some((key) => searchParams.get(key));
-
-    setIsLoading(true);
-
+  try {
     if (hasFilter) {
-      // ── Có bộ lọc → gọi POST /api/batdongsan/search ──────────────────────
+      // Build filterBody
       const filterBody = { propertyStatus };
-
-      // Build filterBody theo PARAM_MAP, tránh lặp code
       PARAM_MAP.forEach(({ param, key, transform }) => {
-        const val = searchParams.get(param);
+        const val = params?.[param];
         if (val) filterBody[key] = transform(val);
       });
 
-      if (isDev) console.log("[page.js] Gọi search với filterBody:", filterBody);
-
-      fetch("/api/batdongsan/search", {
+      const res = await fetchWithTimeout(`${backendApiBaseUrl}/properties/search`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(filterBody),
-        signal,
-      })
-        .then((res) => res.json())
-        .then((result) => {
-          // search/route.js trả về { data: { LatestPropertyData, pagination } }
-          setValue(result?.data?.LatestPropertyData ?? []);
-          if (isDev) console.log("[page.js] Kết quả search:", result?.data?.LatestPropertyData?.length, "mục");
-        })
-        .catch((err) => {
-          if (err.name !== "AbortError") console.error("[page.js] Lỗi search:", err);
-        })
-        .finally(() => setIsLoading(false));
+        cache: "no-store",
+      });
+      const payload = await res.json().catch(() => null);
+      if (res.ok && Array.isArray(payload?.data)) {
+        value = payload.data.map(mapPropertyToCard);
+      }
     } else {
-      // ── Không có bộ lọc → gọi GET /api/batdongsan/list ────────────────────
-      if (isDev) console.log("[page.js] Gọi list với property_status:", propertyStatus);
-
-      fetch(`/api/batdongsan/list?property_status=${propertyStatus}&page=1&limit=50`, { signal })
-        .then((res) => res.json())
-        .then((res) => {
-          // list/route.js trả về { data: { data: PropertyCard[], pagination } }
-          setValue(res?.data ?? []);
-        })
-        .catch((err) => {
-          if (err.name !== "AbortError") console.error("[page.js] Lỗi list:", err);
-        })
-        .finally(() => setIsLoading(false));
+      // Default list
+      const res = await fetchWithTimeout(`${backendApiBaseUrl}/properties/filter?property_status=${propertyStatus}&page=1&limit=50`, { cache: "no-store" });
+      const payload = await res.json().catch(() => null);
+      if (res.ok && Array.isArray(payload?.data)) {
+        value = payload.data.map(mapPropertyToCard);
+      }
     }
-
-    // Cleanup: hủy request đang bay nếu effect chạy lại
-    return () => controller.abort();
-  }, [searchParams, propertyStatus]); // re-run mỗi khi URL params thay đổi
+  } catch (error) {
+    console.error("[BatdongsanPage] Error fetching data:", error);
+  }
 
   return (
     <Fragment>
       <NavbarFour />
-      <Breadcrumb />
+      <HomeBannerSection value={bdsQuangCao} />
       <GridView
         value={value}
         propertyStatus={propertyStatus}
@@ -112,4 +89,4 @@ const LeftSidebar = () => {
   );
 };
 
-export default LeftSidebar;
+export default BatdongsanPage;

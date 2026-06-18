@@ -93,20 +93,21 @@ export class NewsController {
     return this.newsService.findByTag(+tagId, page ? +page : 1, limit ? +limit : 20);
   }
 
+  @Get('categories')
+  @ApiOperation({ summary: 'Lấy toàn bộ danh sách danh mục tin tức (news_catelog)' })
+  findAllCategories() {
+    return this.newsService.findAllCategories();
+  }
+
   @Get('category/:categoryId')
   @ApiOperation({ summary: 'Lấy danh sách tin tức theo Category ID' })
   findByCategory(
     @Param('categoryId') categoryId: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @Query('status') status?: string,
   ) {
-    return this.newsService.findByCategory(+categoryId, page ? +page : 1, limit ? +limit : 20);
-  }
-
-  @Get('categories')
-  @ApiOperation({ summary: 'Lấy toàn bộ danh sách danh mục tin tức (news_catelog)' })
-  findAllCategories() {
-    return this.newsService.findAllCategories();
+    return this.newsService.findByCategory(+categoryId, page ? +page : 1, limit ? +limit : 20, status);
   }
 
   @Get(':id')

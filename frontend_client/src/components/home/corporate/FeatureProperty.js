@@ -58,7 +58,7 @@ const FeaturePropertySection = ({ value }) => {
                               <div className="feature-content">
                                 <div className="details">
                                   <h3>
-                                    <Link href="/property/image-box">{data.title}</Link>
+                                    <Link href={`/batdongsan/detail?id=${data?.id}`}>{data.title}</Link>
                                   </h3>
                                   <h6 >{data.address}<br />{data.landmark}</h6>
                                   <span>
@@ -87,7 +87,7 @@ const FeaturePropertySection = ({ value }) => {
                                     <h3>{data.price_string}</h3>
                                   </div>
                                   <div>
-                                    <Link href="/agent/submit-property">
+                                    <Link href={`/batdongsan/detail?id=${data?.id}`}>
                                       <button type="button" className="btn btn-solid btn-flat">
                                         Xem thêm
                                       </button>

@@ -1,3 +1,4 @@
+"use client";
 /**
  * It takes an array of objects as a prop and returns a Slider component with a div for each object in
  * the array
@@ -19,15 +20,15 @@ const HomeBannerSection = ({ value }) => {
             <div>
               <NoSsr>
                 <Slider className="home-slider-3 arrow-image" {...homeSlider3}>
-                  {value.map((data, i) => (
+                  {value && value.length > 0 && value.map((data, i) => (
                     <div key={i}>
-                      <div className={`bg-layout-3 light-bg-${i + 1}`}>
+                      <div className={`bg-layout-3 light-bg-${i + 1}`} style={{ backgroundImage: `url(${data.img})` }}>
                         <div className="banner-3">
-                          <span className="label label-light label-flat">#Realestate</span>
+                          <span className="label label-light label-flat">Quảng cáo</span>
                           <h1>{data.title}</h1>
-                          <p>{data.details}</p>
-                          <Link href="/property/image-box" className="btn btn-solid btn-flat">
-                            View More
+                          <p>{data.summary}</p>
+                          <Link href={`/news/detail?id=${data.id}`} className="btn btn-solid btn-flat">
+                            Xem thêm
                           </Link>
                         </div>
                       </div>

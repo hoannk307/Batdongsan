@@ -1,47 +1,24 @@
 "use client";
-/**
- * It takes a number of items per page and a list of items, and returns a list of pages, each
- * containing a list of items
- * @returns The return value of the function is the value of the last expression executed in the
- * function body.
- */
 import React, { useEffect, useReducer, useState } from "react";
 import { Col, Container, Row } from "reactstrap";
 import Pagination from "@/layout/Pagination";
 import Category from "@/layout/sidebarLayout/Category";
 import SearchBar from "@/layout/sidebarLayout/SearchBar";
 import Sidebar from "@/layout/sidebarLayout/Sidebar";
-import { getData } from "@/utils/apiRequests";
 import BlogWrapBoxTwo from "../../../elements/propertyBoxs/BlogWrapBoxTwo";
 import { gridReducer, initialGrid } from "../../../listing/gridView/grid/gridReducer";
 
-const BodyContent = ({ side, tagId, filterType }) => {
-  const [value, setValue] = useState();
-  const [categories, setCategories] = useState([]);
+const BodyContent = ({ side, tagId, filterType, initialCategories = [], initialNews = [] }) => {
+  const [value, setValue] = useState(initialNews);
+  const [categories, setCategories] = useState(initialCategories);
   const [grid, gridDispatch] = useReducer(gridReducer, initialGrid);
 
   useEffect(() => {
-    // Fetch categories
-    getData('/api/news/categories')
-      .then((res) => {
-        setCategories(res?.data || []);
-      })
-      .catch((error) => console.error("Error fetching categories:", error));
+    setValue(initialNews);
+    setCategories(initialCategories);
+    gridDispatch({ type: "totalPages", payload: Math.ceil(initialNews.length / 4) });
+  }, [initialNews, initialCategories]);
 
-    // Fetch news list
-    let url = `/api/news`;
-    if (tagId && filterType) {
-      url += `?type=${filterType}&id=${tagId}`;
-    }
-
-    getData(url)
-      .then((res) => {
-        const newsList = res?.data || [];
-        setValue(newsList);
-        gridDispatch({ type: "totalPages", payload: Math.ceil(newsList.length / 4) });
-      })
-      .catch((error) => console.error("Error", error));
-  }, [tagId, filterType]);
   return (
     <section className="ratio_landscape blog-list-section">
       <Container>
@@ -50,8 +27,6 @@ const BodyContent = ({ side, tagId, filterType }) => {
             <Sidebar side={side}>
               <SearchBar />
               <Category categories={categories} />
-              {/* <RecentlyAdded />
-              <PopularTags /> */}
             </Sidebar>
           )}
           <Col xl={side ? "9" : "12"} lg={side ? "8" : "12"}>

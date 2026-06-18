@@ -21,6 +21,7 @@ import SliderBreadcrumbSection from "./SliderBreadcrumb";
 const BodyContent = ({ side }) => {
   const [singleData, setSingleData] = useState(null);
   const [userData, setUserData] = useState(null);
+  const [relatedData, setRelatedData] = useState(null);
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
@@ -30,6 +31,18 @@ const BodyContent = ({ side }) => {
         .then((res) => {
           const propertyObj = res?.data?.data ?? null;
           setSingleData(propertyObj);
+          // lấy các bất động sản liên quan
+          const status = propertyObj?.propertyStatus || "";
+          const type = propertyObj?.propertyType || "";
+          getData(`/api/batdongsan/list?property_status=${status}&property_type=${type}&page=1&limit=7`)
+            .then((res) => {
+              if (res?.data?.data) {
+                // Lọc bỏ property hiện tại và lấy tối đa 6 property
+                const related = res.data.data.filter((item) => String(item.id) !== String(id)).slice(0, 6);
+                setRelatedData(related);
+              }
+            })
+            .catch((error) => console.error("Failed to fetch related properties:", error));
 
           // Lấy thông tin chi tiết user (chủ bất động sản)
           if (propertyObj?.user_id) {
@@ -69,7 +82,7 @@ const BodyContent = ({ side }) => {
           </Row>
         </Container>
       </section>
-      <RelatedProperty />
+      <RelatedProperty relatedData={relatedData} />
     </NoSsr>
   );
 };

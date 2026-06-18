@@ -47,30 +47,30 @@ const PropertyBox = ({ data, relativeSlider, video }) => {
 
           <div className="property-details">
             <span className="show-result">{data.address} </span>
-            <Link href={{ pathname: Array.isArray(data.img) ? "/batdongsan/detail" : "/batdongsan/detail", query: { id: data.id } }}>
+            <Link href={`/batdongsan/detail?id=${data?.id}`}>
               <h3>{data.title}</h3>
             </Link>
 
             <h6>
               {data.price_string}
             </h6>
-            <p className="font-roboto">{data.details || "This home provides wonderful entertaining spaces with a chef kitchen opening. Elegant retreat in a quiet Coral Gables setting.."} </p>
+
             <ul>
               <li>
                 <img src="/assets/images/svg/icon/double-bed.svg" className="img-fluid" alt="" />
-                Phòng ngủ : {data.bedroomCount || 5}
+                Phòng ngủ : {data?.beds}
               </li>
               <li>
                 <img src="/assets/images/svg/icon/bathroom.svg" className="img-fluid" alt="" />
-                Phòng tắm : {data.bathroomCount || 5}
+                Phòng tắm : {data?.baths}
               </li>
               <li>
                 <img src="/assets/images/svg/icon/square-ruler-tool.svg" className="img-fluid ruler-tool" alt="" />
-                Diện tích : {data.area || 5} m²
+                Diện tích : {data?.area} m²
               </li>
             </ul>
             <div className="property-btn d-flex">
-              <span>{data.date}</span>
+              <span>{data?.date}</span>
 
 
               <Link href={{ pathname: Array.isArray(data.img) ? "/batdongsan/detail" : "/batdongsan/detail", query: { id: data.id } }}>

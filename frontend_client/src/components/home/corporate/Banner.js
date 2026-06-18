@@ -10,7 +10,7 @@ import { Col, Container, Row } from "reactstrap";
 const BannerSection = ({ banner, value }) => {
   return (
 
-    <section className={`banner-section  parallax-image`} style={{ backgroundImage: `url(${value?.img})` }}>
+    <section className={`mt-5 banner-section  parallax-image`} style={{ backgroundImage: `url(${value?.img})` }}>
       <Container>
         <Row>
           <Col>

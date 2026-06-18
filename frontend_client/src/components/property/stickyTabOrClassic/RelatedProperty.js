@@ -8,16 +8,14 @@ import { Col, Container, Row } from "reactstrap";
 import { getData } from "../../../utils/apiRequests";
 import PropertyBox from "../../elements/propertyBoxs/PropertyBox";
 
-const RelatedProperty = () => {
+const RelatedProperty = ({ relatedData }) => {
   const [value, setValue] = useState();
 
   useEffect(() => {
-    getData(`/api/batdongsan`)
-      .then((res) => {
-        setValue(res.data?.data); // shape: { data: PropertyCard[], pagination: {} }
-      })
-      .catch((error) => console.error("Error", error));
-  }, []);
+    if (relatedData) {
+      setValue(relatedData);
+    }
+  }, [relatedData]);
   return (
     <section className="property-section pt-0">
       <Container>
@@ -28,7 +26,7 @@ const RelatedProperty = () => {
           <Col sm="12" className=" property-grid-3">
             <Row className="property-2  column-sm zoom-gallery property-label property-grid">
               {value &&
-                value.slice(0, 3).map((data, i) => (
+                value.slice(0, 6).map((data, i) => (
                   <Col xl="4" md="6" className="wow fadeInUp" key={i}>
                     <PropertyBox data={data} />
                   </Col>

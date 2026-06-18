@@ -264,11 +264,11 @@ export class NewsService {
     };
   }
 
-  async findByCategory(categoryId: number, page = 1, limit = 20) {
+  async findByCategory(categoryId: number, page = 1, limit = 20, status?: string) {
     const skip = (page - 1) * limit;
 
     const where: any = {
-      status: 'PUBLISHED',
+      status: status || 'PUBLISHED',
       category: categoryId,
     };
 

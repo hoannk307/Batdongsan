@@ -1,8 +1,4 @@
-/**
- * It takes in a bunch of props, and returns a bunch of JSX
- * @returns The return value of the function is the value of the last expression in the function body.
- */
-
+"use client";
 import { useEffect, useReducer, useState } from "react";
 import { Col, Container, Row } from "reactstrap";
 import Pagination from "../../../../layout/Pagination";
