@@ -1,3 +1,4 @@
+"use client";
 import React, { Fragment, useEffect, useState } from "react";
 import { AppPropertyData } from "@/data/appPropertyData";
 import { getData } from "@/utils/apiRequests";
