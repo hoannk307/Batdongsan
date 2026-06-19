@@ -1,11 +1,11 @@
- "use client";
+"use client";
 
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { Heart } from "react-feather";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { getData } from "@/utils/apiRequests";
+import { getData } from "@/lib/api/apiRequests";
 import useOutsideDropdown from "@/utils/useOutsideDropdown";
 import { unlike } from "@/redux-toolkit/reducers/addToWishListReducer";
 
@@ -51,7 +51,7 @@ const Cart = () => {
                     <h5>{data.title}</h5>
                   </Link>
                   <span> {symbol}
-                  {(data.price * currencyValue).toFixed(2) || (48596.0 * currencyValue).toFixed(2)}</span>
+                    {(data.price * currencyValue).toFixed(2) || (48596.0 * currencyValue).toFixed(2)}</span>
                 </div>
               </div>
               <div className="close-circle">

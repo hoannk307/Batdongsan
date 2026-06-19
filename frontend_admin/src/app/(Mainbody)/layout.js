@@ -28,7 +28,7 @@ export default function RootLayout({ children }) {
       <div className='page-body-wrapper'>
         <Sidebar toggle={toggle} setToggle={setToggle} />
         <div className='page-body'>{children}</div>
-        <Footer />
+        {/* <Footer /> */}
       </div>
       <TapToTop />
       <Customizer />

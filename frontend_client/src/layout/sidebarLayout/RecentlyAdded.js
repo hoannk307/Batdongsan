@@ -4,7 +4,7 @@
  * @returns An array of objects.
  */
 import React, { useEffect, useState } from "react";
-import { getData } from "../../utils/apiRequests";
+import { getData } from "../../lib/api/apiRequests";
 
 const RecentlyAdded = () => {
   const [value, setValue] = useState();

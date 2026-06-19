@@ -10,7 +10,7 @@ import Sidebar from "@/layout/sidebarLayout/Sidebar";
 import Category from "@/layout/sidebarLayout/Category";
 import RecentlyAdded from "@/layout/sidebarLayout/RecentlyAdded";
 import PopularTags from "@/layout/sidebarLayout/PopularTags";
-import { getData } from "@/utils/apiRequests";
+import { getData } from "@/lib/api/apiRequests";
 import BlogWrapBox from "../../../elements/propertyBoxs/BlogWrapBox";
 
 const BodyContent = ({ side }) => {

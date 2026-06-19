@@ -4,7 +4,7 @@
  */
 import React, { useEffect, useState } from "react";
 import { AppPropertyData } from "@/data/appPropertyData";
-import { getData } from "@/utils/apiRequests";
+import { getData } from "@/lib/api/apiRequests";
 import FeaturedPropertySection from "../classic/FeaturedProperty";
 import LatestPropertySection from "../classic/LatestProperty";
 import PropertyServicesSection from "../classic/PropertyServices";
@@ -40,7 +40,7 @@ const BodyContent = () => {
       <SalePropertySection value={value?.LatestForSalePropertyData} />
       <FeaturedPropertySection value={value?.FeaturedPropertyInClassicLayout} />
       <LatestPropertySection value={value?.LatestPropertyInClassicLayout} />
-      <PropertySection value={value?.PropertyListing}  />
+      <PropertySection value={value?.PropertyListing} />
       <BlogSection value={value?.LatestBlogInCorporate} />
       <BrandSection />
     </>

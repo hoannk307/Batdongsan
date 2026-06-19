@@ -14,7 +14,9 @@
 
 /** Base URL của backend NestJS API (dùng cho client-side, browser gọi) */
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://api.nhatranglands.vn/api";
+  // process.env.NEXT_PUBLIC_API_URL || "https://api.nhatranglands.vn/api";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+
 
 /**
  * URL nội bộ của backend (dùng cho server-side API routes bên trong Docker).

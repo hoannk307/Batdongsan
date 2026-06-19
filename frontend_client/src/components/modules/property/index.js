@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from "react";
-import { getData } from "@/utils/apiRequests";
+import { getData } from "@/lib/api/apiRequests";
 import LatestPropertySection from "@/components/home/enterprise/LatestProperty";
 import LatestPropertySectionOne from "@/components/home/classic/LatestProperty";
 import PropertySection from "@/components/home/slider-filter-search/Property";
@@ -18,7 +18,7 @@ const BodyContent = () => {
   }, []);
 
   return (
-    <Fragment> 
+    <Fragment>
       <div className="bg-light">
         <PropertySection value={value?.LatestPropertyData} />
       </div>

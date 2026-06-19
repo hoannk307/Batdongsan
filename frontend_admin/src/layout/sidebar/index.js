@@ -1,10 +1,24 @@
+"use client";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ChevronsLeft } from "react-feather";
 import { Media } from "reactstrap";
 import SidebarMenu from "./SidebarMenu";
 
 const Sidebar = ({ toggle, setToggle }) => {
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("user");
+      if (stored) {
+        setCurrentUser(JSON.parse(stored));
+      }
+    } catch {
+      // ignore parse errors
+    }
+  }, []);
+
   return (
     <div className={`page-sidebar ${!toggle ? 'close_icon' : ''}`}>
       <div className="logo-wrap">
@@ -24,9 +38,9 @@ const Sidebar = ({ toggle, setToggle }) => {
             </div>
             <Media body className="media-body">
               <Link href='/manage-users/profile'>
-                <h6>Zack Lee</h6>
+                <h6>{currentUser?.fullName || currentUser?.username || currentUser?.name || "Admin"}</h6>
               </Link>
-              <span className="font-roboto">zackle@gmail.com</span>
+              <span className="font-roboto">{currentUser?.email || ""}</span>
             </Media>
           </Media>
         </div>

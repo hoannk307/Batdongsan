@@ -4,7 +4,7 @@ import NavbarThree from "@/layout/headers/NavbarThree";
 import FooterThree from "@/layout/footers/FooterThree";
 import Breadcrumb from "@/layout/Breadcrumb/Breadcrumb";
 import BodyContent from "@/components/pages/agency/agencyGrid";
-import { getData } from "@/utils/apiRequests";
+import { getData } from "@/lib/api/apiRequests";
 
 const AgencyList = () => {
   const [clientData, setClientData] = useState();

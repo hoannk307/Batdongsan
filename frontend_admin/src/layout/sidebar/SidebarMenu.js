@@ -98,13 +98,13 @@ const SidebarMenu = ({ setToggle }) => {
             <li>
                 <div className="upgrade-box">
                     <img src="/assets/images/svg/1.svg" className="img-fluid" alt='' />
-                    <h6>Need Help</h6>
+                    {/* <h6>Need Help</h6>
                     <Link href='https://pixelstrap.freshdesk.com/support/home' target='_blank' className="p-0 m-0">
                         <span className="d-block">{'Raise ticket at "support@pixelstrap.com"'}</span>
                     </Link>
                     <Link href='https://themeforest.net/user/pixelstrap/portfolio' target='_blank' className="btn btn-pill btn-gradient btn-sm mt-2 fw-bold">
                         Buy Now
-                    </Link>
+                    </Link> */}
                 </div>
             </li>
         </ul>

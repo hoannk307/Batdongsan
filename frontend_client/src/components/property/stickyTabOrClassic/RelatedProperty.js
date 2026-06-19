@@ -5,7 +5,7 @@
  */
 import React, { useEffect, useState } from "react";
 import { Col, Container, Row } from "reactstrap";
-import { getData } from "../../../utils/apiRequests";
+import { getData } from "../../../lib/api/apiRequests";
 import PropertyBox from "../../elements/propertyBoxs/PropertyBox";
 
 const RelatedProperty = ({ relatedData }) => {

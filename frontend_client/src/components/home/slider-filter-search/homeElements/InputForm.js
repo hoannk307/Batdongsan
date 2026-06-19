@@ -7,7 +7,7 @@
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
-import { getData } from "@/utils/apiRequests";
+import { getData } from "@/lib/api/apiRequests";
 import { Field, Form, Formik } from "formik";
 // InputForm chỉ build URL params và push router;
 // page.js đọc params và tự quyết định gọi search API.

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { Container } from "reactstrap";
-import { getData } from "@/utils/apiRequests";
+import { getData } from "@/lib/api/apiRequests";
 import { removeCompareProducts } from "@/redux-toolkit/reducers/addToCompareReducer";
 import { like } from "@/redux-toolkit/reducers/addToWishListReducer";
 
@@ -146,7 +146,7 @@ const PropertyCompare = () => {
                 </tbody>
               </table>
             ) : (
-             "Empty Cart"
+              "Empty Cart"
             )}
           </div>
         </div>

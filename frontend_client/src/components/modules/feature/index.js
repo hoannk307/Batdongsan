@@ -3,7 +3,7 @@ import FeaturedPropertySection from "@/components/home/classic/FeaturedProperty"
 import FeaturedPropertySectionOne from "@/components/home/corporate/FeatureProperty";
 import FeatureSectionOne from "@/components/home/enterprise/Feature";
 import FeatureSection from "@/components/home/slider-filter-search/Feature";
-import { getData } from "@/utils/apiRequests";
+import { getData } from "@/lib/api/apiRequests";
 import { Fragment, useEffect, useState } from "react";
 
 const BodyContent = () => {

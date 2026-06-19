@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { AppPropertyData } from "@/data/appPropertyData";
-import { getData } from "@/utils/apiRequests";
+import { getData } from "@/lib/api/apiRequests";
 import BlogSection from "../../../home/corporate/Blog";
 import PropertyServicesSection from "../../../home/enterprise/Propertyservices";
 import TestimonialSection from "../../../home/enterprise/Testimonial";
@@ -28,7 +28,7 @@ const BodyContent = () => {
       <PropertyServicesSection value={AppPropertyData.PropertyServices} />
       <div className="bg-light">
         <TestimonialSection value={clientData?.WhatPeopleSay} />
-      </div>      
+      </div>
       <BlogSection value={value?.LatestBlogInCorporate} />
     </>
   );

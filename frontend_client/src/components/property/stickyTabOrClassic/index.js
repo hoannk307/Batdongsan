@@ -2,18 +2,15 @@
  * It returns a section with a container with a row with a sidebar and a single property section
  * @returns The return statement is used to return a value from a function.
  */
-import React, { useEffect, useState } from "react";
+import useMobileSize from "@/utils/useMobileSize";
 import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Container, Row } from "reactstrap";
 import ContactInfo from "../../../layout/sidebarLayout/ContactInfo";
 import Exploration from "../../../layout/sidebarLayout/Exploration";
-import Featured from "../../../layout/sidebarLayout/Featured";
-import Filter from "../../../layout/sidebarLayout/Filter";
-import Mortgage from "../../../layout/sidebarLayout/Mortgage";
-import RecentlyAdded from "../../../layout/sidebarLayout/RecentlyAdded";
 import Sidebar from "../../../layout/sidebarLayout/Sidebar";
+import { getData } from "../../../lib/api/apiRequests";
 import NoSsr from "../../../utils/NoSsr";
-import { getData } from "../../../utils/apiRequests";
 import RelatedProperty from "./RelatedProperty";
 import SinglePropertySection from "./SingleProperty";
 import SliderBreadcrumbSection from "./SliderBreadcrumb";
@@ -24,7 +21,7 @@ const BodyContent = ({ side }) => {
   const [relatedData, setRelatedData] = useState(null);
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
-
+  const isMobile = useMobileSize();
   useEffect(() => {
     if (id) {
       getData(`/api/batdongsan/${id}`)
@@ -82,7 +79,7 @@ const BodyContent = ({ side }) => {
           </Row>
         </Container>
       </section>
-      <RelatedProperty relatedData={relatedData} />
+      {!isMobile && <RelatedProperty relatedData={relatedData} />}
     </NoSsr>
   );
 };

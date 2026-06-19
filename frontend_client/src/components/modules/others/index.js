@@ -5,7 +5,7 @@ import PropertyOfTheDaySection from "@/components/home/enterprise/PropertyOfTheD
 import CitiesWisePropertySection from "@/components/home/slider-filter-search/CitiesWiseProperty";
 import OfferSection from "@/components/home/slider-filter-search/Offer";
 import { AppPropertyData } from "@/data/appPropertyData";
-import { getData } from "@/utils/apiRequests";
+import { getData } from "@/lib/api/apiRequests";
 import { Fragment, useEffect, useState } from "react";
 
 const BodyContent = () => {

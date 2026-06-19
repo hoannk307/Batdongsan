@@ -4,7 +4,7 @@
  */
 import React, { useEffect, useState } from "react";
 import { AppPropertyData } from "@/data/appPropertyData";
-import { getData } from "@/utils/apiRequests";
+import { getData } from "@/lib/api/apiRequests";
 import AboutSection from "./About";
 import BannerSection from "./Banner";
 import BlogSection from "./Blog";

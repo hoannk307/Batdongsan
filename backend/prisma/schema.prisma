@@ -116,6 +116,7 @@ model users {
   phone       String?       @db.VarChar(20)
   role        UserRole      @default(USER)
   avatar      String?       @db.VarChar(255)
+  is_blocked  Boolean       @default(false)
   created_at  DateTime      @default(now())
   updated_at  DateTime
   bk_bookings bk_bookings[]

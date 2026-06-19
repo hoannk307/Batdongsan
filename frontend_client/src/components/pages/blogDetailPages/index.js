@@ -10,7 +10,7 @@ import Sidebar from "@/layout/sidebarLayout/Sidebar";
 import BlogTitle from "./BlogTitle";
 import CommentSection from "./CommentSection";
 import DetailsProperty from "./DetailsProperty";
-import { getData } from "@/utils/apiRequests";
+import { getData } from "@/lib/api/apiRequests";
 import { useSearchParams } from "next/navigation";
 
 const BodyContent = (props) => {
