@@ -18,30 +18,22 @@ const AddUserForm = () => {
             initialValues={{
                 firstname: "",
                 lastname: "",
-                gender: "",
                 phone: "",
-                dob: "",
                 email: "",
                 password: "",
                 confirmPW: "",
-                description: "",
-                address: "",
-                zip: ""
+
             }}
             validationSchema={Yup.object().shape({
                 firstname: Yup.string().required('First name is required'),
                 lastname: Yup.string().required('Last name is required'),
-                gender: Yup.string().required('Gender is required'),
                 phone: Yup.string().required('Phone number is required'),
-                dob: Yup.string().required('Date of birth is required'),
                 email: Yup.string().email('Enter valid Email..!').required('Email is required'),
                 password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
                 confirmPW: Yup.string()
                     .oneOf([Yup.ref('password'), null], 'Confirm Password does not match')
                     .required('Confirm Password is required'),
-                description: Yup.string().required('Description is required'),
-                address: Yup.string().required('Address is required'),
-                zip: Yup.string().min(6, 'Zip code must be 6 characters').max(6, 'Zip code must be 6 characters').required('Zip code is required')
+
             })}
             onSubmit={async (values, { setSubmitting, resetForm }) => {
                 if (!apiBaseUrl) {
@@ -90,15 +82,7 @@ const AddUserForm = () => {
                             <Field name="lastname" type="text" component={ReactstrapInput} className="form-control" placeholder="Enter Your Surname" label="Last Name" />
                         </Col>
                         <Col sm="4" className="form-group">
-                            <Field name="gender" component={ReactstrapSelect} className="form-control" label="Gender"
-                                inputprops={{ options: ["Male", "Female"], defaultOption: "Gender" }}
-                            />
-                        </Col>
-                        <Col sm="4" className="form-group">
                             <Field name="phone" component={ReactstrapInput} type='number' className="form-control" placeholder='Enter Your Mobile Number' label="Phone number" />
-                        </Col>
-                        <Col sm="4" className="form-group">
-                            <Field name="dob" component={ReactstrapInput} type='date' className="form-control" label="Date of birth" />
                         </Col>
                         <Col sm="4" className="form-group">
                             <Field name="email" type="email" component={ReactstrapInput} className="form-control" placeholder="Enter Your Email" label="Email Address" />
@@ -109,15 +93,7 @@ const AddUserForm = () => {
                         <Col sm="6" className="form-group">
                             <Field name="confirmPW" type="text" component={ReactstrapInput} className="form-control" placeholder="Enter Your Password" label="Confirm Password" />
                         </Col>
-                        <Col sm="12" className="form-group">
-                            <Field type="textarea" name="description" component={ReactstrapInput} className="form-control" rows={4} label="Description" />
-                        </Col>
-                        <Col sm="6" className="form-group">
-                            <Field type="text" name="address" component={ReactstrapInput} className="form-control" label="Address" placeholder="Enter Your Address" />
-                        </Col>
-                        <Col sm="6" className="form-group">
-                            <Field type="text" name="zip" component={ReactstrapInput} className="form-control" label="Zip code" placeholder="Enter Pin Code" />
-                        </Col>
+
                     </Row>
                     <div className="dropzone-admin mb-0">
                         <h6>Media</h6>
