@@ -18,16 +18,16 @@ export const MainNavMenuItems = [
     type: "link",
     path: "/news?type=category&id=1",
   },
-  {
-    title: "DU LỊCH",
-    type: "link",
-    path: "/dulich",
-  },
-  {
-    title: "LIÊN HỆ",
-    type: "link",
-    path: "/contact/contact-us-1",
-  },
+  // {
+  //   title: "DU LỊCH",
+  //   type: "link",
+  //   path: "/dulich",
+  // },
+  // {
+  //   title: "LIÊN HỆ",
+  //   type: "link",
+  //   path: "/contact/contact-us-1",
+  // },
 ];
 
 export const languageDropDownData = [
