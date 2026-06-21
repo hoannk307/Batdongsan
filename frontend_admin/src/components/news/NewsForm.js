@@ -74,6 +74,10 @@ export default function NewsForm({ mode, initialValues, newsId, tinymceApiKey: t
   const [isManualSlug, setIsManualSlug] = useState(false);
   const [categories, setCategories] = useState([]);
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  // Ảnh đại diện hiện tại (khi edit)
+  const [existingImagePath, setExistingImagePath] = useState(
+    mode === "edit" ? (initialValues?.img || initialValues?.file_attach?.[0]?.path || "") : ""
+  );
 
   useEffect(() => {
     // Nếu server chưa truyền prop key (undefined/empty) thì fetch từ API server.
@@ -186,7 +190,24 @@ export default function NewsForm({ mode, initialValues, newsId, tinymceApiKey: t
       const headers = getAuthHeaders();
 
       if (mode === "edit") {
-        await axios.patch(`/api/news/${newsId}`, payload, { headers });
+        if (uploadedFiles.length > 0) {
+          // Có ảnh mới: gọi PATCH with-files để xóa ảnh cũ trên R2 + file_attach, upload ảnh mới
+          const formData = new FormData();
+          Object.entries(payload).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== "") {
+              if (Array.isArray(value)) {
+                formData.append(key, JSON.stringify(value));
+              } else {
+                formData.append(key, value);
+              }
+            }
+          });
+          uploadedFiles.forEach((file) => formData.append("files", file));
+          await axios.patch(`/api/news/${newsId}/with-files`, formData, { headers });
+        } else {
+          // Không đổi ảnh: update JSON thông thường
+          await axios.patch(`/api/news/${newsId}`, payload, { headers });
+        }
         toast.success("Cập nhật bài viết thành công.");
       } else if (uploadedFiles.length > 0) {
         const formData = new FormData();
@@ -283,11 +304,57 @@ export default function NewsForm({ mode, initialValues, newsId, tinymceApiKey: t
         <Col md="6">
           <FormGroup>
             <Label>Ảnh đại diện (Featured Image)</Label>
-            <div className="dropzone" id="newsImageUpload">
-              <div className="dz-message needsclick">
-                <DropZones multiple={false} files={uploadedFiles} onFilesChange={setUploadedFiles} />
+            {/* Hiển thị ảnh hiện tại khi edit và chưa chọn ảnh mới */}
+            {mode === "edit" && existingImagePath && uploadedFiles.length === 0 && (
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <img
+                    src={existingImagePath}
+                    alt="Ảnh đại diện hiện tại"
+                    style={{
+                      maxWidth: 260,
+                      maxHeight: 160,
+                      objectFit: "cover",
+                      borderRadius: 8,
+                      border: "1px solid #dee2e6",
+                      display: "block",
+                    }}
+                  />
+                  <button
+                    type="button"
+                    title="Thay ảnh mới"
+                    onClick={() => setExistingImagePath("")}
+                    style={{
+                      position: "absolute",
+                      top: 4,
+                      right: 4,
+                      background: "rgba(220,53,69,0.85)",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "50%",
+                      width: 26,
+                      height: 26,
+                      cursor: "pointer",
+                      fontSize: 14,
+                      lineHeight: "26px",
+                      textAlign: "center",
+                      padding: 0,
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+                <small className="text-muted d-block mt-1">Nhấn ✕ để chọn ảnh mới</small>
               </div>
-            </div>
+            )}
+            {/* Dropzone: hiển thị khi chưa có ảnh hoặc đang thay ảnh */}
+            {(uploadedFiles.length > 0 || !existingImagePath || mode !== "edit") && (
+              <div className="dropzone" id="newsImageUpload">
+                <div className="dz-message needsclick">
+                  <DropZones multiple={false} files={uploadedFiles} onFilesChange={setUploadedFiles} />
+                </div>
+              </div>
+            )}
           </FormGroup>
         </Col>
         <Col md="12">

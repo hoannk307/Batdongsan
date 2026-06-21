@@ -460,6 +460,131 @@ export class NewsService {
     return this.getNewsWithFiles(updatedNews);
   }
 
+  async updateWithFiles(
+    id: number,
+    updateNewsDto: UpdateNewsDto,
+    files: Express.Multer.File[] = [],
+  ) {
+    try {
+      // Không có file mới thì chỉ update text fields
+      if (!files || files.length === 0) {
+        return await this.update(id, updateNewsDto);
+      }
+
+      const existingNews = await this.prisma.news.findUnique({ where: { id } });
+      if (!existingNews) {
+        throw new NotFoundException('News not found');
+      }
+
+      // 1. Lấy ảnh cũ từ file_attach
+      const oldFiles = await this.prisma.file_attach.findMany({
+        where: { object_id: id, nghiepvu_code: 'NEWS' },
+      });
+
+      // Chuẩn bị metadata cho file mới
+      const fileMetas = files.map((file) => {
+        const originalName = file.originalname;
+        const ext = extname(originalName).replace('.', '').toLowerCase();
+        let logicalType = 'other';
+        if (['doc', 'docx'].includes(ext)) logicalType = 'word';
+        else if (['xls', 'xlsx', 'csv'].includes(ext)) logicalType = 'excel';
+        else if (file.mimetype.startsWith('image/') || ['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)) logicalType = 'image';
+        else if (ext === 'pdf') logicalType = 'pdf';
+        const keyPath = `NEWS/${originalName}`;
+        return { file, keyPath, ext, logicalType, name: originalName };
+      });
+
+      // 2. Transaction: update news + xóa file_attach cũ + insert file_attach mới
+      const { tags: rawTags, ...restDto } = updateNewsDto as any;
+      const data: any = { ...restDto, updated_at: new Date() };
+      const shouldSyncTags = updateNewsDto.tags !== undefined;
+      const tagNames = shouldSyncTags ? normalizeTagNames(rawTags) : [];
+
+      if (updateNewsDto.slug?.trim()) {
+        data.slug = updateNewsDto.slug.trim();
+      } else if (updateNewsDto.title && updateNewsDto.title !== existingNews.title) {
+        data.slug = this.generateSlug(updateNewsDto.title);
+      }
+      if (updateNewsDto.status === 'PUBLISHED' && existingNews.status === 'DRAFT') {
+        data.published_at = new Date();
+      }
+
+      // Chuẩn bị tag relation (nếu có)
+      let tagRelation: any = undefined;
+      if (shouldSyncTags) {
+        if (tagNames.length > 0) {
+          const existingTags = await this.prisma.tags.findMany({
+            where: { name: { in: tagNames } },
+            select: { id: true, name: true },
+          });
+          const existingNames = new Set(existingTags.map((t) => t.name));
+          const toCreate = tagNames.filter((name) => !existingNames.has(name));
+          if (toCreate.length > 0) {
+            await this.prisma.tags.createMany({ data: toCreate.map((name) => ({ name })), skipDuplicates: true });
+          }
+          const finalTags = await this.prisma.tags.findMany({
+            where: { name: { in: tagNames } },
+            select: { id: true, name: true },
+          });
+          tagRelation = { set: finalTags.map((t) => ({ id: t.id })) };
+        } else {
+          tagRelation = { set: [] };
+        }
+      }
+
+      // Loại bỏ tags khỏi data (sẽ dùng tagRelation riêng)
+      delete data.tags;
+      const updateData = tagRelation !== undefined ? { ...data, tags: tagRelation } : data;
+
+      await this.prisma.$transaction(async (tx) => {
+        // Xóa file_attach cũ trong DB
+        await tx.file_attach.deleteMany({
+          where: { object_id: id, nghiepvu_code: 'NEWS' },
+        });
+
+        // Insert file_attach mới
+        for (const meta of fileMetas) {
+          await tx.$executeRaw`
+            INSERT INTO file_attach (object_id, path, nghiepvu_code, type, extend, name)
+            VALUES (${id}, ${meta.keyPath}, 'NEWS', ${meta.logicalType}, ${meta.ext}, ${meta.name})
+          `;
+        }
+
+        // Update news record (bao gồm cả tags nếu có)
+        await tx.news.update({
+          where: { id },
+          data: updateData,
+        });
+      });
+
+      // 3. Xóa file cũ trên Cloudflare R2
+      for (const oldFile of oldFiles) {
+        if (oldFile.path) {
+          await this.fileService.deleteFile(oldFile.path);
+        }
+      }
+
+      // 4. Upload file mới lên Cloudflare R2
+      for (const meta of fileMetas) {
+        await this.fileService.uploadFileWithKey(meta.file, meta.keyPath);
+      }
+
+      const updatedNews = await this.prisma.news.findUnique({
+        where: { id },
+        include: {
+          users: { select: { id: true, username: true, full_name: true } },
+          tags: { select: { id: true, name: true, slug: true } },
+        },
+      });
+      return this.getNewsWithFiles(updatedNews);
+    } catch (error) {
+      Logger.error(`Error in updateWithFiles: ${error.message}`, error.stack, 'NewsService');
+      throw new InternalServerErrorException(
+        error.message || 'Có lỗi xảy ra khi cập nhật ảnh đại diện'
+      );
+    }
+  }
+
   async remove(id: number) {
     const existingNews = await this.prisma.news.findUnique({ where: { id } });
     if (!existingNews) {

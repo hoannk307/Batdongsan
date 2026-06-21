@@ -130,6 +130,37 @@ export class NewsController {
     return this.newsService.update(+id, updateNewsDto);
   }
 
+  @Patch(':id/with-files')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FilesInterceptor('files'))
+  @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Cập nhật tin tức kèm thay ảnh đại diện (xóa ảnh cũ R2 + file_attach, upload mới)' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        slug: { type: 'string' },
+        summary: { type: 'string' },
+        content: { type: 'string' },
+        category: { type: 'integer' },
+        status: { type: 'string' },
+        files: {
+          type: 'array',
+          items: { type: 'string', format: 'binary' },
+        },
+      },
+    },
+  })
+  updateWithFiles(
+    @Param('id') id: string,
+    @Body() updateNewsDto: UpdateNewsDto,
+    @UploadedFiles() files: Express.Multer.File[],
+  ) {
+    return this.newsService.updateWithFiles(+id, updateNewsDto, files);
+  }
+
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

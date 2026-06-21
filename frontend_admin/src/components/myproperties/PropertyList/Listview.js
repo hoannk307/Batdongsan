@@ -132,6 +132,7 @@ export default function Listview() {
               <th>Tiêu đề / Địa chỉ</th>
               <th style={{ width: 140 }}>Loại</th>
               <th style={{ width: 120 }}>Trạng thái</th>
+              <th style={{ width: 130 }}>Phê duyệt</th>
               <th style={{ width: 150 }}>Giá</th>
               <th style={{ width: 180 }}>Ngày tạo</th>
               <th style={{ width: 220 }}>Hành động</th>
@@ -140,30 +141,71 @@ export default function Listview() {
           <tbody>
             {filteredRows.length === 0 && (
               <tr>
-                <td colSpan={7}>{loading ? "Đang tải..." : "Không có dữ liệu"}</td>
+                <td colSpan={8}>{loading ? "Đang tải..." : "Không có dữ liệu"}</td>
               </tr>
             )}
-            {filteredRows.map((n) => (
-              <tr key={n.id}>
-                <td>{n.id}</td>
-                <td>
-                  <div className="fw-bold">{n.title}</div>
-                  <div className="text-muted small">{n.address}</div>
-                </td>
-                <td>{n.property_type || "-"}</td>
-                <td>{n.property_status === "FOR_SALE" ? "Bán" : n.property_status === "FOR_RENT" ? "Cho Thuê" : n.property_status}</td>
-                <td>{n.price_string || "-"}</td>
-                <td>{n.created_at ? new Date(n.created_at).toLocaleString() : "-"}</td>
-                <td className="d-flex gap-2">
-                  <Link className="btn btn-sm btn-gradient" href={`/myproperties/edit-property/${n.id}`}>
-                    Edit
-                  </Link>
-                  <Button className="btn btn-sm btn-danger" onClick={() => onDelete(n.id)}>
-                    Delete
-                  </Button>
-                </td>
-              </tr>
-            ))}
+            {filteredRows.map((n) => {
+              const isDraft = !n.is_published;
+              return (
+                <tr
+                  key={n.id}
+                  style={isDraft ? { backgroundColor: "#fff8e1" } : undefined}
+                >
+                  <td>{n.id}</td>
+                  <td>
+                    <div className="fw-bold">{n.title}</div>
+                    <div className="text-muted small">{n.address}</div>
+                  </td>
+                  <td>{n.property_type || "-"}</td>
+                  <td>{n.property_status === "FOR_SALE" ? "Bán" : n.property_status === "FOR_RENT" ? "Cho Thuê" : n.property_status}</td>
+                  <td>
+                    {isDraft ? (
+                      <span
+                        style={{
+                          display: "inline-block",
+                          padding: "3px 10px",
+                          borderRadius: "20px",
+                          fontSize: "0.78rem",
+                          fontWeight: 700,
+                          letterSpacing: "0.5px",
+                          background: "linear-gradient(135deg, #ff9800, #ff5722)",
+                          color: "#fff",
+                          boxShadow: "0 2px 6px rgba(255,152,0,0.45)",
+                        }}
+                      >
+                        ✏️ Draft
+                      </span>
+                    ) : (
+                      <span
+                        style={{
+                          display: "inline-block",
+                          padding: "3px 10px",
+                          borderRadius: "20px",
+                          fontSize: "0.78rem",
+                          fontWeight: 700,
+                          letterSpacing: "0.5px",
+                          background: "linear-gradient(135deg, #43a047, #1b5e20)",
+                          color: "#fff",
+                          boxShadow: "0 2px 6px rgba(67,160,71,0.35)",
+                        }}
+                      >
+                        🌐 Public
+                      </span>
+                    )}
+                  </td>
+                  <td>{n.price_string || "-"}</td>
+                  <td>{n.created_at ? new Date(n.created_at).toLocaleString() : "-"}</td>
+                  <td className="d-flex gap-2">
+                    <Link className="btn btn-sm btn-gradient" href={`/myproperties/edit-property/${n.id}`}>
+                      Edit
+                    </Link>
+                    <Button className="btn btn-sm btn-danger" onClick={() => onDelete(n.id)}>
+                      Delete
+                    </Button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </Table>
       </div>
