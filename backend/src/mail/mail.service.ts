@@ -15,32 +15,49 @@ export class MailService {
     // ConfigService.get() trả về string → ép kiểu Number tường minh
     const mailPort = Number(this.config.get('MAIL_PORT') ?? 587);
 
-    this.logger.log(`📧 Khởi tạo SMTP: ${mailHost}:${mailPort} – user: ${mailUser}`);
+    if (!mailUser || !mailPass) {
+      this.logger.warn('⚠️ THIẾU CẤU HÌNH MAIL_USER HOẶC MAIL_PASS! Vui lòng kiểm tra lại file .env trên production.');
+    }
+
+    this.logger.log(`📧 Khởi tạo SMTP: ${mailHost}:${mailPort} – user: ${mailUser || 'CHƯA CẤU HÌNH'}`);
 
     this.transporter = nodemailer.createTransport({
       host: mailHost,
       port: mailPort,
       secure: mailPort === 465, // true chỉ khi dùng port 465
-      auth: {
-        user: mailUser,
-        pass: mailPass,
-      },
+      // Chỉ truyền auth nếu có user và pass để tránh lỗi Missing credentials for "PLAIN"
+      ...(mailUser && mailPass ? {
+        auth: {
+          user: mailUser,
+          pass: mailPass,
+        }
+      } : {}),
       tls: {
         rejectUnauthorized: false, // bỏ qua lỗi self-signed cert môi trường dev
       },
     });
 
     // Xác minh kết nối SMTP ngay lúc khởi động để log lỗi sớm
-    this.transporter.verify((error) => {
-      if (error) {
-        this.logger.error('❌ Kết nối SMTP thất bại:', error.message);
-      } else {
-        this.logger.log('✅ SMTP sẵn sàng gửi email!');
-      }
-    });
+    if (mailUser && mailPass) {
+      this.transporter.verify((error) => {
+        if (error) {
+          this.logger.error('❌ Kết nối SMTP thất bại:', error.message);
+        } else {
+          this.logger.log('✅ SMTP sẵn sàng gửi email!');
+        }
+      });
+    } else {
+      this.logger.warn('⚠️ Bỏ qua xác minh SMTP do thiếu credentials.');
+    }
   }
 
   async sendContactEmail(dto: SendMailDto): Promise<void> {
+    const mailUser = this.config.get<string>('MAIL_USER');
+    const mailPass = this.config.get<string>('MAIL_PASS');
+    if (!mailUser || !mailPass) {
+      this.logger.warn('⚠️ Bỏ qua việc gửi email do chưa cấu hình MAIL_USER hoặc MAIL_PASS trên server.');
+      return;
+    }
     const {
       toEmail,
       senderName,
@@ -147,6 +164,12 @@ export class MailService {
   }
 
   async sendPropertyApprovalRequest(adminEmails: string[], propertyId: number, propertyType: string, userFullName: string): Promise<void> {
+    const mailUser = this.config.get<string>('MAIL_USER');
+    const mailPass = this.config.get<string>('MAIL_PASS');
+    if (!mailUser || !mailPass) {
+      this.logger.warn('⚠️ Bỏ qua việc gửi email phê duyệt do chưa cấu hình MAIL_USER hoặc MAIL_PASS trên server.');
+      return;
+    }
     const subject = `[Yêu cầu phê duyệt] Bất động sản mới cần duyệt #${propertyId}`;
     const textBody = `Người dùng ${userFullName} vừa đăng một bất động sản mới (Loại: ${propertyType}, ID: ${propertyId}) cần được admin phê duyệt.\nVui lòng đăng nhập vào hệ thống admin để kiểm tra và phê duyệt.`;
 
