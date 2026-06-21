@@ -95,6 +95,8 @@ jobs:
           R2_BUCKET: ${{ secrets.R2_BUCKET }}
           R2_PUBLIC_BASE_URL: ${{ secrets.R2_PUBLIC_BASE_URL }}
           TINYMCE_API_KEY: ${{ secrets.TINYMCE_API_KEY }}
+          MAIL_USER: ${{ secrets.MAIL_USER }}
+          MAIL_PASS: ${{ secrets.MAIL_PASS }}
         run: |
           # Use printenv + grep to safely write values (handles all special chars)
           {
@@ -111,6 +113,8 @@ jobs:
             echo "R2_BUCKET=${R2_BUCKET}"
             echo "R2_PUBLIC_BASE_URL=${R2_PUBLIC_BASE_URL}"
             echo "TINYMCE_API_KEY=${TINYMCE_API_KEY}"
+            echo "MAIL_USER=${MAIL_USER}"
+            echo "MAIL_PASS=${MAIL_PASS}"
           } > deploy.env
           echo "=== .env file created ($(wc -l < deploy.env) lines) ==="
 
