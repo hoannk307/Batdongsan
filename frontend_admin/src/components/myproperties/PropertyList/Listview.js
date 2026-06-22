@@ -28,7 +28,7 @@ export default function Listview() {
         ...(status ? { propertyStatus: status } : {}),
         ...(propertyType ? { propertyTypes: propertyType } : {}),
       }).toString();
-      
+
       const res = await getData(`/api/properties/admin/list?${query}`);
       setRows(res.data?.data || []);
       setPagination(res.data?.pagination || null);
@@ -145,7 +145,7 @@ export default function Listview() {
               </tr>
             )}
             {filteredRows.map((n) => {
-              const isDraft = !n.is_published;
+              const isDraft = n.status !== "PUBLISHED";
               return (
                 <tr
                   key={n.id}
@@ -155,6 +155,7 @@ export default function Listview() {
                   <td>
                     <div className="fw-bold">{n.title}</div>
                     <div className="text-muted small">{n.address}</div>
+                    <div className="text-muted small">{n.landmark}</div>
                   </td>
                   <td>{n.property_type || "-"}</td>
                   <td>{n.property_status === "FOR_SALE" ? "Bán" : n.property_status === "FOR_RENT" ? "Cho Thuê" : n.property_status}</td>
