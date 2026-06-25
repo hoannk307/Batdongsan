@@ -9,16 +9,16 @@ WORKDIR /app
 ARG NEXT_PUBLIC_API_URL=https://api.nhatranglands.vn
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
-# Copy lock file + package files (lock file phải tồn tại để npm ci hoạt động chính xác)
+# Copy lock file + package files
 COPY package.json package-lock.json ./
 COPY frontend_client/package.json ./frontend_client/
 COPY shared/package.json ./shared/
 
-# npm ci sử dụng package-lock.json để cài đúng phiên bản, --ignore-scripts ngăn postinstall độc hại
-RUN npm ci --ignore-scripts
+# npm install dùng lock file để pin versions, --ignore-scripts ngăn postinstall độc hại
+RUN npm install --ignore-scripts
 
-# Re-run scripts chỉ cho các packages native cần thiết (sharp, esbuild)
-RUN npm rebuild sharp esbuild 2>/dev/null || true
+# Rebuild native packages cần thiết cho build (sass, esbuild, sharp)
+RUN npm rebuild sass esbuild sharp 2>/dev/null || true
 
 # Copy source code
 COPY shared/ ./shared/
@@ -47,8 +47,8 @@ COPY package.json package-lock.json ./
 COPY frontend_client/package.json ./frontend_client/
 COPY shared/package.json ./shared/
 
-# Chỉ cài production deps, dùng lock file chính xác, không chạy scripts
-RUN npm ci --omit=dev --ignore-scripts && \
+# Chỉ cài production deps, dùng lock file, không chạy scripts
+RUN npm install --omit=dev --ignore-scripts && \
     npm rebuild sharp 2>/dev/null || true
 
 # Copy shared module
