@@ -9,13 +9,13 @@ WORKDIR /app
 ARG NEXT_PUBLIC_API_URL=https://api.nhatranglands.vn
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
-# Copy lock file + package files
+# Copy root lock file + tất cả package files
 COPY package.json package-lock.json ./
-COPY frontend_client/package.json ./frontend_client/
-COPY shared/package.json ./shared/
+COPY frontend_client/package*.json ./frontend_client/
+COPY shared/package*.json ./shared/
 
-# Builder stage: cài đầy đủ deps để build được
-RUN npm install
+# Install đầy đủ deps kể cả devDeps cần thiết để build
+RUN npm install --prefer-offline || npm install
 
 # Copy source code
 COPY shared/ ./shared/

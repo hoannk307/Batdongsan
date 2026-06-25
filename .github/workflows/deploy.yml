@@ -83,8 +83,7 @@ jobs:
           tags: |
             ${{ env.IMAGE_PREFIX }}/batdongsan-${{ matrix.service }}:latest
             ${{ env.IMAGE_PREFIX }}/batdongsan-${{ matrix.service }}:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          no-cache: true
           build-args: |
             NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
             NEXT_PUBLIC_TINYMCE_API_KEY=${{ secrets.NEXT_PUBLIC_TINYMCE_API_KEY }}

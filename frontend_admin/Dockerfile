@@ -12,13 +12,14 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_TINYMCE_API_KEY
 ENV NEXT_PUBLIC_TINYMCE_API_KEY=$NEXT_PUBLIC_TINYMCE_API_KEY
 
-# Copy lock file + package files
+# Copy root lock file + tất cả package files
+# package*.json để copy cả package-lock.json của workspace (như cấu trúc gốc)
 COPY package.json package-lock.json ./
-COPY frontend_admin/package.json ./frontend_admin/
-COPY shared/package.json ./shared/
+COPY frontend_admin/package*.json ./frontend_admin/
+COPY shared/package*.json ./shared/
 
-# Builder stage: cài đầy đủ deps (bao gồm devDeps như sass) để build được
-RUN npm install
+# Install đầy đủ deps kể cả devDeps (sass, esbuild...) cần thiết để build
+RUN npm install --prefer-offline || npm install
 
 # Copy source code
 COPY shared/ ./shared/

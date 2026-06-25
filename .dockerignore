@@ -1,0 +1,34 @@
+# Dependencies - không copy node_modules vào Docker (npm install sẽ cài lại)
+**/node_modules
+
+# Next.js build output - builder stage sẽ tự build lại
+**/.next
+**/.cache
+
+# Environment files - secrets KHÔNG được đưa vào Docker image
+**/.env
+**/.env.local
+**/.env.*.local
+**/.env.development
+**/.env.production
+
+# Git
+.git
+.gitignore
+
+# Logs
+**/*.log
+**/npm-debug.log*
+
+# Editor
+.vscode
+.idea
+**/.DS_Store
+
+# Test
+**/*.test.ts
+**/*.spec.ts
+**/coverage
+
+# Docs
+*.md
