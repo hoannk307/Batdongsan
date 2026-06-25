@@ -45,9 +45,10 @@ services:
       MAIL_USER: ${MAIL_USER}
       MAIL_PASS: ${MAIL_PASS}
       CORS_ORIGIN: ${CORS_ORIGIN:-}
-    # KHÔNG expose port backend ra ngoài host - chỉ accessible qua internal Docker network
-    expose:
-      - "3000"
+    # Chỉ bind vào loopback (127.0.0.1) - không expose ra public interface
+    # Cần thiết để health check script trên VPS reach được
+    ports:
+      - "127.0.0.1:3000:3000"
     networks:
       - app_network
     security_opt:
