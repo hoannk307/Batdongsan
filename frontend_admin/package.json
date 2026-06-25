@@ -44,7 +44,7 @@
   "devDependencies": {
     "eslint": "^9",
     "eslint-config-next": "15.3.9",
-    "sass": "1.77.6"
+    "sass": "^1.77.6"
   },
   "overrides": {
     "react-popper": {
