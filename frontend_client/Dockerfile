@@ -14,11 +14,8 @@ COPY package.json package-lock.json ./
 COPY frontend_client/package.json ./frontend_client/
 COPY shared/package.json ./shared/
 
-# npm install dùng lock file để pin versions, --ignore-scripts ngăn postinstall độc hại
-RUN npm install --ignore-scripts
-
-# Rebuild native packages cần thiết cho build (sass, esbuild, sharp)
-RUN npm rebuild sass esbuild sharp 2>/dev/null || true
+# Builder stage: cài đầy đủ deps để build được
+RUN npm install
 
 # Copy source code
 COPY shared/ ./shared/
