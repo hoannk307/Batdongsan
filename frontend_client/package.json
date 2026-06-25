@@ -23,7 +23,7 @@
     "i18next-browser-languagedetector": "^8.0.2",
     "i18next-resources-to-backend": "^1.2.1",
     "lottie-web": "^5.12.2",
-    "next": "15.1.6",
+    "next": "15.3.9",
     "next-i18next": "^15.4.2",
     "next-pwa": "^5.6.0",
     "photoswipe": "^5.4.4",
@@ -46,13 +46,13 @@
     "react-toastify": "^11.0.3",
     "reactstrap": "^9.2.3",
     "slick-carousel": "^1.8.1",
-    "swiper": "^11.2.2",
+    "swiper": "^12.2.0",
     "typed.js": "^2.1.0",
     "yup": "^1.6.1"
   },
   "devDependencies": {
     "eslint": "^9",
-    "eslint-config-next": "15.1.6",
+    "eslint-config-next": "15.3.9",
     "npm-check-updates": "^17.1.14",
     "sass": "1.77.6"
   },

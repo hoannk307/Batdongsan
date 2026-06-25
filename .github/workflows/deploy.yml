@@ -16,11 +16,35 @@ env:
 
 jobs:
   # ============================================
+  # Job 0: Security audit (chặn deploy nếu có critical/high vulnerabilities)
+  # ============================================
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies (lock only)
+        run: npm install --package-lock-only --ignore-scripts
+
+      - name: Run npm audit (fail on critical)
+        run: npm audit --audit-level=critical
+        continue-on-error: false
+
+  # ============================================
   # Job 1: Build Docker images and push to GHCR
   # ============================================
   build-and-push:
     name: Build & Push ${{ matrix.service }}
     runs-on: ubuntu-latest
+    needs: security-audit
     permissions:
       contents: read
       packages: write

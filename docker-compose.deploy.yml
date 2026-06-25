@@ -20,6 +20,8 @@ services:
       start_period: 10s
     networks:
       - app_network
+    security_opt:
+      - no-new-privileges:true
 
   backend:
     image: ghcr.io/${GITHUB_REPO_OWNER}/batdongsan-backend:latest
@@ -43,10 +45,13 @@ services:
       MAIL_USER: ${MAIL_USER}
       MAIL_PASS: ${MAIL_PASS}
       CORS_ORIGIN: ${CORS_ORIGIN:-}
-    ports:
-      - "3000:3000"
+    # KHÔNG expose port backend ra ngoài host - chỉ accessible qua internal Docker network
+    expose:
+      - "3000"
     networks:
       - app_network
+    security_opt:
+      - no-new-privileges:true
 
   frontend_admin:
     image: ghcr.io/${GITHUB_REPO_OWNER}/batdongsan-frontend_admin:latest
@@ -59,9 +64,11 @@ services:
       # URL nội bộ Docker để server-side API routes gọi backend trực tiếp
       INTERNAL_API_URL: http://backend:3000/api
     ports:
-      - "3001:3001"
+      - "127.0.0.1:3001:3001"
     networks:
       - app_network
+    security_opt:
+      - no-new-privileges:true
 
   frontend_client:
     image: ghcr.io/${GITHUB_REPO_OWNER}/batdongsan-frontend_client:latest
@@ -74,9 +81,11 @@ services:
       # URL nội bộ Docker để server-side API routes gọi backend trực tiếp
       INTERNAL_API_URL: http://backend:3000/api
     ports:
-      - "3002:3002"
+      - "127.0.0.1:3002:3002"
     networks:
       - app_network
+    security_opt:
+      - no-new-privileges:true
 
   nginx:
     image: nginx:alpine
@@ -96,6 +105,8 @@ services:
     entrypoint: /bin/sh -c "if [ ! -f /etc/nginx/ssl/selfsigned.crt ]; then mkdir -p /etc/nginx/ssl && apk add --no-cache openssl && openssl req -x509 -nodes -newkey rsa:2048 -days 3650 -keyout /etc/nginx/ssl/selfsigned.key -out /etc/nginx/ssl/selfsigned.crt -subj '/CN=nhatranglands.vn'; fi && nginx -g 'daemon off;'"
     networks:
       - app_network
+    security_opt:
+      - no-new-privileges:true
 
 networks:
   app_network:
