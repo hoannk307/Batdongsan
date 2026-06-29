@@ -27,10 +27,7 @@ cd "$DEPLOY_DIR"
 # Step 1: Pull latest images
 # ============================================
 echo -e "${YELLOW}[1/4] Pulling latest images from GHCR...${NC}"
-# Pull app images from GHCR
 docker compose -f "$COMPOSE_FILE" pull backend frontend_admin frontend_client
-# Pull database image from Docker Hub (postgres official image)
-docker compose -f "$COMPOSE_FILE" pull database
 
 # ============================================
 # Step 2: Restart services with new images
