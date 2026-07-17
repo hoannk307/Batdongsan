@@ -13,6 +13,9 @@ import { UpdateExpenseDto } from './dto/update-expense.dto';
  * - Chi phí tháng và chi phí năm là 2 khoản tách biệt:
  *     Doanh thu tháng = tổng thu booking trong tháng − chi phí phát sinh của tháng.
  *     Doanh thu năm   = tổng thu 12 tháng − tổng chi phí 12 tháng − chi phí riêng của năm.
+ * - Lọc theo phòng:
+ *     Chọn 1 phòng  -> chỉ thu và chi phí của riêng phòng đó; chi phí chung KHÔNG bị trừ.
+ *     Chọn tất cả   -> thu của mọi phòng, trừ cả chi phí chung lẫn chi phí của từng phòng.
  */
 @Injectable()
 export class RevenueService {
@@ -42,9 +45,27 @@ export class RevenueService {
     return Math.max(0, Math.round(ms / 86400000));
   }
 
+  /**
+   * Lọc theo phòng cho cả booking lẫn chi phí.
+   * Chọn 1 phòng -> chỉ bản ghi của phòng đó.
+   * Chọn tất cả  -> không lọc: chi phí chung (room_id null) và chi phí mọi phòng đều được tính.
+   */
+  private roomFilter(roomId?: number) {
+    return roomId ? { room_id: roomId } : {};
+  }
+
+  private async assertRoomOwned(roomId: number, userId: number) {
+    const room = await this.prisma.bk_rooms.findUnique({ where: { id: roomId } });
+    if (!room) throw new NotFoundException('Room not found');
+    if (room.user_id !== userId) throw new ForbiddenException('Not your room');
+    return room;
+  }
+
   private serializeExpense(e: any) {
     return {
       id: e.id,
+      room_id: e.room_id,
+      room_name: e.rooms?.name ?? null,
       period_type: e.period_type,
       year: e.year,
       month: e.month,
@@ -60,20 +81,22 @@ export class RevenueService {
   /**
    * Doanh thu 1 tháng: danh sách booking (thu nhập từng booking) + chi phí phát sinh của tháng.
    */
-  async getMonthlyRevenue(userId: number, month: number, year: number) {
+  async getMonthlyRevenue(userId: number, month: number, year: number, roomId?: number) {
     if (!month || month < 1 || month > 12) throw new BadRequestException('month không hợp lệ (1-12)');
     if (!year || year < 2000 || year > 2100) throw new BadRequestException('year không hợp lệ');
+    if (roomId) await this.assertRoomOwned(roomId, userId);
 
     const { start, end } = this.monthRangeUtc(year, month);
 
     const [bookings, expenses] = await Promise.all([
       this.prisma.bk_bookings.findMany({
-        where: { user_id: userId, check_out: { gte: start, lt: end } },
+        where: { user_id: userId, check_out: { gte: start, lt: end }, ...this.roomFilter(roomId) },
         include: { rooms: true, sources: true },
         orderBy: { check_out: 'asc' },
       }),
       this.prisma.bk_expenses.findMany({
-        where: { user_id: userId, period_type: 'MONTH', year, month },
+        where: { user_id: userId, period_type: 'MONTH', year, month, ...this.roomFilter(roomId) },
+        include: { rooms: true },
         orderBy: { created_at: 'asc' },
       }),
     ]);
@@ -99,6 +122,7 @@ export class RevenueService {
     return {
       month,
       year,
+      room_id: roomId ?? null,
       bookings: bookingRows,
       expenses: expenseRows,
       totals: {
@@ -113,19 +137,21 @@ export class RevenueService {
   /**
    * Doanh thu 1 năm: bảng 12 tháng + chi phí phát sinh riêng của năm.
    */
-  async getYearlyRevenue(userId: number, year: number) {
+  async getYearlyRevenue(userId: number, year: number, roomId?: number) {
     if (!year || year < 2000 || year > 2100) throw new BadRequestException('year không hợp lệ');
+    if (roomId) await this.assertRoomOwned(roomId, userId);
 
     const start = new Date(Date.UTC(year, 0, 1));
     const end = new Date(Date.UTC(year + 1, 0, 1));
 
     const [bookings, expenses] = await Promise.all([
       this.prisma.bk_bookings.findMany({
-        where: { user_id: userId, check_out: { gte: start, lt: end } },
+        where: { user_id: userId, check_out: { gte: start, lt: end }, ...this.roomFilter(roomId) },
         select: { check_out: true, total_amount: true },
       }),
       this.prisma.bk_expenses.findMany({
-        where: { user_id: userId, year },
+        where: { user_id: userId, year, ...this.roomFilter(roomId) },
+        include: { rooms: true },
         orderBy: { created_at: 'asc' },
       }),
     ]);
@@ -167,6 +193,7 @@ export class RevenueService {
 
     return {
       year,
+      room_id: roomId ?? null,
       months,
       expenses: yearExpenses,
       totals: {
@@ -182,13 +209,14 @@ export class RevenueService {
 
   // ===== Chi phí phát sinh =====
 
-  async findExpenses(userId: number, year: number, periodType?: string, month?: number) {
-    const where: any = { user_id: userId, year };
+  async findExpenses(userId: number, year: number, periodType?: string, month?: number, roomId?: number) {
+    const where: any = { user_id: userId, year, ...this.roomFilter(roomId) };
     if (periodType) where.period_type = periodType;
     if (month) where.month = month;
 
     const rows = await this.prisma.bk_expenses.findMany({
       where,
+      include: { rooms: true },
       orderBy: { created_at: 'asc' },
     });
     return rows.map((e) => this.serializeExpense(e));
@@ -201,10 +229,13 @@ export class RevenueService {
     if (!dto.name?.trim()) {
       throw new BadRequestException('Tên chi phí không được để trống');
     }
+    if (dto.room_id) await this.assertRoomOwned(dto.room_id, userId);
 
     const created = await this.prisma.bk_expenses.create({
       data: {
         user_id: userId,
+        // Không có room_id = chi phí chung, không thuộc phòng nào.
+        room_id: dto.room_id ?? null,
         period_type: dto.period_type as any,
         year: dto.year,
         // Chi phí năm không gắn với tháng nào.
@@ -213,6 +244,7 @@ export class RevenueService {
         amount: dto.amount,
         comment: dto.comment?.trim() || null,
       },
+      include: { rooms: true },
     });
     return this.serializeExpense(created);
   }
@@ -228,7 +260,11 @@ export class RevenueService {
     if (dto.amount !== undefined) data.amount = dto.amount;
     if (dto.comment !== undefined) data.comment = dto.comment?.trim() || null;
 
-    const updated = await this.prisma.bk_expenses.update({ where: { id }, data });
+    const updated = await this.prisma.bk_expenses.update({
+      where: { id },
+      data,
+      include: { rooms: true },
+    });
     return this.serializeExpense(updated);
   }
 

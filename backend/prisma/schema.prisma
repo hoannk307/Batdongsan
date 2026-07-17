@@ -141,6 +141,7 @@ model bk_rooms {
   created_at  DateTime         @default(now())
   updated_at  DateTime         @updatedAt
   bookings    bk_bookings[]
+  expenses    bk_expenses[]
   locked_days bk_locked_days[]
   users       users            @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
@@ -213,9 +214,12 @@ model bk_payments {
 /// Chi phí phát sinh nhập tay cho doanh thu booking.
 /// period_type = MONTH  -> month bắt buộc, chi phí của riêng tháng đó.
 /// period_type = YEAR   -> month = null, chi phí chung của cả năm.
+/// room_id = null       -> chi phí chung, không thuộc phòng nào.
+/// room_id có giá trị    -> chi phí của riêng phòng đó.
 model bk_expenses {
   id          Int             @id @default(autoincrement())
   user_id     Int
+  room_id     Int?
   period_type BkExpensePeriod
   year        Int
   month       Int?
@@ -224,10 +228,12 @@ model bk_expenses {
   comment     String?
   created_at  DateTime        @default(now())
   updated_at  DateTime        @updatedAt
+  rooms       bk_rooms?       @relation(fields: [room_id], references: [id], onDelete: Cascade)
   users       users           @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id, year, month])
   @@index([user_id, period_type, year])
+  @@index([room_id])
 }
 
 model bk_locked_days {

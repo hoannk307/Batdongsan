@@ -1,6 +1,11 @@
 import { IsString, IsOptional, IsNumber, IsEnum, IsInt, Min, Max } from 'class-validator';
 
 export class CreateExpenseDto {
+  /** Bỏ trống = chi phí chung, không thuộc phòng nào. */
+  @IsOptional()
+  @IsInt()
+  room_id?: number;
+
   @IsEnum(['MONTH', 'YEAR'])
   period_type: string;
 

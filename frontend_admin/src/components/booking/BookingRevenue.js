@@ -60,6 +60,8 @@ export default function BookingRevenue() {
   const [mode, setMode] = useState("month"); // "month" | "year"
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [year, setYear] = useState(now.getFullYear());
+  const [roomId, setRoomId] = useState(""); // "" = tất cả các phòng
+  const [rooms, setRooms] = useState([]);
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -76,9 +78,10 @@ export default function BookingRevenue() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
+      const roomParam = roomId ? `&room_id=${roomId}` : "";
       const url = mode === "month"
-        ? `/api/booking/revenue/monthly?month=${month}&year=${year}`
-        : `/api/booking/revenue/yearly?year=${year}`;
+        ? `/api/booking/revenue/monthly?month=${month}&year=${year}${roomParam}`
+        : `/api/booking/revenue/yearly?year=${year}${roomParam}`;
       const res = await getData(url);
       setData(res?.data || null);
     } catch {
@@ -87,9 +90,20 @@ export default function BookingRevenue() {
     } finally {
       setLoading(false);
     }
-  }, [mode, month, year]);
+  }, [mode, month, year, roomId]);
 
   useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await getData("/api/booking/rooms");
+        setRooms(Array.isArray(res?.data) ? res.data : []);
+      } catch {
+        toast.error("Không thể tải danh sách phòng.");
+      }
+    })();
+  }, []);
 
   const resetForm = () => setForm({ name: "", amount: "", comment: "" });
 
@@ -105,6 +119,8 @@ export default function BookingRevenue() {
       amount,
     };
     if (mode === "month") payload.month = month;
+    // Chọn 1 phòng -> chi phí thuộc phòng đó. Chọn tất cả -> bỏ room_id = chi phí chung.
+    if (roomId) payload.room_id = Number(roomId);
     if (form.comment.trim()) payload.comment = form.comment.trim();
 
     setSaving(true);
@@ -163,6 +179,8 @@ export default function BookingRevenue() {
 
   const periodLabel = mode === "month" ? `${MONTHS[month - 1]}/${year}` : `năm ${year}`;
   const totals = data?.totals;
+  const selectedRoom = rooms.find((r) => String(r.id) === String(roomId));
+  const roomLabel = selectedRoom ? selectedRoom.name : "tất cả các phòng";
 
   return (
     <Fragment>
@@ -197,7 +215,14 @@ export default function BookingRevenue() {
             {yearOptions.map((y) => <option key={y} value={y}>{y}</option>)}
           </Input>
         </Col>
-        <Col md={6} className="d-flex align-items-end mb-2">
+        <Col xs={12} md={4} className="mb-2">
+          <Label className="form-label fw-bold">Phòng</Label>
+          <Input type="select" value={roomId} onChange={(e) => setRoomId(e.target.value)}>
+            <option value="">Tất cả các phòng</option>
+            {rooms.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
+          </Input>
+        </Col>
+        <Col md={2} className="d-flex align-items-end mb-2">
           {loading && <span className="text-muted">Đang tải...</span>}
         </Col>
       </Row>
@@ -206,7 +231,7 @@ export default function BookingRevenue() {
       {totals && (
         <Row className="mb-4">
           <SummaryTile label={`Tổng thu ${periodLabel}`} value={totals.total_income} color="#2a9d8f"
-            hint={`${totals.booking_count} booking`} />
+            hint={`${totals.booking_count} booking • ${roomLabel}`} />
           <SummaryTile label="Tổng chi phí phát sinh" value={totals.total_expense} color="#d00000"
             hint={mode === "year"
               ? `Chi phí tháng ${formatVnd(totals.total_month_expense)} đ + chi phí năm ${formatVnd(totals.total_year_expense)} đ`
@@ -224,14 +249,20 @@ export default function BookingRevenue() {
       )}
 
       {/* ===== Chi phí phát sinh ===== */}
-      <h6 className="fw-bold mt-4 mb-2">
+      <h6 className="fw-bold mt-4 mb-1">
         Chi phí phát sinh {mode === "month" ? `của ${MONTHS[month - 1]}/${year}` : `riêng của năm ${year}`}
+        {selectedRoom ? ` — ${selectedRoom.name}` : ""}
       </h6>
       {mode === "year" && (
-        <p className="text-muted mb-2" style={{ fontSize: 12 }}>
+        <p className="text-muted mb-1" style={{ fontSize: 12 }}>
           Đây là các khoản chi chung cả năm (VD: bảo trì, thuế). Chi phí nhập ở từng tháng đã được trừ riêng trong bảng trên.
         </p>
       )}
+      <p className="text-muted mb-2" style={{ fontSize: 12 }}>
+        {selectedRoom
+          ? `Chi phí nhập ở đây thuộc riêng phòng ${selectedRoom.name}. Chi phí chung không bị trừ vào phòng này.`
+          : "Chi phí nhập ở đây là chi phí chung, không thuộc phòng nào. Bảng dưới hiện cả chi phí chung lẫn chi phí của từng phòng, tất cả đều được trừ vào doanh thu."}
+      </p>
 
       {/* Form nhập: 1 hàng trên desktop, tự xếp dọc trên mobile nên không tràn màn hình */}
       <div className="p-3 rounded mb-3" style={{ background: "#f8f9fa" }}>
@@ -261,6 +292,7 @@ export default function BookingRevenue() {
 
       <ExpenseList
         rows={data?.expenses || []}
+        showRoom={!selectedRoom}
         onEdit={openEdit}
         onDelete={onDeleteExpense}
       />
@@ -452,8 +484,15 @@ function YearlyMonths({ months, loading, totals }) {
   );
 }
 
+/** Nhãn phòng của 1 khoản chi phí. */
+function RoomTag({ expense }) {
+  return expense.room_name
+    ? <span className="badge bg-light text-dark border">{expense.room_name}</span>
+    : <span className="badge bg-secondary">Chung</span>;
+}
+
 /** Danh sách chi phí phát sinh: bảng trên desktop, card trên mobile. */
-function ExpenseList({ rows, onEdit, onDelete }) {
+function ExpenseList({ rows, showRoom, onEdit, onDelete }) {
   const total = rows.reduce((s, e) => s + (Number(e.amount) || 0), 0);
 
   if (rows.length === 0) {
@@ -468,6 +507,7 @@ function ExpenseList({ rows, onEdit, onDelete }) {
           <thead>
             <tr>
               <th>Tên chi phí</th>
+              {showRoom && <th style={{ width: 140 }}>Thuộc phòng</th>}
               <th>Ghi chú</th>
               <th className="text-end">Số tiền</th>
               <th style={{ width: 150 }}>Thao tác</th>
@@ -477,6 +517,7 @@ function ExpenseList({ rows, onEdit, onDelete }) {
             {rows.map((e) => (
               <tr key={e.id}>
                 <td className="fw-bold">{e.name}</td>
+                {showRoom && <td><RoomTag expense={e} /></td>}
                 <td>{e.comment || "-"}</td>
                 <td className="text-end fw-bold" style={{ color: "#d00000" }}>{formatVnd(e.amount)} đ</td>
                 <td className="d-flex gap-2">
@@ -488,7 +529,7 @@ function ExpenseList({ rows, onEdit, onDelete }) {
           </tbody>
           <tfoot>
             <tr style={{ background: "#f8f9fa" }}>
-              <td className="fw-bold" colSpan={2}>Tổng chi phí</td>
+              <td className="fw-bold" colSpan={showRoom ? 3 : 2}>Tổng chi phí</td>
               <td className="text-end fw-bold" style={{ color: "#d00000" }}>{formatVnd(total)} đ</td>
               <td />
             </tr>
@@ -504,6 +545,7 @@ function ExpenseList({ rows, onEdit, onDelete }) {
               <div className="fw-bold" style={{ wordBreak: "break-word" }}>{e.name}</div>
               <div className="fw-bold text-nowrap" style={{ color: "#d00000" }}>{formatVnd(e.amount)} đ</div>
             </div>
+            {showRoom && <div className="mt-1"><RoomTag expense={e} /></div>}
             {e.comment && <div className="text-muted" style={{ fontSize: 12 }}>{e.comment}</div>}
             <div className="d-flex gap-2 mt-2">
               <Button className="btn btn-sm btn-gradient flex-fill" onClick={() => onEdit(e)}>Sửa</Button>

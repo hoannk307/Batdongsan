@@ -26,15 +26,29 @@ export class RevenueController {
   // ===== Thống kê doanh thu =====
 
   @Get('revenue/monthly')
-  @ApiOperation({ summary: 'Doanh thu theo tháng (danh sách booking + chi phí tháng)' })
-  getMonthly(@Request() req, @Query('month') month: string, @Query('year') year: string) {
-    return this.revenueService.getMonthlyRevenue(req.user.userId, +month, +year);
+  @ApiOperation({ summary: 'Doanh thu theo tháng (danh sách booking + chi phí tháng). Bỏ room_id = tất cả phòng.' })
+  getMonthly(
+    @Request() req,
+    @Query('month') month: string,
+    @Query('year') year: string,
+    @Query('room_id') roomId?: string,
+  ) {
+    return this.revenueService.getMonthlyRevenue(
+      req.user.userId,
+      +month,
+      +year,
+      roomId ? +roomId : undefined,
+    );
   }
 
   @Get('revenue/yearly')
-  @ApiOperation({ summary: 'Doanh thu theo năm (bảng 12 tháng + chi phí năm)' })
-  getYearly(@Request() req, @Query('year') year: string) {
-    return this.revenueService.getYearlyRevenue(req.user.userId, +year);
+  @ApiOperation({ summary: 'Doanh thu theo năm (bảng 12 tháng + chi phí năm). Bỏ room_id = tất cả phòng.' })
+  getYearly(@Request() req, @Query('year') year: string, @Query('room_id') roomId?: string) {
+    return this.revenueService.getYearlyRevenue(
+      req.user.userId,
+      +year,
+      roomId ? +roomId : undefined,
+    );
   }
 
   // ===== Chi phí phát sinh =====
@@ -46,12 +60,14 @@ export class RevenueController {
     @Query('year') year: string,
     @Query('period_type') periodType?: string,
     @Query('month') month?: string,
+    @Query('room_id') roomId?: string,
   ) {
     return this.revenueService.findExpenses(
       req.user.userId,
       +year,
       periodType,
       month ? +month : undefined,
+      roomId ? +roomId : undefined,
     );
   }
 
