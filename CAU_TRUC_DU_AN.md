@@ -1,522 +1,221 @@
-# CẤU TRÚC DỰ ÁN - NESTJS + PRISMA + NEXT.JS
+# CẤU TRÚC DỰ ÁN (ĐÃ CẬP NHẬT THEO CODE THỰC TẾ)
 
-## 📁 Cấu trúc thư mục
+> Tài liệu này mô tả **cấu trúc và công nghệ thực tế đang chạy trong repo**, thay thế bản thiết kế ban đầu (vốn giả định NestJS + Prisma 5 + Next.js/TypeScript/Tailwind chung một `frontend/`). Thực tế dự án đã tách thành 2 frontend riêng (JavaScript, không dùng Tailwind) và mở rộng thêm module đặt phòng (`booking`). Xem thêm [CLAUDE.md](./CLAUDE.md) — bản tóm tắt ngắn dành riêng cho AI code assistant.
+
+## 📁 Cấu trúc thư mục thực tế
 
 ```
-batdongsan/
-├── backend/                          # NestJS Backend
+batdongsan/                           # npm workspaces monorepo (root package.json không có scripts)
+├── backend/                          # NestJS 10 + Prisma 7 (TypeScript)
 │   ├── src/
-│   │   ├── main.ts                   # Entry point
-│   │   ├── app.module.ts             # Root module
+│   │   ├── main.ts                   # Entry point — CORS allowlist thủ công, prefix /api, Swagger /api/docs
+│   │   ├── app.module.ts             # Import toàn bộ feature module
 │   │   │
-│   │   ├── auth/                     # Authentication Module
-│   │   │   ├── auth.module.ts
-│   │   │   ├── auth.controller.ts
-│   │   │   ├── auth.service.ts
-│   │   │   ├── strategies/
-│   │   │   │   ├── jwt.strategy.ts
-│   │   │   │   └── local.strategy.ts
-│   │   │   ├── guards/
-│   │   │   │   ├── jwt-auth.guard.ts
-│   │   │   │   └── roles.guard.ts
-│   │   │   └── decorators/
-│   │   │       ├── current-user.decorator.ts
-│   │   │       └── roles.decorator.ts
+│   │   ├── auth/                     # JWT (Passport) — KHÔNG có roles.guard.ts (chỉ check đăng nhập, chưa phân quyền)
+│   │   │   ├── auth.controller.ts / auth.service.ts / auth.module.ts
+│   │   │   ├── decorators/current-user.decorator.ts
+│   │   │   ├── dto/{login,register}.dto.ts
+│   │   │   ├── guards/jwt-auth.guard.ts
+│   │   │   └── strategies/{jwt,local}.strategy.ts
 │   │   │
-│   │   ├── properties/               # Property Module
-│   │   │   ├── properties.module.ts
-│   │   │   ├── properties.controller.ts
-│   │   │   ├── properties.service.ts
-│   │   │   ├── dto/
-│   │   │   │   ├── create-property.dto.ts
-│   │   │   │   ├── update-property.dto.ts
-│   │   │   │   └── search-property.dto.ts
-│   │   │   └── entities/
-│   │   │       └── property.entity.ts
+│   │   ├── properties/               # Module bất động sản
+│   │   │   ├── properties.controller.ts / .service.ts / .module.ts
+│   │   │   ├── dto/{create,update,search,filter,search-result}-property.dto.ts
+│   │   │   └── enums/property-defaults.enum.ts
 │   │   │
-│   │   ├── news/                     # News Module
-│   │   │   ├── news.module.ts
-│   │   │   ├── news.controller.ts
-│   │   │   ├── news.service.ts
-│   │   │   └── dto/
-│   │   │       ├── create-news.dto.ts
-│   │   │       └── update-news.dto.ts
+│   │   ├── news/                     # Tin tức — hỗ trợ tags, category, upload file kèm bài
+│   │   │   ├── news.controller.ts / .service.ts / .module.ts
+│   │   │   └── dto/{create,update}-news.dto.ts
 │   │   │
-│   │   ├── locations/                # Location Module
-│   │   │   ├── locations.module.ts
-│   │   │   ├── locations.controller.ts
-│   │   │   └── locations.service.ts
+│   │   ├── booking/                  # Module đặt phòng (KHÔNG có trong thiết kế gốc) — quản lý phòng lưu trú
+│   │   │   │                         # riêng cho agent: phòng, nguồn khách, booking, phụ thu, thanh toán, khóa ngày
+│   │   │   ├── booking.controller.ts / .service.ts       # bookings, lock-days, payments, surcharges
+│   │   │   ├── rooms.controller.ts / rooms.service.ts    # bk_rooms
+│   │   │   ├── sources.controller.ts / sources.service.ts # bk_sources (nguồn đặt phòng)
+│   │   │   └── dto/*.dto.ts
 │   │   │
-│   │   ├── upload/                   # File Upload Module
-│   │   │   ├── upload.module.ts
-│   │   │   ├── upload.controller.ts
-│   │   │   └── upload.service.ts
-│   │   │
-│   │   ├── prisma/                   # Prisma Service
-│   │   │   └── prisma.service.ts
-│   │   │
-│   │   └── common/                   # Shared Modules
-│   │       ├── filters/
-│   │       │   └── http-exception.filter.ts
-│   │       ├── interceptors/
-│   │       │   └── transform.interceptor.ts
-│   │       ├── pipes/
-│   │       │   └── validation.pipe.ts
-│   │       └── decorators/
+│   │   ├── locations/                # Tỉnh/Phường (2 cấp, tự tham chiếu qua parent_id)
+│   │   ├── users/                    # Quản lý user, khóa/mở tài khoản (is_blocked)
+│   │   ├── mail/                     # Gửi mail qua nodemailer
+│   │   ├── file/                     # Upload/xem/tải file — lưu trên Cloudflare R2 (KHÔNG lưu local disk)
+│   │   ├── upload/                   # Thư mục rỗng — còn sót lại từ thiết kế cũ, không dùng
+│   │   └── prisma/
+│   │       ├── prisma.module.ts
+│   │       └── prisma.service.ts     # Dùng driver adapter (@prisma/adapter-pg + pg.Pool), không dùng engine mặc định
 │   │
 │   ├── prisma/
-│   │   ├── schema.prisma             # Prisma schema
-│   │   ├── migrations/               # Database migrations
-│   │   └── seed.ts                   # Seed data
-│   │
-│   ├── test/                         # E2E tests
-│   ├── .env                          # Environment variables
-│   ├── .env.example
-│   ├── nest-cli.json
-│   ├── tsconfig.json
+│   │   ├── schema.prisma             # Xem chi tiết models bên dưới
+│   │   ├── migrations/               # 0_init + các migration bổ sung booking/property fields/is_blocked
+│   │   └── seed.ts
+│   ├── prisma.config.ts              # Cấu hình Prisma 7 (thay cho datasource url trong schema.prisma)
 │   └── package.json
 │
-├── frontend/                         # Next.js Frontend
-│   ├── app/                          # Next.js 14 App Router
-│   │   ├── layout.tsx                 # Root layout
-│   │   ├── page.tsx                   # Homepage
-│   │   ├── globals.css                # Global styles (Tailwind)
-│   │   │
-│   │   ├── (auth)/                    # Auth routes group
-│   │   │   ├── login/
-│   │   │   │   └── page.tsx
-│   │   │   └── register/
-│   │   │       └── page.tsx
-│   │   │
-│   │   ├── properties/                # Property pages
-│   │   │   ├── page.tsx               # List/Search page
-│   │   │   ├── [id]/
-│   │   │   │   └── page.tsx           # Detail page
-│   │   │   └── create/
-│   │   │       └── page.tsx           # Create property
-│   │   │
-│   │   ├── news/                      # News pages
-│   │   │   ├── page.tsx               # News list
-│   │   │   └── [slug]/
-│   │   │       └── page.tsx           # News detail
-│   │   │
-│   │   └── api/                       # API routes (optional)
-│   │       └── ...
-│   │
-│   ├── components/                    # React Components
-│   │   ├── layout/
-│   │   │   ├── Header.tsx
-│   │   │   ├── Footer.tsx
-│   │   │   └── Navbar.tsx
-│   │   │
-│   │   ├── properties/
-│   │   │   ├── PropertyCard.tsx
-│   │   │   ├── PropertyList.tsx
-│   │   │   ├── PropertyDetail.tsx
-│   │   │   ├── PropertyForm.tsx
-│   │   │   └── SearchFilters.tsx
-│   │   │
-│   │   ├── news/
-│   │   │   ├── NewsCard.tsx
-│   │   │   └── NewsList.tsx
-│   │   │
-│   │   ├── ui/                        # Reusable UI components
-│   │   │   ├── Button.tsx
-│   │   │   ├── Input.tsx
-│   │   │   ├── Select.tsx
-│   │   │   ├── Modal.tsx
-│   │   │   └── ...
-│   │   │
-│   │   └── forms/
-│   │       └── ...
-│   │
-│   ├── lib/                           # Utilities
-│   │   ├── api/
-│   │   │   ├── client.ts              # API client (axios/fetch)
-│   │   │   ├── properties.ts
-│   │   │   ├── news.ts
-│   │   │   └── auth.ts
-│   │   ├── utils/
-│   │   │   ├── format.ts              # Format price, area, etc.
-│   │   │   └── validation.ts
-│   │   └── constants/
-│   │       ├── property-types.ts
-│   │       └── directions.ts
-│   │
-│   ├── hooks/                         # Custom React Hooks
-│   │   ├── useAuth.ts
-│   │   ├── useProperties.ts
-│   │   ├── useSearch.ts
-│   │   └── useDebounce.ts
-│   │
-│   ├── types/                         # TypeScript Types
-│   │   ├── property.ts
-│   │   ├── news.ts
-│   │   ├── user.ts
-│   │   └── api.ts
-│   │
-│   ├── store/                         # State Management (Zustand)
-│   │   ├── authStore.ts
-│   │   └── searchStore.ts
-│   │
-│   ├── public/                        # Static files
-│   │   ├── images/
-│   │   └── icons/
-│   │
-│   ├── .env.local                     # Environment variables
-│   ├── .env.example
-│   ├── next.config.js
-│   ├── tailwind.config.js
-│   ├── tsconfig.json
-│   └── package.json
+├── frontend_admin/                   # Next.js 15.3.9 — "sheltos-next-admin" template, JavaScript (jsconfig.json, alias @/*)
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── (Auth)/authentication/       # Trang đăng nhập
+│   │   │   ├── (Mainbody)/                  # Layout chính (sidebar/header)
+│   │   │   │   ├── dashboard/ agents/ booking/ manage-users/ map/
+│   │   │   │   │   myproperties/ news/ payments/ reports/ types/
+│   │   │   └── api/                         # Route Handlers — BFF proxy sang backend NestJS
+│   │   │       ├── auth/ booking/ locations/ news/ properties/
+│   │   │       ├── tinymce-key/             # Trả API key TinyMCE từ server, không lộ ra client
+│   │   │       └── userdata/ users/
+│   │   ├── components/                      # Mirror theo từng feature area ở trên
+│   │   ├── layout/{customizer,header,sidebar}/
+│   │   ├── data/ config/ lib/api/ services/ utils/
+│   ├── jsconfig.json                        # "@/*" → "./src/*"
+│   ├── next.config.mjs                      # reactStrictMode: false; fallback env API_URL
+│   └── package.json                         # dev script: next dev -p 3001
 │
-├── prisma/                            # Shared Prisma (optional)
-│   └── schema.prisma
+├── frontend_client/                  # Next.js 15.3.9 — "sheltos-next-template", JavaScript, có i18n + Redux
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── (Mainbody)/
+│   │   │   │   ├── home/ batdongsan/ (danh sách/tìm BĐS) duanbds/ dulich/
+│   │   │   │   │   news/ user-profile/ authen/ pages/
+│   │   │   ├── api/                         # BFF proxy — gọi INTERNAL_API_URL (backend qua Docker network)
+│   │   │   │   ├── batdongsan/ client-agent/ mail/ news/ property/ user/
+│   │   │   ├── i18n/                        # next-i18next: locales/, i18n-context.js, server.js, settings.js
+│   │   │   └── MainProvider.js
+│   │   ├── components/{agent,contact,elements,home,listing,modules,pages,property}/
+│   │   ├── layout/{advancedSearch,Breadcrumb,footers,headers,loader,sidebarLayout}/
+│   │   ├── lib/api/
+│   │   │   ├── fetchBackend.js              # fetch có timeout + phát hiện lỗi kết nối, dùng chung cho mọi API route
+│   │   │   ├── apiRequests.js
+│   │   │   └── mappers/{newsMapper,propertyMapper}.js   # Chuẩn hóa response backend → props component
+│   │   ├── redux-toolkit/reducers/          # State client (frontend_admin KHÔNG dùng Redux)
+│   │   ├── config/ constValues/ data/ utils/
+│   ├── next.config.mjs                      # images.domains cho Google avatar; reactStrictMode: false
+│   └── package.json                         # dev script: next dev -p 3002
 │
-├── docs/                              # Documentation
-│   ├── THIET_KE_HE_THONG.md
-│   ├── SO_DO_LUONG.md
-│   └── CAU_TRUC_DU_AN.md
+├── shared/                           # @batdongsan/shared — CommonJS, dùng chung cho cả 3 app
+│   └── index.js                      # Hằng số: PRICE_OPTIONS, RENT_PRICE_OPTIONS, SQUARE_FEET_OPTIONS,
+│                                      # ROOMS/BATH/BED_OPTIONS, PROPERTY_STATUS(_OPTIONS)
 │
-└── README.md
+├── nginx/nginx.conf                  # Reverse proxy TLS: nhatranglands.vn / admin.* / api.* → 3 service tương ứng
+├── docker-compose.yml                # Dev (hot-reload qua volume mount)
+├── docker-compose.deploy.yml         # Production, dùng bởi CI/CD
+├── .github/workflows/deploy.yml      # security-audit → build & push GHCR → deploy VPS qua SSH
+├── scripts/deploy.sh
+└── package.json                      # workspaces: [backend, frontend_client, frontend_admin, shared]
 ```
 
-## 🔧 Cấu hình Backend (NestJS)
+## 🧩 Kiến trúc giao tiếp Frontend ↔ Backend (khác thiết kế gốc)
 
-### Dependencies chính
+Thiết kế gốc giả định frontend gọi thẳng backend bằng axios + Bearer token lưu `localStorage`. **Thực tế cả hai frontend đều dùng mô hình BFF (Backend-for-Frontend)**:
 
-```json
-{
-  "dependencies": {
-    "@nestjs/common": "^10.0.0",
-    "@nestjs/core": "^10.0.0",
-    "@nestjs/platform-express": "^10.0.0",
-    "@nestjs/jwt": "^10.0.0",
-    "@nestjs/passport": "^10.0.0",
-    "@prisma/client": "^5.0.0",
-    "prisma": "^5.0.0",
-    "passport": "^0.6.0",
-    "passport-jwt": "^4.0.1",
-    "passport-local": "^1.0.0",
-    "bcrypt": "^5.1.0",
-    "class-validator": "^0.14.0",
-    "class-transformer": "^0.5.1",
-    "multer": "^1.4.5",
-    "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.8.1"
-  },
-  "devDependencies": {
-    "@nestjs/cli": "^10.0.0",
-    "@nestjs/schematics": "^10.0.0",
-    "@nestjs/testing": "^10.0.0",
-    "@types/express": "^4.17.17",
-    "@types/node": "^20.0.0",
-    "@types/passport-jwt": "^3.0.9",
-    "@types/passport-local": "^1.0.35",
-    "@types/bcrypt": "^5.0.0",
-    "@types/multer": "^1.4.7",
-    "typescript": "^5.0.0"
-  }
-}
+1. Component/page gọi Next.js Route Handler nội bộ (`src/app/api/.../route.js`).
+2. Route Handler dùng `fetchWithTimeout()` (`lib/api/fetchBackend.js`, timeout 5s, tự phát hiện `ECONNREFUSED`/`AbortError`) để gọi backend NestJS qua `INTERNAL_API_URL` (hostname Docker nội bộ, ví dụ `http://backend:3000/api`) hoặc `NEXT_PUBLIC_API_URL` khi chạy local.
+3. `mappers/` (`newsMapper.js`, `propertyMapper.js`) chuẩn hóa dữ liệu backend trả về trước khi đưa vào component.
+
+Khi debug lỗi gọi API từ frontend, kiểm tra Route Handler tương ứng trước, không phải component — logic gọi backend nằm ở đó.
+
+## 🗄️ Prisma Schema — models thực tế (`backend/prisma/schema.prisma`)
+
+| Model | Ghi chú |
+|---|---|
+| `users` | `role` (USER/ADMIN), `is_blocked`, quan hệ tới `news`, `favorites`, `bk_*` |
+| `properties` | `property_type` là string tự do (không enum), `property_status` (FOR_SALE/FOR_RENT), `status` xuất bản (DRAFT/PUBLISHED), `outstanding` (BĐS nổi bật), index theo city/area/price/type |
+| `news` | `status` (DRAFT/PUBLISHED), quan hệ n-n với `tags`, `category` là số nguyên tham chiếu `news_catelog` (không có FK ràng buộc) |
+| `tags`, `news_catelog` | Danh mục/tag cho tin tức |
+| `locations` | Tự tham chiếu (`parent_id`) — 2 cấp: PROVINCE, WARD |
+| `favorites` | User yêu thích property, unique (user_id, property_id) |
+| `file_attach` | Bảng đính kèm file **kiểu polymorphic**: khóa theo `object_id` + `nghiepvu_code` (không có FK thật tới property/news) — cẩn thận khi join |
+| `bk_rooms`, `bk_sources`, `bk_bookings`, `bk_surcharges`, `bk_payments`, `bk_locked_days` | Toàn bộ nghiệp vụ module **booking** (đặt phòng lưu trú riêng cho agent), không liên quan trực tiếp tới `properties` |
+
+Enums: `LocationType`, `NewsStatus`, `PropertyStatus`, `PropertyPublishStatus`, `UserRole`, `BkBookingStatus`.
+
+`PrismaService` dùng driver adapter (`PrismaPg` + `pg.Pool`) thay vì kết nối engine mặc định — bắt buộc với Prisma 7. Cấu hình datasource nằm ở `backend/prisma.config.ts`, không phải block `datasource` trong `schema.prisma`.
+
+## 🔌 API Endpoints thực tế (prefix `/api`, Swagger tại `/api/docs`)
+
+### Auth (`/auth`)
+- `POST /auth/register`, `POST /auth/login`, `GET /auth/me`
+
+### Properties (`/properties`)
+- `POST /` , `POST /with-files` (multipart, upload R2 trong transaction) — cần JWT
+- `GET /` (phân trang/sort), `GET /filter` (lọc theo field, **phải đứng trước `:id`**), `POST /search` (lọc nâng cao qua body)
+- `GET /defaults/options`, `GET /featured`
+- `GET /admin/list`, `GET /admin/:id` — cần JWT (theo owner)
+- `GET /:id`, `PATCH /:id/view` (tăng view), `PATCH /:id`, `DELETE /:id`
+
+### News (`/news`)
+- `POST /`, `POST /with-files` — cần JWT
+- `GET /`, `GET /latest`, `GET /categories`, `GET /category/:categoryId`, `GET /tags/:tagId`
+- `GET /:id`, `GET /slug/:slug`
+- `PATCH /:id`, `PATCH /:id/with-files`, `DELETE /:id`
+
+### Locations (`/locations`)
+- `GET /provinces`, `GET /wards`
+
+### Users (`/users`)
+- `GET /`, `GET /:id`, `PATCH /:id`, `PATCH /:id/block`, `DELETE /:id`
+
+### File (`/file`)
+- `POST /upload`, `GET /view/:key`, `GET /download/:key` (Cloudflare R2)
+
+### Mail (`/mail`)
+- `POST /send`
+
+### Booking (`/booking`) — module đặt phòng
+- `GET /rooms`, `GET /rooms/:id`, `POST /rooms`, `POST /rooms/with-files`, `PUT /rooms/:id`, `DELETE /rooms/:id`
+- `GET /sources`, `POST /sources`, `PUT /sources/:id`, `DELETE /sources/:id`
+- `GET /bookings`, `GET /bookings/calendar`, `GET /bookings/timeline`, `GET /bookings/:id`, `POST /bookings`, `PUT /bookings/:id`, `DELETE /bookings/:id`
+- `POST /lock-days`, `DELETE /lock-days`
+- `POST /payments`, `DELETE /payments/:id`
+- `POST /surcharges`, `DELETE /surcharges/:id`
+
+## 🛠️ Công nghệ sử dụng thực tế
+
+### Backend
+- **NestJS 10** + **TypeScript**, **Prisma 7** (`@prisma/adapter-pg`, không dùng engine mặc định) + **PostgreSQL**
+- **Passport JWT** (không có roles guard — chỉ phân biệt đã đăng nhập/chưa)
+- **class-validator/class-transformer** — `ValidationPipe` global bật `whitelist` + `forbidNonWhitelisted`
+- **@aws-sdk/client-s3** → **Cloudflare R2** cho lưu trữ file (không lưu local, không dùng thư mục `uploads/`)
+- **nodemailer** cho gửi mail
+- **@nestjs/swagger** — docs tại `/api/docs`
+- Test: **Jest** (unit `*.spec.ts` trong `src/`, e2e trong `test/`)
+
+### Frontend (cả 2 app)
+- **Next.js 15.3.9**, **JavaScript thuần** (không TypeScript — dùng `jsconfig.json` alias `@/*`)
+- **Bootstrap 5 / reactstrap / SCSS** (KHÔNG dùng Tailwind như thiết kế gốc)
+- `frontend_admin`: Formik + Yup, TinyMCE, Leaflet/react-leaflet (bản đồ), apexcharts/react-chartjs-2 (dashboard), SweetAlert2, không dùng Redux
+- `frontend_client`: Redux Toolkit + react-redux, i18next/next-i18next (đa ngôn ngữ), pigeon-maps, Swiper/react-slick (carousel), photoswipe (gallery ảnh)
+- Không có test suite ở cả 2 frontend — chỉ có `next lint`
+
+### Shared
+- `@batdongsan/shared`: file CommonJS (`index.js` + `index.d.ts`) chứa các hằng số dropdown (khoảng giá, diện tích, số phòng, trạng thái BĐS) dùng chung — sửa ở đây, không copy riêng từng app.
+
+## 🚀 Scripts thực tế
+
+### Backend
+```bash
+npm run start:dev       # http://localhost:3000, Swagger /api/docs
+npm run build            # nest build
+npm run lint              # eslint --fix
+npm run test / test:watch / test:cov / test:e2e
+npm run prisma:generate / prisma:migrate / prisma:studio / prisma:seed
 ```
 
-### Prisma Service
-
-```typescript
-// src/prisma/prisma.service.ts
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
-
-@Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit {
-  async onModuleInit() {
-    await this.$connect();
-  }
-}
+### frontend_admin (port 3001) / frontend_client (port 3002)
+```bash
+npm run dev      # next dev -p <port> (port cố định trong script, không dùng .env)
+npm run build
+npm run start
+npm run lint      # next lint — không có test
 ```
 
-### Environment Variables (.env)
-
-```env
-# Database
-DATABASE_URL="postgresql://user:password@localhost:5432/batdongsan?schema=public"
-
-# JWT
-JWT_SECRET="your-secret-key"
-JWT_EXPIRES_IN="7d"
-
-# Server
-PORT=3000
-NODE_ENV=development
-
-# File Upload
-MAX_FILE_SIZE=5242880
-UPLOAD_DEST="./uploads"
-
-# CORS
-CORS_ORIGIN="http://localhost:3001"
+### Docker
+```bash
+docker compose up                              # dev: postgres + backend + 2 frontend + nginx, hot-reload qua volume
+# production dùng docker-compose.deploy.yml, do CI/CD (.github/workflows/deploy.yml) điều khiển, không chạy tay
 ```
 
-## 🎨 Cấu hình Frontend (Next.js)
+## 🔒 Bảo mật — lưu ý quan trọng
 
-### Dependencies chính
-
-```json
-{
-  "dependencies": {
-    "next": "^14.0.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "typescript": "^5.0.0",
-    "tailwindcss": "^3.3.0",
-    "autoprefixer": "^10.4.0",
-    "postcss": "^8.4.0",
-    "axios": "^1.6.0",
-    "react-hook-form": "^7.48.0",
-    "zod": "^3.22.0",
-    "@hookform/resolvers": "^3.3.0",
-    "zustand": "^4.4.0",
-    "@tanstack/react-query": "^5.0.0",
-    "react-dropzone": "^14.2.0",
-    "date-fns": "^2.30.0"
-  },
-  "devDependencies": {
-    "@types/node": "^20.0.0",
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
-    "eslint": "^8.0.0",
-    "eslint-config-next": "^14.0.0"
-  }
-}
-```
-
-### Tailwind Config
-
-```javascript
-// tailwind.config.js
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: [
-    './pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './components/**/*.{js,ts,jsx,tsx,mdx}',
-    './app/**/*.{js,ts,jsx,tsx,mdx}',
-  ],
-  theme: {
-    extend: {
-      colors: {
-        primary: {
-          50: '#f0f9ff',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-        },
-      },
-    },
-  },
-  plugins: [],
-}
-```
-
-### Environment Variables (.env.local)
-
-```env
-# API
-NEXT_PUBLIC_API_URL=http://localhost:3000/api
-
-# Google Maps (optional)
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-api-key
-```
-
-## 📦 Module Structure (NestJS)
-
-### Property Module Example
-
-```typescript
-// properties/properties.module.ts
-import { Module } from '@nestjs/common';
-import { PropertiesController } from './properties.controller';
-import { PropertiesService } from './properties.service';
-import { PrismaModule } from '../prisma/prisma.module';
-
-@Module({
-  imports: [PrismaModule],
-  controllers: [PropertiesController],
-  providers: [PropertiesService],
-  exports: [PropertiesService],
-})
-export class PropertiesModule {}
-```
-
-### DTO Example
-
-```typescript
-// properties/dto/create-property.dto.ts
-import { IsString, IsNumber, IsEnum, IsOptional, Min } from 'class-validator';
-import { PropertyType, PropertyPurpose } from '@prisma/client';
-
-export class CreatePropertyDto {
-  @IsString()
-  title: string;
-
-  @IsOptional()
-  @IsString()
-  description?: string;
-
-  @IsEnum(PropertyType)
-  type: PropertyType;
-
-  @IsEnum(PropertyPurpose)
-  purpose: PropertyPurpose;
-
-  @IsNumber()
-  @Min(0)
-  price: number;
-
-  @IsNumber()
-  @Min(0)
-  area: number;
-
-  // ... other fields
-}
-```
-
-## 🎯 Component Structure (Next.js)
-
-### Property Card Component
-
-```typescript
-// components/properties/PropertyCard.tsx
-import Image from 'next/image';
-import Link from 'next/link';
-import { Property } from '@/types/property';
-
-interface PropertyCardProps {
-  property: Property;
-}
-
-export default function PropertyCard({ property }: PropertyCardProps) {
-  return (
-    <Link href={`/properties/${property.id}`}>
-      <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-        <Image
-          src={property.images[0]?.imageUrl || '/placeholder.jpg'}
-          alt={property.title}
-          width={400}
-          height={250}
-          className="w-full h-48 object-cover"
-        />
-        <div className="p-4">
-          <h3 className="font-semibold text-lg mb-2">{property.title}</h3>
-          <p className="text-primary-600 font-bold text-xl">
-            {formatPrice(property.price)} {property.purpose === 'SALE' ? '' : '/tháng'}
-          </p>
-          <p className="text-gray-600 text-sm mt-1">
-            {property.area} m² • {property.bedrooms} phòng ngủ
-          </p>
-          <p className="text-gray-500 text-sm mt-1">
-            {property.district}, {property.province}
-          </p>
-        </div>
-      </div>
-    </Link>
-  );
-}
-```
-
-## 🔄 API Client Structure
-
-```typescript
-// lib/api/client.ts
-import axios from 'axios';
-
-const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Add auth token interceptor
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-export default apiClient;
-```
-
-```typescript
-// lib/api/properties.ts
-import apiClient from './client';
-import { Property, SearchParams } from '@/types/property';
-
-export const propertiesApi = {
-  getAll: (params?: SearchParams) => 
-    apiClient.get('/properties', { params }),
-  
-  getById: (id: number) => 
-    apiClient.get(`/properties/${id}`),
-  
-  create: (data: FormData) => 
-    apiClient.post('/properties', data, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }),
-  
-  update: (id: number, data: FormData) => 
-    apiClient.put(`/properties/${id}`, data, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }),
-  
-  delete: (id: number) => 
-    apiClient.delete(`/properties/${id}`),
-  
-  search: (params: SearchParams) => 
-    apiClient.post('/properties/search', params),
-};
-```
-
-## 🚀 Scripts
-
-### Backend (package.json)
-
-```json
-{
-  "scripts": {
-    "build": "nest build",
-    "start": "nest start",
-    "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio",
-    "prisma:seed": "ts-node prisma/seed.ts"
-  }
-}
-```
-
-### Frontend (package.json)
-
-```json
-{
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "type-check": "tsc --noEmit"
-  }
-}
-```
-
-## 📝 Notes
-
-- **Prisma**: Schema được định nghĩa trong `prisma/schema.prisma`, chạy `prisma generate` sau khi thay đổi
-- **NestJS**: Sử dụng decorators và dependency injection
-- **Next.js**: Sử dụng App Router (Next.js 14+), Server Components mặc định
-- **Tailwind**: Utility-first CSS, tùy chỉnh trong `tailwind.config.js`
-- **TypeScript**: Strict mode được khuyến nghị cho cả backend và frontend
-
+Production từng bị tấn công (06/2026) qua lỗ hổng RCE nghiêm trọng của Next.js 15.1.x ở cả 2 frontend. Các biện pháp đã áp dụng:
+- Luôn giữ `next` ở bản vá mới nhất (hiện tại: 15.3.9) cho cả `frontend_admin` và `frontend_client`.
+- CI có job `security-audit` chạy `npm audit --audit-level=critical` **trước** khi build — pipeline sẽ fail nếu có lỗ hổng critical.
+- Luôn commit `package-lock.json` ở root — thiếu lockfile là nguyên nhân gốc khiến version bị trôi dẫn tới bản dính lỗ hổng.
+- File lưu trên Cloudflare R2, không lưu local — biến môi trường `R2_*` bắt buộc phải cấu hình đúng, nếu thiếu thì `FileService` tự vô hiệu hóa upload/xóa thay vì lỗi khi khởi động.

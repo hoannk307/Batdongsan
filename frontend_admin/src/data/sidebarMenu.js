@@ -90,6 +90,11 @@ export const SidebarMenuItem = [
                 type: 'link'
             },
             {
+                path: "/booking/revenue",
+                title: 'Doanh thu',
+                type: 'link'
+            },
+            {
                 path: "/booking/sources",
                 title: 'Nguồn khách hàng',
                 type: 'link'

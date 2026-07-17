@@ -120,6 +120,7 @@ model users {
   created_at  DateTime      @default(now())
   updated_at  DateTime
   bk_bookings bk_bookings[]
+  bk_expenses bk_expenses[]
   bk_rooms    bk_rooms[]
   bk_sources  bk_sources[]
   favorites   favorites[]
@@ -209,6 +210,26 @@ model bk_payments {
   @@index([booking_id])
 }
 
+/// Chi phí phát sinh nhập tay cho doanh thu booking.
+/// period_type = MONTH  -> month bắt buộc, chi phí của riêng tháng đó.
+/// period_type = YEAR   -> month = null, chi phí chung của cả năm.
+model bk_expenses {
+  id          Int             @id @default(autoincrement())
+  user_id     Int
+  period_type BkExpensePeriod
+  year        Int
+  month       Int?
+  name        String          @db.VarChar(255)
+  amount      Decimal         @db.Decimal(15, 2)
+  comment     String?
+  created_at  DateTime        @default(now())
+  updated_at  DateTime        @updatedAt
+  users       users           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, year, month])
+  @@index([user_id, period_type, year])
+}
+
 model bk_locked_days {
   id          Int      @id @default(autoincrement())
   room_id     Int
@@ -244,6 +265,11 @@ enum BkBookingStatus {
   COMPLETED
   DEPOSITED
   UNPAID
+}
+
+enum BkExpensePeriod {
+  MONTH
+  YEAR
 }
 
 enum PropertyPublishStatus {
