@@ -212,14 +212,15 @@ export default function BookingCalendar() {
     const base = {
       width: "100%",
       aspectRatio: "1",
+      minWidth: 0,
       border: "1px solid #e0e0e0",
-      borderRadius: 8,
+      borderRadius: 6,
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
       cursor: "pointer",
-      fontSize: 14,
+      fontSize: 13,
       fontWeight: 500,
       transition: "all 0.2s",
       position: "relative",
@@ -321,10 +322,10 @@ export default function BookingCalendar() {
       </Row>
 
       {/* Calendar Grid */}
-      <div className="table-responsive" style={{ overflowX: "auto", paddingBottom: 10 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(40px, 1fr))", gap: 6, minWidth: 400 }}>
+      <div style={{ paddingBottom: 4 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4, width: "100%" }}>
           {WEEKDAYS.map((wd) => (
-            <div key={wd} style={{ textAlign: "center", fontWeight: 700, fontSize: 13, padding: "8px 0", color: "#6c757d" }}>
+            <div key={wd} style={{ textAlign: "center", fontWeight: 700, fontSize: 12, padding: "4px 0", color: "#6c757d" }}>
               {wd}
             </div>
           ))}

@@ -1664,6 +1664,22 @@
     }
 }
 
+// iOS Safari auto-zooms into a focused form field whenever its font-size is
+// below 16px, which inflates and breaks the layout on tap. The template sets
+// form controls to 14px, so force them to 16px on small screens to stop it.
+@media (max-width: 767px) {
+    input,
+    select,
+    textarea,
+    .form-control,
+    form input,
+    form select,
+    form textarea,
+    form .form-control {
+        font-size: 16px;
+    }
+}
+
 /**=====================
      responsive css end
 ==========================**/
