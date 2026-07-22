@@ -1680,6 +1680,39 @@
     }
 }
 
+// Bootstrap's grid puts half a gutter of padding on every column and a matching
+// negative margin on the row. On phones the columns stack full width anyway, so
+// that padding only eats horizontal space — drop the gutter so content lines up
+// with the page container edges.
+//
+// The containers carry the same gutter (0.75rem each side), so they are zeroed
+// too, otherwise the row override below only shifts the wasted space one level
+// up. Edge spacing on mobile is left to `.page-body` (0 15px, see _sidebar.scss).
+@media (max-width: 767px) {
+    .container,
+    .container-fluid,
+    .container-sm,
+    .container-md,
+    .container-lg,
+    .container-xl,
+    .container-xxl {
+        --bs-gutter-x: 0;
+        padding-right: 0;
+        padding-left: 0;
+    }
+
+    .row {
+        --bs-gutter-x: 0;
+        margin-right: 0;
+        margin-left: 0;
+
+        > * {
+            padding-right: 0;
+            padding-left: 0;
+        }
+    }
+}
+
 /**=====================
      responsive css end
 ==========================**/
